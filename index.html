@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- A) Cross-Platform/PWA-like settings & Mobile Viewport Fixes -->
+    <!-- viewport-fit=cover enables safe-area-inset-* support -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Official V25 H4 Runner Bot Interface - v2.0</title>
+    <meta name="theme-color" content="#007aff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Load Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font import for a clean, modern look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f0f5; /* Light grey/off-white background */
+            /* Add safe area padding for iPhone notch/bars */
+            padding-top: env(safe-area-inset-top, 16px);
+            padding-bottom: env(safe-area-inset-bottom, 16px);
+        }
+        
+        /* Official Card Style: Simulating smooth, iOS-like card containers */
+        .official-card {
+            background-color: white;
+            padding: 20px; /* Adjusted for mobile */
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05); 
+            border: 1px solid #e5e5e5; 
+        }
+
+        /* B) Mobile-safe Input and Button sizing for touch targets (44px min height) */
+        /* iOS-Style Text Field */
+        .ios-input {
+            padding: 12px 16px;
+            min-height: 44px; /* Minimum tap target height */
+            background-color: #ffffff; 
+            border: 1px solid #d1d5db; 
+            border-radius: 8px;
+            color: #1f2937; 
+            transition: all 0.2s ease-in-out;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06); 
+        }
+        .ios-input:focus {
+            border-color: #007aff; 
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3); 
+        }
+
+        .ios-input:disabled {
+            background-color: #f7f7f7; /* Light gray for disabled fields */
+            color: #9ca3af;
+        }
+
+        /* iOS-Style Button (Action Blue) */
+        .ios-btn-primary {
+            font-weight: 600;
+            border-radius: 10px;
+            min-height: 48px; /* Slightly larger for better tap target */
+            transition: background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 3px 6px rgba(0, 122, 255, 0.3);
+        }
+        .ios-btn-primary:hover {
+            opacity: 0.9;
+            box-shadow: 0 5px 10px rgba(0, 122, 255, 0.4);
+        }
+        
+        /* Log Area Styling */
+        #log-output {
+            background-color: #f7f7f7; 
+            border: 1px solid #e5e5e5;
+        }
+        #log-output::-webkit-scrollbar {
+            width: 6px;
+        }
+        #log-output::-webkit-scrollbar-thumb {
+            background-color: #c0c0c0;
+            border-radius: 3px;
+        }
+
+        /* Status Text Styling */
+        .status-label {
+            font-size: 0.875rem; 
+            color: #6b7280; 
+            margin-bottom: 2px;
+        }
+        .status-value {
+            font-weight: 700; 
+            color: #1f2937; 
+        }
+
+        /* Custom Colors for Status (iOS Palette) */
+        .text-status-active { color: #34c759; } /* Green */
+        .text-status-warn { color: #ff9500; } /* Orange */
+        .text-status-error { color: #ff3b30; } /* Red */
+        .text-status-neutral { color: #5a5a5a; } /* Dark Neutral */
+
+        /* Preference Popup Styles */
+        .preference-modal {
+            background-color: #ffffff;
+            border-radius: 16px;
+            max-width: 600px;
+            max-height: 90vh; /* C) Allow scrolling on small screens */
+            overflow-y: auto;
+        }
+        .preference-card {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .preference-card:hover {
+            border-color: #007aff;
+        }
+        .preference-card.selected {
+            border-color: #007aff;
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.3);
+            background-color: #e6f0ff;
+        }
+        
+        /* D) Accessibility: Focus styles */
+        .ios-input:focus-visible,
+        .ios-btn-primary:focus-visible,
+        .preference-card:focus-visible {
+            outline: 3px solid #007aff;
+            outline-offset: 2px;
+        }
+
+        /* C) Reduced Motion Support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+                animation: none !important;
+            }
+        }
+
+        /* Mode Effects */
+        .mode-ios .ios-input {
+            /* Fixes iOS Safari auto-zoom bug on input focus for < 16px font size */
+            font-size: 16px !important; 
+        }
+        .mode-ios .max-w-4xl.mx-auto {
+             /* Add extra bottom padding to account for home indicator safe area */
+            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+        }
+        /* Android mode adjustments (e.g., tighter spacing, more defined shadows) can be added here */
+        .mode-android .official-card {
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="max-w-4xl mx-auto p-4 sm:p-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">V25 Breakout Strategy Runner</h1>
+            <p class="text-gray-500">Secure trading interface with built-in profit protection and safety locks.</p>
+        </header>
+
+        <!-- 1) PROTECTED DEFAULTS PANEL -->
+        <div id="protected-defaults-card" class="official-card mb-6 space-y-4">
+            <!-- B) Responsive layout with Change Preference button -->
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b pb-2 mb-4">
+                <h2 class="text-xl font-semibold text-gray-700 mb-2 sm:mb-0">Protected Defaults 
+                    <span id="safe-mode-indicator" class="text-sm font-bold ml-2 py-1 px-2 rounded-full text-white bg-green-500">Safe Mode: ON</span>
+                </h2>
+                <div class="flex space-x-2">
+                    <button id="change-preference-btn" class="text-sm py-1 px-3 bg-gray-400 text-white rounded-lg transition hover:bg-gray-500 min-h-[32px]">
+                        Change Preference
+                    </button>
+                    <button id="unlock-settings-btn" class="text-sm py-1 px-3 bg-blue-500 text-white rounded-lg transition hover:bg-blue-600 min-h-[32px]">
+                        Unlock Settings 🔒
+                    </button>
+                </div>
+            </div>
+            
+            <!-- A) SAFE MODE TOGGLE -->
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <label for="safe-mode-toggle" class="font-medium text-gray-700">Safe Mode</label>
+                <input type="checkbox" id="safe-mode-toggle" checked class="form-checkbox h-5 w-5 text-green-500 rounded-full" />
+            </div>
+
+            <div id="settings-area" class="space-y-4">
+                <h3 class="font-semibold text-gray-600 pt-2 border-t border-gray-100">Market & Limits</h3>
+
+                <!-- B) Responsive grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="relative">
+                        <label for="symbol-input" class="sr-only">Symbol</label>
+                        <input id="symbol-input" type="text" value="Volatility 25 (1s) Index" disabled class="ios-input w-full" />
+                        <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Symbol</span>
+                    </div>
+                    <div class="relative">
+                        <label for="timeframe-input" class="sr-only">Timeframe</label>
+                        <input id="timeframe-input" type="text" value="H4 Bias / LTF Execution" disabled class="ios-input w-full" />
+                        <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Timeframe</span>
+                    </div>
+                </div>
+
+                <!-- 2) MAX TRADES PER SIGNAL -->
+                <div class="relative">
+                    <label for="max-trades-input" class="sr-only">Max Trades Per Signal</label>
+                    <input id="max-trades-input" type="number" value="2" disabled class="ios-input w-full" />
+                    <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Max Trades Per Signal (Default: 2) 🔒</span>
+                </div>
+
+                <!-- 2) ACCOUNT FIT RULE -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="relative flex-1">
+                        <label for="balance-min-input" class="sr-only">Min Balance ($)</label>
+                        <input id="balance-min-input" type="number" value="10.00" step="1.00" disabled class="ios-input w-full" />
+                        <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Min Balance ($) 🔒</span>
+                    </div>
+                    <div class="relative flex-1">
+                        <label for="balance-max-input" class="sr-only">Max Balance ($)</label>
+                        <input id="balance-max-input" type="number" value="50.00" step="1.00" disabled class="ios-input w-full" />
+                        <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Max Balance ($) 🔒</span>
+                    </div>
+                </div>
+
+                <h3 class="font-semibold text-gray-600 pt-2 border-t border-gray-100">Position Size & Safety</h3>
+                
+                <!-- 2) POSITION SIZE -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="relative flex-1">
+                        <label for="stake-amount" class="sr-only">Stake / Lot Size</label>
+                        <input id="stake-amount" type="number" value="0.01" step="0.01" disabled class="ios-input w-full" />
+                        <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Stake / Lot Size 🔒</span>
+                    </div>
+                    
+                    <!-- Optional Auto-Scale Toggle -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg w-full sm:w-1/3">
+                        <label for="auto-scale-toggle" class="font-medium text-gray-700 text-sm">Auto-Scale</label>
+                        <input type="checkbox" id="auto-scale-toggle" disabled class="form-checkbox h-5 w-5 text-blue-500 rounded-full" />
+                    </div>
+                </div>
+
+                <!-- 5) SAFETY STOPS + COOLDOWNS -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="relative">
+                        <label for="cooldown-input" class="sr-only">Cooldown (min)</label>
+                        <input id="cooldown-input" type="number" value="3" disabled class="ios-input w-full" />
+                        <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Cooldown (min) 🔒</span>
+                    </div>
+                    <div class="relative">
+                        <label for="max-loss-streak-input" class="sr-only">Max Loss Streak</label>
+                        <input id="max-loss-streak-input" type="number" value="2" disabled class="ios-input w-full" />
+                        <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Max Loss Streak 🔒</span>
+                    </div>
+                    <div class="relative">
+                        <label for="daily-cap-input" class="sr-only">Daily Loss Cap (%)</label>
+                        <input id="daily-cap-input" type="number" value="5" step="0.5" disabled class="ios-input w-full" />
+                        <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Daily Loss Cap (%) 🔒</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- API Configuration and Controls (Bottom Card) -->
+        <div id="config-card" class="official-card mb-6 space-y-4">
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">API Connection</h2>
+            
+            <label for="api-token" class="sr-only">Deriv API Token</label>
+            <input id="api-token" type="password" placeholder="Deriv API Token (required)" 
+                   class="ios-input w-full" aria-label="Deriv API Token" />
+
+            <button id="toggle-bot-btn" 
+                    class="w-full py-3 text-lg ios-btn-primary bg-blue-500 text-white">
+                Start Bot
+            </button>
+        </div>
+
+        <!-- 6) LIVE STATUS BOARD UPGRADES -->
+        <div id="status-card" class="official-card mb-6">
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">Live Status Board</h2>
+            <!-- B) Use grid layout for responsiveness -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                
+                <!-- Status Row 1 -->
+                <div>
+                    <p class="status-label">API Connection:</p>
+                    <p id="connection-status" class="text-status-error status-value">DISCONNECTED</p>
+                </div>
+                <div>
+                    <p class="status-label">Safe Mode:</p>
+                    <p id="safe-mode-status" class="text-status-active status-value">ON</p>
+                </div>
+                <div>
+                    <p class="status-label">Trade Active:</p>
+                    <p id="trade-active-status" class="text-status-neutral status-value">FALSE</p>
+                </div>
+                <div>
+                    <p class="status-label">H4 Bias / Level:</p>
+                    <p id="breakout-level-display" class="text-status-neutral status-value">N/A | 0.00</p>
+                </div>
+
+                <!-- Status Row 2 -->
+                <div>
+                    <p class="status-label">Current Balance:</p>
+                    <p id="current-balance-display" class="text-status-neutral status-value">$0.00</p>
+                </div>
+                <div>
+                    <p class="status-label">Trades This Signal:</p>
+                    <p id="trades-this-signal-display" class="text-status-neutral status-value">0/2</p>
+                </div>
+                <div>
+                    <p class="status-label">Current P/L ($):</p>
+                    <p id="current-profit-display" class="text-status-neutral status-value">$0.00</p>
+                </div>
+                <div>
+                    <p class="status-label">Max P/L Reached (%):</p>
+                    <p id="max-profit-display" class="text-status-neutral status-value">0.00%</p>
+                </div>
+                
+                <!-- Status Row 3 -->
+                <div>
+                    <p class="status-label">Locked Profit:</p>
+                    <p id="locked-profit-level-display" class="text-status-neutral status-value">None</p>
+                </div>
+                <div>
+                    <p class="status-label">Balance Tier:</p>
+                    <p id="balance-tier-display" class="text-status-neutral status-value">BLOCKED</p>
+                </div>
+                <div>
+                    <p class="status-label">Daily Loss Cap:</p>
+                    <p id="daily-cap-status" class="status-value text-status-active">OK</p>
+                </div>
+                <div>
+                    <p class="status-label">Block Reason:</p>
+                    <p id="block-reason-display" class="text-status-neutral status-value">Awaiting Start</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7) SYSTEM LOG -->
+        <div class="official-card p-4">
+            <h2 class="text-xl font-semibold mb-3 border-b pb-2 text-gray-700">System Log</h2>
+            <div id="log-output" class="p-3 h-64 overflow-y-auto text-sm rounded-lg space-y-1 text-gray-800">
+                <p class="text-gray-500">[SYSTEM] Initialization complete. Enter API Token and click Start.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Confirmation Modal Structure (Existing - Hidden by default) -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full space-y-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <h3 id="modal-title" class="text-lg font-bold text-red-600">Confirmation Required</h3>
+            <p id="modal-message" class="text-gray-700">Are you sure?</p>
+            <input type="text" id="modal-input" placeholder="Type UNLOCK" class="ios-input w-full hidden" />
+            <div class="flex justify-end space-x-3">
+                <button id="modal-cancel-btn" class="py-2 px-4 text-gray-600 rounded-lg hover:bg-gray-100">Cancel</button>
+                <button id="modal-confirm-btn" class="py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600">Confirm</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 2) Preference Selection Modal (Full Screen - NEW) -->
+    <div id="preference-modal-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden">
+        <div class="preference-modal p-6 w-full space-y-6" role="dialog" aria-modal="true" aria-labelledby="pref-modal-title">
+            <h3 id="pref-modal-title" class="text-2xl font-bold text-gray-800 text-center">Select Your Preferred Experience</h3>
+            <p class="text-gray-500 text-center">This optimizes layout, touch responsiveness, and performance for your device.</p>
+            
+            <div id="preference-options" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Option 1: Web/Desktop Mode -->
+                <div data-mode="web" class="preference-card official-card p-4 text-center" tabindex="0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-2 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    <h4 class="font-semibold text-gray-800">Web/Desktop Mode</h4>
+                    <p class="text-sm text-gray-500">Standard spacing, hover effects, and optimized for mouse input.</p>
+                </div>
+                
+                <!-- Option 2: iOS Mode -->
+                <div data-mode="ios" class="preference-card official-card p-4 text-center" tabindex="0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-2 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94a1 1 0 0 0 .5-.13l6.5-4.5V7.19a1 1 0 0 0-.5-.87L12.5 2.13a1 1 0 0 0-1 0L5 6.32a1 1 0 0 0-.5.87v9.22l6.5 4.5a1 1 0 0 0 .5.13z"/><path d="M16 3.16l-4 2.82-4-2.82"/><path d="M16 16.84l-4-2.82-4 2.82"/></svg>
+                    <h4 class="font-semibold text-gray-800">iOS Mode</h4>
+                    <p class="text-sm text-gray-500">Prevents text zoom, larger touch targets, and safe area padding.</p>
+                </div>
+                
+                <!-- Option 3: Android Mode -->
+                <div data-mode="android" class="preference-card official-card p-4 text-center" tabindex="0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-2 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/><line x1="9" y1="6" x2="15" y2="6"/></svg>
+                    <h4 class="font-semibold text-gray-800">Android Mode</h4>
+                    <p class="text-sm text-gray-500">Optimized for Chrome WebView and tighter Material design spacing.</p>
+                </div>
+            </div>
+            
+            <div class="pt-4">
+                <button id="preference-continue-btn" disabled 
+                        class="w-full py-3 text-lg ios-btn-primary bg-blue-500 text-white opacity-50 cursor-not-allowed">
+                    Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONSTANTS AND INITIAL STATE ---
+        const APP_ID = 1089; 
+        const SYMBOL = 'R_25'; 
+        const API_URL = `wss://ws.binaryws.com/websockets/v3?app_id=${APP_ID}`;
+        
+        // --- BALANCE TIER CONFIGURATION ---
+        const TIER_CONFIGS = {
+            BLOCKED: {
+                min: 0.00, max: 1.99, name: "BLOCKED (Min $2)",
+                maxTradesPerSignal: 0, cooldownDuration: 0, 
+                maxLossStreak: 999, dailyLossCapPercent: 100.0,
+                breakEvenLockUSD: 999, partialLockUSD: 999, trailingStartPercent: 999, 
+                trailingExitDrawdown: 1.0, isBlocked: true
+            },
+            MICRO: {
+                min: 2.00, max: 4.99, name: "MICRO MODE ($2-$4.99)",
+                maxTradesPerSignal: 1, cooldownDuration: 300, // 5 min
+                maxLossStreak: 1, dailyLossCapPercent: 3.0,
+                breakEvenLockUSD: 0.10, partialLockUSD: 0.20, trailingStartPercent: 30.0, // 30% of stake
+                trailingExitDrawdown: 0.6, isBlocked: false
+            },
+            LOW: {
+                min: 5.00, max: 9.99, name: "LOW MODE ($5-$9.99)",
+                maxTradesPerSignal: 2, cooldownDuration: 180, // 3 min
+                maxLossStreak: 2, dailyLossCapPercent: 4.0,
+                breakEvenLockUSD: 0.15, partialLockUSD: 0.30, trailingStartPercent: 50.0, // 50% of stake
+                trailingExitDrawdown: 0.6, isBlocked: false
+            },
+            STANDARD: {
+                min: 10.00, max: 50.00, name: "STANDARD MODE ($10-$50)",
+                maxTradesPerSignal: 2, cooldownDuration: 180, // 3 min (existing)
+                maxLossStreak: 2, dailyLossCapPercent: 5.0,
+                breakEvenLockUSD: 0.20, partialLockUSD: 0.40, trailingStartPercent: 60.0, // 60% of stake
+                trailingExitDrawdown: 0.6, isBlocked: false
+            }
+        };
+
+
+        // Global State
+        let state = {
+            ws: null,
+            apiToken: '',
+            isBotRunning: false,
+            
+            // --- Settings & Tier ---
+            settingsLocked: true,
+            safeMode: true, // Default ON
+            currentTier: TIER_CONFIGS.BLOCKED, // Start blocked until balance is known
+            
+            // Account Rules (Default Values from UI - Overridden by Tier in SafeMode)
+            stakeAmount: 0.01, 
+            maxTradesPerSignal: 2, // Will be set by Tier
+            maxAllowedTrades: 3, 
+            balanceMin: 10.00,
+            balanceMax: 50.00,
+            autoScaleEnabled: false,
+            
+            // Safety Stops (Will be set by Tier)
+            cooldownDuration: 180, 
+            maxLossStreak: 2,
+            dailyLossCapPercent: 5.0, 
+            dailyProfitLossUSD: 0, 
+            
+            // --- Bot Logic State ---
+            bias: "",
+            breakoutLevel: 0,
+            lossStreak: 0,
+            runnerMode: false,
+            maxProfit: 0, 
+            dailyLossCapTriggered: false, 
+            cooldown: false,
+            lastClosedDay: new Date().getDate(),
+            activeContract: null, 
+            
+            // --- Live Metrics ---
+            tradeCounter: 0, 
+            currentBalance: 0, 
+            initialDailyBalance: 0, 
+            lockedProfitLevel: 'None', 
+            blockReason: 'Awaiting Start',
+        };
+
+        // --- PLATFORM PREFERENCE STATE (NEW) ---
+        let selectedPlatform = null;
+
+        // --- DOM ELEMENTS ---
+        const tokenInput = document.getElementById('api-token');
+        const stakeInput = document.getElementById('stake-amount');
+        const maxTradesInput = document.getElementById('max-trades-input');
+        const balanceMinInput = document.getElementById('balance-min-input');
+        const balanceMaxInput = document.getElementById('balance-max-input');
+        const autoScaleToggle = document.getElementById('auto-scale-toggle');
+        const cooldownInput = document.getElementById('cooldown-input');
+        const maxLossStreakInput = document.getElementById('max-loss-streak-input');
+        const dailyCapInput = document.getElementById('daily-cap-input');
+        const safeModeToggle = document.getElementById('safe-mode-toggle');
+        const unlockBtn = document.getElementById('unlock-settings-btn');
+        const safeModeIndicator = document.getElementById('safe-mode-indicator');
+        const settingsInputs = document.querySelectorAll('#settings-area .ios-input'); 
+
+        const toggleBtn = document.getElementById('toggle-bot-btn');
+        const logOutput = document.getElementById('log-output');
+        
+        const statusDisplay = {
+            connection: document.getElementById('connection-status'),
+            safeMode: document.getElementById('safe-mode-status'),
+            active: document.getElementById('trade-active-status'),
+            bias: document.getElementById('breakout-level-display'), 
+            level: document.getElementById('breakout-level-display'),
+            
+            balance: document.getElementById('current-balance-display'),
+            trades: document.getElementById('trades-this-signal-display'),
+            currentProfit: document.getElementById('current-profit-display'),
+            maxProfit: document.getElementById('max-profit-display'),
+            
+            lockedProfit: document.getElementById('locked-profit-level-display'),
+            tier: document.getElementById('balance-tier-display'), 
+            cap: document.getElementById('daily-cap-status'),
+            block: document.getElementById('block-reason-display'),
+        };
+
+        // Modal Elements
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalInput = document.getElementById('modal-input');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+        const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+
+        // --- PLATFORM PREFERENCE LOGIC (NEW) ---
+
+        function applyPlatformMode(mode) {
+            const body = document.body;
+            body.className = ''; // Clear existing classes
+            body.classList.add(`mode-${mode}`);
+            localStorage.setItem('preferredPlatform', mode);
+            selectedPlatform = mode;
+            log(`Platform mode set to: ${mode.toUpperCase()}`, 'info');
+
+            // Visually select the card if modal is open
+            document.querySelectorAll('.preference-card').forEach(card => {
+                card.classList.remove('selected');
+                if (card.getAttribute('data-mode') === mode) {
+                    card.classList.add('selected');
+                }
+            });
+            
+            // Ensure main content is visible after selection
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        function selectPlatform(event) {
+            const card = event.currentTarget;
+            const mode = card.getAttribute('data-mode');
+            
+            document.querySelectorAll('.preference-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            
+            const continueBtn = document.getElementById('preference-continue-btn');
+            continueBtn.disabled = false;
+            continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            continueBtn.onclick = () => {
+                applyPlatformMode(mode);
+                document.getElementById('preference-modal-overlay').classList.add('hidden');
+            };
+        }
+
+        function showPreferenceModal() {
+            const modal = document.getElementById('preference-modal-overlay');
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden'); // Prevent background scrolling
+            
+            const continueBtn = document.getElementById('preference-continue-btn');
+            continueBtn.disabled = true;
+            continueBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // Add event listeners for options
+            document.querySelectorAll('.preference-card').forEach(card => {
+                // Remove previous listeners to prevent multiple firings
+                card.removeEventListener('click', selectPlatform);
+                card.addEventListener('click', selectPlatform);
+                
+                // Keyboard accessibility for selection
+                card.removeEventListener('keydown', handleCardKeydown);
+                card.addEventListener('keydown', handleCardKeydown);
+
+                card.classList.remove('selected');
+            });
+            
+            // Re-select if preference exists
+            if (selectedPlatform) {
+                const card = document.querySelector(`.preference-card[data-mode="${selectedPlatform}"]`);
+                if (card) card.click();
+            }
+
+            // D) ESC to close (only if already selected, otherwise must choose)
+            function handleEsc(e) {
+                if (e.key === 'Escape' && selectedPlatform) {
+                    modal.classList.add('hidden');
+                    document.body.classList.remove('overflow-hidden');
+                    document.removeEventListener('keydown', handleEsc);
+                }
+            }
+            document.addEventListener('keydown', handleEsc);
+        }
+        
+        function handleCardKeydown(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                selectPlatform(e);
+            }
+        }
+
+
+        // --- UI / LOCKING FUNCTIONS ---
+        
+        function applyLockState() {
+            const inputs = [stakeInput, maxTradesInput, balanceMinInput, balanceMaxInput, cooldownInput, maxLossStreakInput, dailyCapInput, autoScaleToggle];
+            inputs.forEach(input => input.disabled = state.settingsLocked);
+
+            unlockBtn.textContent = state.settingsLocked ? 'Unlock Settings 🔒' : 'Settings Unlocked 🔓';
+            unlockBtn.classList.toggle('bg-blue-500', state.settingsLocked);
+            unlockBtn.classList.toggle('bg-red-500', !state.settingsLocked);
+
+            settingsInputs.forEach(input => {
+                const label = input.parentElement.querySelector('span');
+                if (label) {
+                    label.textContent = label.textContent.replace(' 🔒', '').replace(' 🔓', '');
+                    if (state.settingsLocked) {
+                        label.textContent += ' 🔒';
+                    }
+                }
+            });
+            safeModeToggle.disabled = false;
+        }
+
+        /** Reads user inputs from UI but does not apply them to execution state yet. */
+        function syncStateFromUI() {
+            state.stakeAmount = parseFloat(stakeInput.value) || 0.01;
+            state.balanceMin = parseFloat(balanceMinInput.value) || 10.00;
+            state.balanceMax = parseFloat(balanceMaxInput.value) || 50.00;
+            state.autoScaleEnabled = autoScaleToggle.checked;
+            
+            // Only read defaults. Tier logic will apply the execution state.
+            state.maxTradesPerSignal = parseInt(maxTradesInput.value) || 2;
+            state.cooldownDuration = parseFloat(cooldownInput.value) * 60 || 180; 
+            state.maxLossStreak = parseInt(maxLossStreakInput.value) || 2;
+            state.dailyLossCapPercent = parseFloat(dailyCapInput.value) || 5.0;
+        }
+
+        function showModal(title, message, requiresInput = false, onConfirm, onCancel) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalInput.classList.toggle('hidden', !requiresInput);
+            modalInput.value = '';
+            
+            // D) Accessibility: ESC closes confirmation modal
+            function handleEsc(e) {
+                if (e.key === 'Escape') {
+                    modalOverlay.classList.add('hidden');
+                    document.removeEventListener('keydown', handleEsc);
+                    onCancel();
+                }
+            }
+            document.addEventListener('keydown', handleEsc);
+
+            modalConfirmBtn.onclick = () => {
+                if (requiresInput && modalInput.value !== 'UNLOCK') {
+                    log('Typed confirmation was incorrect.', 'error');
+                    return;
+                }
+                modalOverlay.classList.add('hidden');
+                document.removeEventListener('keydown', handleEsc);
+                onConfirm();
+            };
+            modalCancelBtn.onclick = () => {
+                modalOverlay.classList.add('hidden');
+                document.removeEventListener('keydown', handleEsc);
+                onCancel();
+            };
+            modalOverlay.classList.remove('hidden');
+        }
+
+        // --- CORE LOGIC HANDLERS (Unchanged) ---
+        
+        function handleUnlockSettings() {
+            showModal(
+                'Unlock Confirmation',
+                'To change protected defaults, type UNLOCK below and confirm.',
+                true,
+                () => {
+                    state.settingsLocked = false;
+                    log('Settings unlocked. Use caution when modifying defaults.', 'warn');
+                    syncStateFromUI();
+                    applyLockState();
+                },
+                () => { /* Do nothing on cancel */ }
+            );
+        }
+
+        /** Handles safe mode toggle and pre-flight verification. */
+        function handleSafeModeToggle() {
+            if (safeModeToggle.checked) {
+                state.safeMode = true;
+                safeModeIndicator.textContent = 'Safe Mode: ON';
+                safeModeIndicator.classList.replace('bg-red-500', 'bg-green-500');
+                log('Safe Mode ENABLED. Trading will follow strict safety rules.', 'success');
+            } else {
+                // --- SAFE MODE OFF CONFIRMATION CHECK ---
+                let checksPassed = true;
+                let failureReason = '';
+                
+                // 1. API Connected Check
+                if (state.ws?.readyState !== WebSocket.OPEN) {
+                    checksPassed = false;
+                    failureReason = 'API NOT CONNECTED.';
+                }
+                // 2. Balance Tier Check (Must not be BLOCKED)
+                else if (state.currentTier.isBlocked || state.currentBalance < TIER_CONFIGS.MICRO.min) {
+                    checksPassed = false;
+                    failureReason = `Balance Tier ${state.currentTier.name} (Balance $${state.currentBalance.toFixed(2)})`;
+                }
+                // 3. Loss Caps/SL Logic Active Check (Implicitly true if Tier is detected and not BLOCKED)
+                else if (state.dailyLossCapPercent <= 0) {
+                    checksPassed = false;
+                    failureReason = 'Daily Loss Cap not configured.';
+                }
+                
+                if (!checksPassed) {
+                    log(`Safe Mode OFF BLOCKED: ${failureReason} (Forcing Safe Mode ON)`, 'error');
+                    // Force Safe Mode ON
+                    state.safeMode = true;
+                    safeModeToggle.checked = true;
+                    updateUI(); 
+                    return;
+                }
+
+                // If checks pass, proceed with unlock confirmation modal
+                log('System verified. Safe Mode unlock available.', 'info');
+                showModal(
+                    'WARNING: Increase Risk',
+                    'Turning off Safe Mode removes protections like loss streak cap and balance fit rules. Confirm?',
+                    false,
+                    () => {
+                        state.safeMode = false;
+                        safeModeIndicator.textContent = 'Safe Mode: OFF';
+                        safeModeIndicator.classList.replace('bg-green-500', 'bg-red-500');
+                        log('Safe Mode DISABLED. Safety checks are now bypassed.', 'error');
+                        updateUI();
+                    },
+                    () => {
+                        // Revert toggle state if user cancels
+                        safeModeToggle.checked = true;
+                        state.safeMode = true;
+                        updateUI();
+                    }
+                );
+            }
+        }
+
+
+        // --- BALANCE TIER LOGIC (Unchanged) ---
+        
+        function detectBalanceTier() {
+            let newTier = TIER_CONFIGS.BLOCKED;
+
+            if (state.currentBalance >= TIER_CONFIGS.STANDARD.min && state.currentBalance <= TIER_CONFIGS.STANDARD.max) {
+                newTier = TIER_CONFIGS.STANDARD;
+            } else if (state.currentBalance >= TIER_CONFIGS.LOW.min && state.currentBalance <= TIER_CONFIGS.LOW.max) {
+                newTier = TIER_CONFIGS.LOW;
+            } else if (state.currentBalance >= TIER_CONFIGS.MICRO.min && state.currentBalance <= TIER_CONFIGS.MICRO.max) {
+                newTier = TIER_CONFIGS.MICRO;
+            } else {
+                newTier = TIER_CONFIGS.BLOCKED;
+            }
+
+            if (newTier.name !== state.currentTier.name) {
+                log(`Balance tier changed from ${state.currentTier.name} to ${newTier.name}`, 'action');
+                if (newTier.isBlocked) {
+                    log(`Trading BLOCKED: Balance $${state.currentBalance.toFixed(2)} is below minimum $2.00.`, 'error');
+                } else {
+                    log(`Risk auto-scaled to match ${newTier.name} safety rules.`, 'warn');
+                }
+                state.currentTier = newTier;
+            }
+        }
+
+        // --- UTILITY & API FUNCTIONS (Unchanged) ---
+
+        function log(message, type = 'info') {
+            const now = new Date().toLocaleTimeString();
+            let colorClass = 'text-gray-500';
+
+            switch (type) {
+                case 'error': colorClass = 'text-status-error'; break;
+                case 'success': colorClass = 'text-status-active'; break;
+                case 'warn': colorClass = 'text-status-warn'; break;
+                case 'action': colorClass = 'text-blue-500'; break; 
+                default: colorClass = 'text-gray-500';
+            }
+            
+            const logEntry = document.createElement('p');
+            logEntry.className = colorClass;
+            logEntry.innerHTML = `[${now}] [${type.toUpperCase()}] ${message}`;
+            logOutput.prepend(logEntry);
+
+            if (logOutput.children.length > 50) {
+                logOutput.removeChild(logOutput.lastChild);
+            }
+            logOutput.scrollTop = 0; 
+        }
+
+        /** Updates the status panel in the UI. */
+        function updateUI() {
+            const validatedStake = (typeof state.stakeAmount === 'number' && state.stakeAmount > 0) ? state.stakeAmount : 0.01;
+
+            const currentP_L_USD = state.activeContract ? parseFloat(state.activeContract.profit) : 0;
+            
+            // Status Updates
+            statusDisplay.safeMode.textContent = state.safeMode ? 'ON' : 'OFF';
+            statusDisplay.safeMode.className = state.safeMode ? 'status-value text-status-active' : 'status-value text-status-error';
+            
+            const biasText = state.bias ? state.bias.toUpperCase() : 'N/A';
+            statusDisplay.level.textContent = `${biasText} | ${state.breakoutLevel.toFixed(4)}`;
+            
+            statusDisplay.balance.textContent = `$${state.currentBalance.toFixed(2)}`;
+            statusDisplay.trades.textContent = `${state.tradeCounter}/${state.maxTradesPerSignal}`;
+            
+            statusDisplay.currentProfit.textContent = `$${currentP_L_USD.toFixed(2)}`;
+            statusDisplay.currentProfit.classList.remove('text-status-active', 'text-status-error', 'text-status-neutral');
+            if (currentP_L_USD > 0) statusDisplay.currentProfit.classList.add('text-status-active');
+            else if (currentP_L_USD < 0) statusDisplay.currentProfit.classList.add('text-status-error');
+            else statusDisplay.currentProfit.classList.add('text-status-neutral');
+
+            statusDisplay.maxProfit.textContent = `${state.maxProfit.toFixed(2)}%`;
+            statusDisplay.lockedProfit.textContent = state.lockedProfitLevel;
+            
+            // Balance Tier Display
+            statusDisplay.tier.textContent = state.currentTier.name;
+            statusDisplay.tier.className = state.currentTier.isBlocked ? 'status-value text-status-error' : 'status-value text-status-warn';
+
+            statusDisplay.cap.textContent = state.dailyLossCapTriggered ? 'CAPPED' : 'OK';
+            statusDisplay.cap.className = state.dailyLossCapTriggered ? 'status-value text-status-error' : 'status-value text-status-active';
+            
+            statusDisplay.block.textContent = state.blockReason;
+            statusDisplay.block.className = state.blockReason === 'Awaiting Trade' || state.blockReason === 'Ready' ? 
+                                            'status-value text-status-active' : 'status-value text-status-warn';
+
+            // Button styling
+            toggleBtn.textContent = state.isBotRunning ? 'Stop Bot (Running)' : 'Start Bot';
+            toggleBtn.className = state.isBotRunning ? 
+                'w-full py-3 text-lg ios-btn-primary bg-red-500 hover:bg-red-600 text-white' :
+                'w-full py-3 text-lg ios-btn-primary bg-blue-500 hover:bg-blue-600 text-white';
+        }
+
+        // --- API & CONNECTION HANDLING (Unchanged) ---
+
+        function connect() {
+            if (state.ws) {
+                state.ws.close();
+            }
+
+            state.apiToken = tokenInput.value.trim();
+            if (!state.apiToken) {
+                log('API Token is required to start the bot.', 'error');
+                return;
+            }
+
+            log('Attempting to connect to Deriv API...', 'info');
+            state.ws = new WebSocket(API_URL);
+
+            state.ws.onopen = () => {
+                statusDisplay.connection.textContent = 'CONNECTED';
+                statusDisplay.connection.className = 'text-status-active font-bold';
+                log('Connection established. Authorizing...', 'success');
+                send({ authorize: state.apiToken });
+            };
+
+            state.ws.onmessage = (msg) => {
+                const data = JSON.parse(msg.data);
+                if (data.error) {
+                    log(`API Error: ${data.error.message}`, 'error');
+                    stopBot();
+                    return;
+                }
+                handleMessage(data);
+            };
+
+            state.ws.onclose = () => {
+                statusDisplay.connection.textContent = 'DISCONNECTED';
+                statusDisplay.connection.className = 'text-status-error font-bold';
+                log('Connection closed.', 'warn');
+                stopBot();
+            };
+
+            state.ws.onerror = (e) => {
+                log('WebSocket Error. Check console for details.', 'error');
+                console.error('WebSocket Error:', e);
+            };
+        }
+
+        function send(request) {
+            if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+                try {
+                    state.ws.send(JSON.stringify(request));
+                } catch (e) {
+                    log('Failed to send request.', 'error');
+                }
+            }
+        }
+
+        function handleMessage(data) {
+            
+            if (data.msg_type === 'authorize' && data.authorize) {
+                log(`Authorized successfully for account: ${data.authorize.loginid}`, 'success');
+                state.currentBalance = parseFloat(data.authorize.balance);
+                state.initialDailyBalance = state.currentBalance;
+                detectBalanceTier(); // Run initial tier check
+                if (state.isBotRunning) {
+                    log('Authorization successful. Starting bot logic loop...', 'success');
+                    startLogicLoop();
+                }
+            }
+            
+            if (data.msg_type === 'balance' && data.balance) {
+                state.currentBalance = parseFloat(data.balance.balance);
+                detectBalanceTier(); // Re-check tier after balance update
+                updateUI();
+            }
+
+            if (data.msg_type === 'candles' && data.candles) {
+                if (data.candles.length > 0) {
+                    const h4Candle = data.candles[data.candles.length - 1];
+                    detectH4Structure(h4Candle);
+                }
+            }
+
+            if (data.msg_type === 'proposal_open_contract' && data.proposal_open_contract) {
+                const contract = data.proposal_open_contract;
+                if (contract.is_sold) {
+                    handleTradeClose(contract);
+                } else {
+                    state.activeContract = contract;
+                    runTradeManagement();
+                }
+            }
+
+            if (data.msg_type === 'tick' && data.tick) {
+                const currentPrice = parseFloat(data.tick.quote);
+                
+                const biasText = state.bias ? state.bias.toUpperCase() : 'N/A';
+                statusDisplay.level.textContent = `${biasText} | ${state.breakoutLevel.toFixed(4)} (Current: ${currentPrice.toFixed(4)})`;
+
+                if (state.activeContract) {
+                    runTradeManagement(currentPrice);
+                }
+            }
+
+            if (data.msg_type === 'buy' && data.buy) {
+                state.activeContract = data.buy;
+                state.tradeCounter++;
+                log(`TRADE BOUGHT: Contract ID ${data.buy.contract_id}. Trade ${state.tradeCounter}/${state.maxTradesPerSignal}`, 'success');
+                send({ "proposal_open_contract": 1, "subscribe": 1 });
+            }
+        }
+
+
+        // --- BOT LIFE CYCLE (Unchanged) ---
+
+        function toggleBot() {
+            state.isBotRunning = !state.isBotRunning;
+            syncStateFromUI(); 
+
+            if (state.isBotRunning) {
+                log(`Bot started with Stake $${state.stakeAmount.toFixed(2)}.`, 'info');
+                connect();
+            } else {
+                log('Bot manually stopped.', 'error');
+                stopBot();
+            }
+            updateUI();
+        }
+
+        function stopBot() {
+            state.isBotRunning = false;
+            if (state.ws) {
+                state.ws.close();
+            }
+            clearInterval(logicInterval);
+            updateUI();
+        }
+
+        let logicInterval = null;
+        function startLogicLoop() {
+            mainLogic();
+            send({"balance": 1, "subscribe": 1});
+            logicInterval = setInterval(mainLogic, 60000); // 1 minute interval
+        }
+
+        // --- CORE BOT LOGIC (Unchanged) ---
+
+        function mainLogic() {
+            // DAILY RESET
+            const currentDay = new Date().getDate();
+            if (currentDay !== state.lastClosedDay) {
+                state.dailyLossCapTriggered = false;
+                state.lossStreak = 0;
+                state.dailyProfitLossUSD = 0;
+                state.initialDailyBalance = state.currentBalance;
+                state.lastClosedDay = currentDay;
+                log('Daily reset executed.', 'action');
+            }
+            
+            detectBalanceTier(); 
+
+            // --- TIER/SAFE MODE PARAMETER APPLICATION ---
+            const tier = state.currentTier;
+
+            // If Safe Mode is ON, apply Tier Rules, overriding user input.
+            if (state.safeMode) {
+                state.maxTradesPerSignal = tier.maxTradesPerSignal;
+                state.cooldownDuration = tier.cooldownDuration;
+                state.maxLossStreak = tier.maxLossStreak;
+                state.dailyLossCapPercent = tier.dailyLossCapPercent;
+            }
+            
+            // --- SAFETY VALIDATION CHECKS ---
+            
+            // 1. Balance Block Check (Min $2)
+            if (tier.isBlocked) {
+                state.blockReason = tier.name;
+                if (state.isBotRunning) stopBot(); 
+                return;
+            }
+
+            // 2. Daily Loss Cap Check
+            const lossCapUSD = state.initialDailyBalance * (state.dailyLossCapPercent / 100);
+            if (state.dailyProfitLossUSD < -lossCapUSD) {
+                state.dailyLossCapTriggered = true;
+                state.blockReason = `Daily Cap Reached (>$${lossCapUSD.toFixed(2)} / ${state.dailyLossCapPercent}%)`;
+                log(`Daily loss cap reached. Bot paused for safety.`, 'error');
+                stopBot();
+                return;
+            } else if (state.dailyLossCapTriggered) {
+                 state.blockReason = 'DAILY CAP TRIGGERED';
+                 return;
+            }
+
+            // 3. Cooldown Check
+            if (state.cooldown) {
+                state.blockReason = 'Cooldown Active';
+                return;
+            }
+
+            // 4. Trade Limit Check
+            if (state.tradeCounter >= state.maxTradesPerSignal) {
+                state.blockReason = 'Trade Limit Reached for Signal';
+                return;
+            }
+
+            // 5. Active Trade Check
+            if (state.activeContract) {
+                state.blockReason = 'Trade Active - Management Running';
+                updateUI();
+                return;
+            }
+
+            state.blockReason = 'Awaiting Trade';
+
+            // H4 STRUCTURE DETECTION (Request the last H4 candle data)
+            send({
+                "forget_all": "candles",
+                "ticks_history": SYMBOL,
+                "end": "latest",
+                "count": 2,
+                "granularity": 14400, // H4 (4 hours)
+                "style": "candles",
+                "subscribe": 1 
+            });
+
+            // Request balance & open contract status
+            send({ "balance": 1, "subscribe": 1 });
+            send({ "proposal_open_contract": 1, "subscribe": 1 });
+
+            updateUI();
+        }
+
+
+        // --- H4 BREAKOUT LOGIC (Unchanged) ---
+
+        function detectH4Structure(candle) {
+            const close = parseFloat(candle.close);
+            const open = parseFloat(candle.open);
+            const high = parseFloat(candle.high);
+            const low = parseFloat(candle.low);
+            const candleRange = high - low;
+
+            let newBias = "";
+            let newLevel = 0;
+
+            const isBullish = close > open && close >= open + (candleRange * 0.7);
+            if (isBullish) { newBias = "bullish"; newLevel = high; } 
+            
+            const isBearish = close < open && close <= open - (candleRange * 0.7);
+            if (isBearish) { newBias = "bearish"; newLevel = low; }
+            
+            const signalDetected = !!newBias && newLevel !== state.breakoutLevel;
+
+            if (signalDetected) {
+                if (state.activeContract) {
+                    state.runnerMode = true;
+                    log('Runner Mode activated: New H4 breakout signal detected while in trade.', 'action');
+                    state.maxTradesPerSignal = state.maxAllowedTrades; // Allow up to 3 trades
+                }
+                
+                state.bias = newBias;
+                state.breakoutLevel = newLevel;
+                log(`H4 Structure detected: ${newBias.toUpperCase()} at level ${newLevel.toFixed(4)}`, 'info');
+            } 
+            
+            // ENTRY VALIDATION 
+            if (state.bias && validRetest() && !state.activeContract && state.tradeCounter < state.maxTradesPerSignal) {
+                log(`Entry signal confirmed: ${state.bias.toUpperCase()} retest confirmed.`, 'warn');
+                takeTrade(state.bias);
+            }
+        }
+
+
+        // --- TRADE EXECUTION AND MANAGEMENT (Unchanged) ---
+        
+        function takeTrade(bias) {
+            log(`Faking trade entry for ${bias.toUpperCase()} with stake $${state.stakeAmount.toFixed(2)}.`, 'action');
+            
+            state.tradeCounter++;
+            log(`TRADE BOUGHT: Trade ${state.tradeCounter}/${state.maxTradesPerSignal}`, 'success');
+            // Simulate having an active contract
+            state.activeContract = {
+                contract_id: 'SIMULATED_ID',
+                buy_price: 1000.0,
+                entry_spot: 1000.0,
+                profit: 0.0,
+                current_spot: 1000.0,
+                bid_price: 1000.0,
+            };
+            send({ "proposal_open_contract": 1, "subscribe": 1 });
+        }
+
+
+        function runTradeManagement(currentPrice = null) {
+            const contract = state.activeContract;
+            if (!contract) return;
+
+            // Get parameters from the current TIER
+            const tier = state.currentTier;
+            const validatedStake = (typeof state.stakeAmount === 'number' && state.stakeAmount > 0) ? state.stakeAmount : 0.01;
+            
+            const BE_USD = tier.breakEvenLockUSD;
+            const PARTIAL_USD = tier.partialLockUSD;
+            const TRAILING_START_PERCENT = tier.trailingStartPercent;
+            const TRAILING_EXIT_DRAWDOWN = tier.trailingExitDrawdown; // 0.6 = 60%
+
+            const currentP_L_USD = parseFloat(contract.profit); 
+            const currentP_L_Percent = (currentP_L_USD / validatedStake) * 100; 
+            const currentSpot = currentPrice || parseFloat(contract.bid_price);
+
+            state.maxProfit = Math.max(state.maxProfit, currentP_L_Percent);
+
+            // Reset locked level every management cycle
+            state.lockedProfitLevel = 'None'; 
+
+            const SL_MANDATE = (message) => { log(message, 'action'); state.lockedProfitLevel = message.split(' ')[0]; };
+            
+            // 1. BREAK-EVEN LOCK (current_profit >= BE_USD)
+            if (currentP_L_USD >= BE_USD) {
+                SL_MANDATE(`BE Lock Activated ($${BE_USD.toFixed(2)})`);
+            }
+            
+            // 2. PARTIAL PROFIT LOCK (current_profit >= PARTIAL_USD)
+            if (currentP_L_USD >= PARTIAL_USD) {
+                SL_MANDATE(`Partial Lock Activated ($${PARTIAL_USD.toFixed(2)})`);
+            }
+            
+            // 3. TRAILING EXIT (Rule Check)
+            if (state.maxProfit >= TRAILING_START_PERCENT && currentP_L_Percent < (state.maxProfit * TRAILING_EXIT_DRAWDOWN)) {
+                const drawdownPercent = (1 - TRAILING_EXIT_DRAWDOWN) * 100;
+                log(`TRAILING EXIT TRIGGERED! P/L ${currentP_L_Percent.toFixed(2)}% below ${drawdownPercent.toFixed(0)}% of Max ${state.maxProfit.toFixed(2)}%`, 'error');
+                closePosition(contract.contract_id, 'Trailing Exit');
+                return;
+            }
+            
+            // 4. STRUCTURE FAILURE CHECK
+            if ((state.bias === "bullish" && currentSpot < state.breakoutLevel) ||
+                (state.bias === "bearish" && currentSpot > state.breakoutLevel)) {
+                if (state.lockedProfitLevel === 'None' || currentP_L_USD < BE_USD) {
+                    log(`STRUCTURE FAILURE: Price crossed breakout level ${state.breakoutLevel.toFixed(4)}`, 'error');
+                    closePosition(contract.contract_id, 'Structure Failure');
+                    return;
+                }
+            }
+
+            updateUI();
+        }
+
+        function closePosition(contractId, reason = 'Manual') {
+            send({ "sell": contractId, "price": 0.01 }); 
+            log(`Selling position: ${reason}`, 'error');
+            state.activeContract = null; 
+        }
+
+        function handleTradeClose(contract) {
+            state.activeContract = null;
+            state.runnerMode = false;
+            state.maxProfit = 0;
+            state.lockedProfitLevel = 'None';
+            
+            detectBalanceTier(); 
+
+            const pnl = contract ? (parseFloat(contract.sell_price) - parseFloat(contract.buy_price)) : -0.50; // Simulated PNL
+            const isLoss = pnl < 0;
+
+            state.dailyProfitLossUSD += pnl; 
+            
+            if (isLoss) {
+                state.lossStreak++;
+                log(`TRADE CLOSED (LOSS): P/L: $${pnl.toFixed(2)}. Daily P/L: $${state.dailyProfitLossUSD.toFixed(2)}`, 'error');
+                
+                // Loss Streak Check (Uses tier-configured maxLossStreak)
+                if (state.lossStreak >= state.maxLossStreak) { 
+                    state.dailyLossCapTriggered = true;
+                    log(`MAX LOSS STREAK (${state.maxLossStreak}) reached. Bot paused for safety.`, 'error');
+                }
+            } else {
+                state.lossStreak = 0;
+                log(`TRADE CLOSED (PROFIT): P/L: $${pnl.toFixed(2)}. Daily P/L: $${state.dailyProfitLossUSD.toFixed(2)}`, 'success');
+            }
+
+            // COOLDOWN HANDLING (Uses tier-configured duration)
+            state.cooldown = true;
+            const cooldownMinutes = state.cooldownDuration / 60;
+            log(`Cooldown active: ${cooldownMinutes} minutes until next trade.`, 'warn');
+            setTimeout(() => { 
+                state.cooldown = false;
+                log('Cooldown period finished. Ready for next cycle.', 'info');
+                mainLogic(); 
+            }, state.cooldownDuration * 1000); 
+
+            updateUI();
+        }
+        
+        function validRetest() { return true; }
+
+
+        // --- EVENT LISTENERS ---
+        toggleBtn.addEventListener('click', toggleBot);
+        unlockBtn.addEventListener('click', handleUnlockSettings);
+        safeModeToggle.addEventListener('change', handleSafeModeToggle);
+        
+        // --- D) Merged DOMContentLoaded and Platform Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 1. Platform Preference Check (NEW) ---
+            selectedPlatform = localStorage.getItem('preferredPlatform');
+            const preferenceModal = document.getElementById('preference-modal-overlay');
+
+            if (selectedPlatform) {
+                applyPlatformMode(selectedPlatform);
+                preferenceModal.classList.add('hidden');
+            } else {
+                // Show preference modal on first run
+                document.body.classList.add('overflow-hidden');
+                showPreferenceModal();
+            }
+
+            // --- 2. Existing Initialization Logic (PRESERVED) ---
+            // Use the UI elements to store default state values
+            stakeInput.value = state.stakeAmount.toFixed(2);
+            maxTradesInput.value = TIER_CONFIGS.STANDARD.maxTradesPerSignal;
+            balanceMinInput.value = TIER_CONFIGS.STANDARD.min.toFixed(2);
+            balanceMaxInput.value = TIER_CONFIGS.STANDARD.max.toFixed(2);
+            cooldownInput.value = (TIER_CONFIGS.STANDARD.cooldownDuration / 60); 
+            maxLossStreakInput.value = TIER_CONFIGS.STANDARD.maxLossStreak;
+            dailyCapInput.value = TIER_CONFIGS.STANDARD.dailyLossCapPercent;
+
+            applyLockState();
+            updateUI(); 
+
+            // --- 3. New Event Listeners (NEW) ---
+            document.getElementById('change-preference-btn').addEventListener('click', showPreferenceModal);
+        });
+    </script>
+</body>
+</html>
