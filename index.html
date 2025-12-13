@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Official V25 H4 Runner Bot Interface - v2.3 (Beginner $1)</title>
+  <title>Official V25 H4 Runner Bot Interface - v2.4 (Beginner $1)</title>
   <meta name="theme-color" content="#007aff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -41,7 +41,7 @@
   <div class="max-w-4xl mx-auto p-4 sm:p-8">
     <header class="mb-8 text-center">
       <h1 class="text-3xl font-bold text-gray-800 mb-2">V25 Breakout Strategy Runner</h1>
-      <p class="text-gray-500">Beginner-safe interface + guarded subscriptions + no entry spam.</p>
+      <p class="text-gray-500">Beginner-safe interface + guarded subscriptions + no close spam.</p>
       <p class="text-xs text-gray-400 mt-2">Trading involves risk. This tool adds guardrails but cannot guarantee profits.</p>
     </header>
 
@@ -139,6 +139,10 @@
             <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Stop Loss ($)</span>
           </div>
         </div>
+
+        <p class="text-xs text-gray-400 mt-2">
+          Note: 1-tick contracts often expire fast and may not be sellable. If not sellable, TP/SL by “sell” is skipped automatically.
+        </p>
       </div>
     </div>
 
@@ -223,7 +227,7 @@
 
       stakeAmount:1.00, maxTradesPerSignal:2, balanceMin:0.90, balanceMax:999999,
       cooldownDuration:180, maxLossStreak:2, dailyLossCapPercent:5,
-      autoScaleEnabled:false,  // OFF by default for $1 stake
+      autoScaleEnabled:false,
 
       tpQuickUSD:0.90, tpCleanUSD:1.20, stopLossUSD:0.20,
 
@@ -235,6 +239,10 @@
       lockedProfitLevel:"None", blockReason:"Awaiting Start",
 
       entryInProgress:false,
+
+      // ✅ close spam guards
+      sellInProgress:false,
+      lastCloseAttemptContractId:null,
 
       subs:{
         balance:{subscribed:false,subscribing:false},
@@ -459,6 +467,7 @@
       state.entryInProgress=true;
       const contract_type = (bias==="bullish") ? "CALL" : "PUT";
 
+      // beginner 1-tick
       const duration = 1;
       const duration_unit = "t";
 
@@ -492,26 +501,60 @@
       send(proposalReq);
     }
 
+    // ✅ close guard: only sell if contract is sellable + not spam
     function closePosition(contractId, reason){
-      if(!contractId) return;
+      const c = state.activeContract;
+      if(!contractId || !c) return;
+
+      if (state.sellInProgress) return;
+      if (state.lastCloseAttemptContractId === contractId) return;
+
+      // If already ended, skip
+      if (c.is_sold || c.status === "sold" || c.status === "expired") {
+        log(`Close skipped (${reason}) — contract already ended.`, "warn");
+        return;
+      }
+
+      // Sellable check (many 1-tick contracts are not sellable)
+      if (c.is_sellable !== 1) {
+        log(`Close skipped (${reason}) — not sellable (expiry-only).`, "warn");
+        state.lastCloseAttemptContractId = contractId;
+        return;
+      }
+
+      state.sellInProgress = true;
+      state.lastCloseAttemptContractId = contractId;
+
       send({ sell: contractId, price: 0 });
       log(`Close requested: ${reason}`,"warn");
+
+      setTimeout(()=>{ state.sellInProgress=false; }, 1200);
     }
 
+    // ✅ management: if NOT sellable (typical 1-tick), do NOT try TP/SL via sell
     function runTradeManagement(){
       if(!state.activeContract) return;
-      const profit=parseFloat(state.activeContract.profit||0);
+
+      const c = state.activeContract;
+      const profit=parseFloat(c.profit||0);
+
+      // Lock display only
+      if(profit >= 0.10) state.lockedProfitLevel="BE Lock (soft)";
+      if(profit >= 0.20) state.lockedProfitLevel="Partial Lock (soft)";
+
+      // If not sellable, skip TP/SL closing (prevents “expired” spam)
+      if (c.is_sellable !== 1) {
+        state.lockedProfitLevel = "Expiry-only (no sell)";
+        return;
+      }
 
       const target = isCleanBreakout() ? state.tpCleanUSD : state.tpQuickUSD;
       const stop = -Math.abs(state.stopLossUSD);
 
-      if(profit >= 0.10) state.lockedProfitLevel="BE Lock (soft)";
-      if(profit >= 0.20) state.lockedProfitLevel="Partial Lock (soft)";
-
       if(profit >= target){
-        closePosition(state.activeContract.contract_id, `TP Hit (+$${profit.toFixed(2)})`);
+        closePosition(c.contract_id, `TP Hit (+$${profit.toFixed(2)})`);
       } else if(profit <= stop){
-        closePosition(state.activeContract.contract_id, `SL Hit ($${profit.toFixed(2)})`);
+        closePosition(c.contract_id, `SL Hit ($${profit.toFixed(2)})`);
       }
     }
 
@@ -525,6 +568,8 @@
       state.activeContractId=null;
       state.lockedProfitLevel="None";
       state.entryInProgress=false;
+      state.sellInProgress=false;
+      state.lastCloseAttemptContractId=null;
 
       if(pnl<0){
         state.lossStreak++;
@@ -547,6 +592,7 @@
     }
 
     function handleMessage(data){
+      // ✅ subscription duplicate ignore
       if(data?.error?.message?.includes("already subscribed to balance")){
         state.subs.balance.subscribed=true; state.subs.balance.subscribing=false;
         log("Balance already subscribed (ignored).","warn");
@@ -606,8 +652,8 @@
         if(state.activeContractId && c.contract_id && c.contract_id!==state.activeContractId) return;
 
         state.activeContract=c;
-        state.entryInProgress = !!c.contract_id;
 
+        // if finished
         if(c.is_sold){
           state.tradeCounter++;
           handleTradeClose(c);
@@ -636,6 +682,9 @@
 
       state.ws.onopen=()=>{
         resetSubs();
+        state.sellInProgress=false;
+        state.lastCloseAttemptContractId=null;
+
         statusDisplay.connection.textContent="CONNECTED";
         statusDisplay.connection.className="text-status-active status-value";
         send({ authorize: state.apiToken });
@@ -643,6 +692,20 @@
 
       state.ws.onmessage=(evt)=>{
         const data=JSON.parse(evt.data);
+
+        // ✅ expired-contract guard (prevents the spam you saw)
+        if (data?.error?.message?.toLowerCase().includes("the contract has expired")) {
+          log("Contract expired (OK). Clearing trade state.", "warn");
+          state.activeContract = null;
+          state.activeContractId = null;
+          state.entryInProgress = false;
+          state.sellInProgress = false;
+          state.lastCloseAttemptContractId = null;
+          state.lockedProfitLevel = "None";
+          updateUI();
+          return;
+        }
+
         if(data.error){
           log(`API Error: ${data.error.message}`,"error");
           if(/invalid token/i.test(data.error.message)) stopBot("Invalid token.");
@@ -716,6 +779,9 @@
       state.activeContractId=null;
       state.entryInProgress=false;
       state.tradeCounter=0;
+      state.sellInProgress=false;
+      state.lastCloseAttemptContractId=null;
+
       log(`Bot stopped: ${reason}`,"warn");
       if(state.ws && state.ws.readyState===WebSocket.OPEN) state.ws.close();
       state.ws=null;
@@ -811,5 +877,5 @@
     });
   </script>
 </body>
-</html>;
+</html>
        
