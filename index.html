@@ -1,264 +1,865 @@
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Scalp Bot v1.2</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Expose Firebase services globally for use in the script below
+        window.firebase = {
+            initializeApp,
+            getAuth,
+            signInAnonymously,
+            signInWithCustomToken,
+            onAuthStateChanged,
+            getFirestore,
+            doc,
+            getDoc,
+            setDoc,
+            setLogLevel
+        };
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .log-line { border-left: 3px solid; padding-left: 0.5rem; margin-bottom: 0.25rem; font-size: 0.8rem; }
+        .log-info { border-color: #60a5fa; } /* blue-400 */
+        .log-success { border-color: #34d399; } /* emerald-400 */
+        .log-warning { border-color: #fbbf24; } /* amber-400 */
+        .log-error { border-color: #f87171; } /* red-400 */
+        .log-system { border-color: #a78bfa; color: #a78bfa; } /* violet-400 */
+        
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+        }
+        .status-connected { background-color: #34d399; color: #064e3b; }
+        .status-disconnected { background-color: #f87171; color: #450a0a; }
+        .status-active { background-color: #3b82f6; color: white; }
+        .status-inactive { background-color: #9ca3af; color: #1f2937; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 sm:p-8">
 
-  // --- FIREBASE CONFIGURATION ---
-  const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-  const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    <div id="settings-locked" class="hidden"></div>
+    <input type="checkbox" id="safe-mode-toggle" class="hidden" checked>
 
-  let db = null;
-  let auth = null;
-  let userId = null;
-  let isFirebaseReady = false;
+    <!-- Main Container -->
+    <div class="max-w-4xl mx-auto space-y-6">
+        <header class="text-center">
+            <h1 class="text-3xl font-extrabold text-gray-900">Quantum Scalp Bot</h1>
+            <p class="text-sm text-gray-500">Real-time Volatility 25 (1s) Trading</p>
+        </header>
 
-  // --- DERIV API CONSTANTS ---
-  const API_APP_ID = 1089;
-  const SYMBOL = 'R_25';
-  const API_URL = `wss://ws.binaryws.com/websockets/v3?app_id=${API_APP_ID}`;
+        <!-- Connection and Status Card -->
+        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Connection & Control</h2>
+            
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <div class="flex-grow">
+                    <label for="api-token" class="block text-sm font-medium text-gray-700 mb-1">Deriv API Token</label>
+                    <input type="password" id="api-token" placeholder="Enter Deriv Token (Authorizes R/W)" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
+                </div>
+                <button id="toggle-bot-btn" class="w-full md:w-40 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md transition duration-150 transform hover:scale-[1.02] mt-auto">
+                    Start Bot
+                </button>
+            </div>
 
-  // --- SCALP MOMENTUM DEFAULTS (works even while your UI is locked) ---
-  const SCALP_CONFIG = {
-    duration: 5,
-    durationUnit: "t",          // ticks
-    tickBufferSize: 8,
-    minTicksToEvaluate: 6,
-    moveTrigger: 0.02,          // momentum threshold
-    tpUSD: 0.05,                // auto close profit
-    slUSD: 0.05,                // auto close loss
-    cooldownAfterTradeSec: 2     // extra small cooldown after any close
-  };
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center border-t pt-4 mt-4">
+                <div>
+                    <p class="text-xs text-gray-500">Connection Status</p>
+                    <span id="connection-status" class="status-pill status-disconnected">DISCONNECTED</span>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500">Current Balance</p>
+                    <span id="current-balance-display" class="text-lg font-bold text-blue-600">$ 0.00</span>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500">Trade Active</p>
+                    <span id="trade-active-status" class="status-pill status-inactive">FALSE</span>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500">Tier Status</p>
+                    <span id="tier-status-display" class="text-sm font-semibold text-purple-600">Base</span>
+                </div>
+            </div>
+        </div>
 
-  // --- BALANCE TIER CONFIGURATION ---
-  const TIER_CONFIGS = {
-    BLOCKED: {
-      min: 0.00, max: 0.89, name: "BLOCKED (Min $0.90)",
-      maxTradesPerSignal: 0, cooldownDuration: 0,
-      maxLossStreak: 999, dailyLossCapPercent: 100.0,
-      breakEvenLockUSD: 999, partialLockUSD: 999, trailingStartPercent: 999,
-      trailingExitDrawdown: 1.0, isBlocked: true
-    },
-    MICRO: {
-      min: 0.90, max: 4.99, name: "MICRO MODE ($0.90-$4.99)",
-      maxTradesPerSignal: 1, cooldownDuration: 300, // 5 min
-      maxLossStreak: 1, dailyLossCapPercent: 3.0,
-      breakEvenLockUSD: 0.10, partialLockUSD: 0.20, trailingStartPercent: 30.0,
-      trailingExitDrawdown: 0.6, isBlocked: false
-    },
-    LOW: {
-      min: 5.00, max: 9.99, name: "LOW MODE ($5-$9.99)",
-      maxTradesPerSignal: 2, cooldownDuration: 180, // 3 min
-      maxLossStreak: 2, dailyLossCapPercent: 4.0,
-      breakEvenLockUSD: 0.15, partialLockUSD: 0.30, trailingStartPercent: 50.0,
-      trailingExitDrawdown: 0.6, isBlocked: false
-    },
-    STANDARD: {
-      min: 10.00, max: 50.00, name: "STANDARD MODE ($10-$50)",
-      maxTradesPerSignal: 2, cooldownDuration: 180, // 3 min
-      maxLossStreak: 2, dailyLossCapPercent: 5.0,
-      breakEvenLockUSD: 0.20, partialLockUSD: 0.40, trailingStartPercent: 60.0,
-      trailingExitDrawdown: 0.6, isBlocked: false
-    }
-  };
+        <!-- Trading Configuration Card -->
+        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Trading Settings</h2>
+                <button onclick="toggleSettingsLock()" id="unlock-settings-btn" class="text-sm text-blue-600 hover:text-blue-800 font-medium transition duration-150">
+                    Unlock Settings
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Stake Amount -->
+                <div class="config-item">
+                    <label for="stake-amount" class="block text-sm font-medium text-gray-700">Stake ($)</label>
+                    <input type="number" step="0.05" id="stake-amount" value="0.35" class="w-full p-2 border border-gray-300 rounded-lg text-sm text-gray-800" disabled>
+                </div>
+                <!-- Max Trades Per Signal -->
+                <div class="config-item">
+                    <label for="max-trades-per-signal" class="block text-sm font-medium text-gray-700">Max Trades/Signal</label>
+                    <input type="number" id="max-trades-per-signal" value="1" class="w-full p-2 border border-gray-300 rounded-lg text-sm text-gray-800" disabled>
+                </div>
+                <!-- Cooldown Duration -->
+                <div class="config-item">
+                    <label for="cooldown-duration" class="block text-sm font-medium text-gray-700">Cooldown (sec)</label>
+                    <input type="number" id="cooldown-duration" value="60" class="w-full p-2 border border-gray-300 rounded-lg text-sm text-gray-800" disabled>
+                </div>
+                <!-- Max Loss Streak -->
+                <div class="config-item">
+                    <label for="max-loss-streak" class="block text-sm font-medium text-gray-700">Max Loss Streak</label>
+                    <input type="number" id="max-loss-streak" value="3" class="w-full p-2 border border-gray-300 rounded-lg text-sm text-gray-800" disabled>
+                </div>
+                <!-- Daily Loss Cap Percent -->
+                <div class="config-item">
+                    <label for="daily-loss-cap-percent" class="block text-sm font-medium text-gray-700">Daily Loss Cap (%)</label>
+                    <input type="number" step="0.5" id="daily-loss-cap-percent" value="5.0" class="w-full p-2 border border-gray-300 rounded-lg text-sm text-gray-800" disabled>
+                </div>
+            </div>
 
-  // --- GLOBAL STATE ---
-  let state = {
-    ws: null,
-    apiToken: '',
-    isBotRunning: false,
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg flex items-center justify-between">
+                <label for="safe-mode-toggle" class="flex items-center space-x-2 cursor-pointer">
+                    <span class="text-sm font-medium text-gray-700">Safe Mode (Tier Overrides Active)</span>
+                    <input type="checkbox" id="safe-mode-toggle" class="sr-only peer" checked>
+                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                </label>
+            </div>
+        </div>
 
-    // tier + settings
-    settingsLocked: true,
-    safeMode: true,
-    currentTier: TIER_CONFIGS.BLOCKED,
+        <!-- Live Status Board -->
+        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Live Performance</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Current Profit -->
+                <div class="p-3 bg-blue-50 rounded-lg">
+                    <p class="text-xs text-blue-600 font-semibold">Contract P/L</p>
+                    <span id="current-profit-display" class="text-xl font-extrabold text-blue-800">$ 0.00</span>
+                </div>
+                <!-- Daily P/L -->
+                <div class="p-3 bg-yellow-50 rounded-lg">
+                    <p class="text-xs text-yellow-600 font-semibold">Daily P/L (Cap: <span id="daily-cap-percent-display">5%</span>)</p>
+                    <span id="daily-profit-loss-display" class="text-xl font-extrabold text-yellow-800">$ 0.00</span>
+                </div>
+                <!-- Trades this Signal -->
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <p class="text-xs text-gray-600 font-semibold">Trades This Signal</p>
+                    <span id="trades-this-signal-display" class="text-xl font-extrabold text-gray-800">0/1</span>
+                </div>
+                <!-- Loss Streak -->
+                <div class="p-3 bg-red-50 rounded-lg">
+                    <p class="text-xs text-red-600 font-semibold">Current Loss Streak</p>
+                    <span id="loss-streak-display" class="text-xl font-extrabold text-red-800">0</span>
+                </div>
+            </div>
+            
+            <!-- Block Reason -->
+            <div class="mt-4 p-4 bg-red-100 border border-red-300 rounded-lg">
+                <p class="text-sm font-medium text-red-800">Bot Status: <span id="block-reason-display" class="font-bold text-red-900">Awaiting Connection</span></p>
+            </div>
+        </div>
 
-    stakeAmount: 0.01,
-    maxTradesPerSignal: 0,
-    cooldownDuration: 0,
-    maxLossStreak: 999,
-    dailyLossCapPercent: 100.0,
+        <!-- Log Output Card -->
+        <div class="bg-gray-800 p-6 rounded-xl shadow-xl">
+            <h2 class="text-xl font-bold text-white mb-4">Bot Log</h2>
+            <div id="log-output" class="h-64 overflow-y-scroll bg-black p-3 rounded-lg text-gray-300">
+                <!-- Log entries appear here -->
+            </div>
+        </div>
+    </div>
 
-    // trade logic
-    bias: "",
-    breakoutLevel: 0,
+    <!-- Scripts -->
+    <script>
+        // Set up the necessary global variables for Firebase access in the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
 
-    tradeCounter: 0,
-    lossStreak: 0,
-    cooldown: false,
-    cooldownTimer: null,
+        let app, db, auth;
+        let userId = null;
+        let isAuthReady = false;
 
-    // daily P/L
-    currentBalance: 0,
-    initialDailyBalance: 0,
-    dailyProfitLossUSD: 0,
-    dailyLossCapTriggered: false,
-    lastClosedDay: new Date().getDate(),
+        // Bot State Management
+        const state = {
+            ws: null,
+            isRunning: false,
+            isAuthenticated: false,
+            isSubscribed: { balance: false, ticks: false, contracts: false },
+            entryInProgress: false,
+            entryTimeout: null,
+            closeRequestedForContractId: null,
+            tradeCounter: 0,
+            lossStreak: 0,
+            cooldownActive: false,
+            cooldownTimer: null,
+            activeContract: null, // Full contract object
+            activeContractId: null, // Contract ID string
+            tickBuffer: [], // Max 8 ticks
+            // Balance and P/L
+            currentBalance: 0,
+            initialDailyBalance: 0, 
+            dailyLossCapTriggered: false,
+            lastDailyReset: null, 
+            // Settings (Tier/UI determined)
+            stakeAmount: 0.35, 
+            maxTradesPerSignal: 1,
+            cooldownDuration: 60,
+            maxLossStreak: 3,
+            dailyLossCapPercent: 5.0,
+            currentTierName: "Base",
+            isBlockedByTier: false,
+        };
 
-    // live contract
-    activeContract: null,
-    activeContractId: null,
+        // --- UTILITY FUNCTIONS ---
 
-    // guards
-    entryInProgress: false,
-    closeRequestedForContractId: null,
-    lastNoSellableWarnForContractId: null,
-    postCloseCooldownUntil: 0,
+        /**
+         * Custom logging function that writes to the UI and console.
+         * @param {string} message - The message to log.
+         * @param {('info'|'success'|'warning'|'error'|'system')} type - Log type.
+         */
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log-output');
+            const now = new Date().toLocaleTimeString();
+            const logLine = document.createElement('div');
+            logLine.className = `log-line log-${type}`;
+            logLine.innerHTML = `[${now}] ${message}`;
+            logElement.prepend(logLine); // Prepend for LIFO order
 
-    // scalp ticks
-    tickBuffer: [],
+            // Clean up old logs to prevent excessive memory use
+            while (logElement.children.length > 100) {
+                logElement.lastChild.remove();
+            }
+            
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
 
-    // request routing
-    reqId: 1,
-    pending: new Map(),
+        /**
+         * Helper to safely send requests over WebSocket.
+         * @param {object} req - The request payload.
+         */
+        function send(req) {
+            if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+                state.ws.send(JSON.stringify(req));
+            } else {
+                log('WebSocket not open. Request failed.', 'error');
+                updateUI();
+            }
+        }
 
-    // UI fields
-    maxProfit: 0,
-    lockedProfitLevel: 'None',
-    blockReason: 'Awaiting Start',
-  };
+        /**
+         * Main function to update all UI status elements.
+         */
+        function updateUI() {
+            // Connection Status
+            const connStatusEl = document.getElementById('connection-status');
+            connStatusEl.textContent = state.ws?.readyState === WebSocket.OPEN ? 'CONNECTED' : 'DISCONNECTED';
+            connStatusEl.className = `status-pill ${state.ws?.readyState === WebSocket.OPEN ? 'status-connected' : 'status-disconnected'}`;
 
-  // --- PLATFORM PREFERENCE STATE ---
-  let selectedPlatform = null;
+            // Trade Active Status
+            const tradeStatusEl = document.getElementById('trade-active-status');
+            tradeStatusEl.textContent = state.activeContractId ? 'TRUE' : 'FALSE';
+            tradeStatusEl.className = `status-pill ${state.activeContractId ? 'status-active' : 'status-inactive'}`;
 
-  // --- DOM ---
-  const tokenInput = document.getElementById('api-token');
-  const stakeInput = document.getElementById('stake-amount');
-  const maxTradesInput = document.getElementById('max-trades-input');
-  const balanceMinInput = document.getElementById('balance-min-input');
-  const balanceMaxInput = document.getElementById('balance-max-input');
-  const autoScaleToggle = document.getElementById('auto-scale-toggle');
-  const cooldownInput = document.getElementById('cooldown-input');
-  const maxLossStreakInput = document.getElementById('max-loss-streak-input');
-  const dailyCapInput = document.getElementById('daily-cap-input');
-  const safeModeToggle = document.getElementById('safe-mode-toggle');
-  const unlockBtn = document.getElementById('unlock-settings-btn');
-  const safeModeIndicator = document.getElementById('safe-mode-indicator');
-  const settingsInputs = document.querySelectorAll('#settings-area .ios-input');
-  const toggleBtn = document.getElementById('toggle-bot-btn');
-  const logOutput = document.getElementById('log-output');
+            // Balance & P/L
+            document.getElementById('current-balance-display').textContent = `$ ${state.currentBalance.toFixed(2)}`;
+            
+            const dailyPL = state.currentBalance - state.initialDailyBalance;
+            const dailyPLEl = document.getElementById('daily-profit-loss-display');
+            dailyPLEl.textContent = `$ ${dailyPL.toFixed(2)}`;
+            dailyPLEl.classList.remove('text-green-800', 'text-red-800', 'text-yellow-800');
+            dailyPLEl.classList.add(dailyPL > 0.01 ? 'text-green-800' : dailyPL < -0.01 ? 'text-red-800' : 'text-yellow-800');
+            
+            // Contract P/L
+            const currentProfit = state.activeContract?.profit || 0;
+            const currentProfitEl = document.getElementById('current-profit-display');
+            currentProfitEl.textContent = `$ ${currentProfit.toFixed(2)}`;
+            currentProfitEl.classList.remove('text-green-800', 'text-red-800', 'text-blue-800');
+            currentProfitEl.classList.add(currentProfit > 0.01 ? 'text-green-800' : currentProfit < -0.01 ? 'text-red-800' : 'text-blue-800');
 
-  const statusDisplay = {
-    connection: document.getElementById('connection-status'),
-    safeMode: document.getElementById('safe-mode-status'),
-    active: document.getElementById('trade-active-status'),
-    bias: document.getElementById('breakout-level-display'),
+            // Trading Stats
+            document.getElementById('trades-this-signal-display').textContent = `${state.tradeCounter}/${state.maxTradesPerSignal}`;
+            document.getElementById('loss-streak-display').textContent = state.lossStreak;
+            document.getElementById('tier-status-display').textContent = state.currentTierName;
+            document.getElementById('daily-cap-percent-display').textContent = `${state.dailyLossCapPercent.toFixed(1)}%`;
 
-    balance: document.getElementById('current-balance-display'),
-    trades: document.getElementById('trades-this-signal-display'),
-    currentProfit: document.getElementById('current-profit-display'),
-    maxProfit: document.getElementById('max-profit-display'),
 
-    lockedProfit: document.getElementById('locked-profit-level-display'),
-    tier: document.getElementById('balance-tier-display'),
-    cap: document.getElementById('daily-cap-status'),
-    block: document.getElementById('block-reason-display'),
-  };
+            // Block Reason
+            let reason = 'Awaiting momentum';
+            const dailyCapHit = state.dailyLossCapTriggered;
+            const tierBlocked = state.isBlockedByTier;
 
-  // modal
-  const modalOverlay = document.getElementById('modal-overlay');
-  const modalTitle = document.getElementById('modal-title');
-  const modalMessage = document.getElementById('modal-message');
-  const modalInput = document.getElementById('modal-input');
-  const modalCancelBtn = document.getElementById('modal-cancel-btn');
-  const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+            if (!state.isRunning) {
+                reason = 'Bot is STOPPED';
+            } else if (!state.isAuthenticated) {
+                reason = 'Authorizing...';
+            } else if (tierBlocked) {
+                reason = `Tier Blocked: ${state.currentTierName}`;
+            } else if (dailyCapHit) {
+                reason = 'Daily loss cap hit! Trading stopped for the day.';
+            } else if (state.cooldownActive) {
+                reason = `Cooldown Active (${state.cooldownDuration}s remaining)`;
+            } else if (state.activeContractId) {
+                reason = 'Trade Active';
+            } else if (state.entryInProgress) {
+                reason = 'Entry in progress...';
+            } else if (state.lossStreak >= state.maxLossStreak) {
+                 reason = `Max Loss Streak (${state.maxLossStreak}) reached. Cooldown starting...`;
+            }
+            
+            document.getElementById('block-reason-display').textContent = reason;
 
-  // --- UTILS ---
-  function log(message, type = 'system') {
-    const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
-    const el = document.createElement('p');
+            // Toggle Button Text
+            const toggleBtn = document.getElementById('toggle-bot-btn');
+            toggleBtn.textContent = state.isRunning ? 'Stop Bot' : 'Start Bot';
+            toggleBtn.classList.remove('bg-green-600', 'bg-red-600');
+            toggleBtn.classList.add(state.isRunning ? 'bg-red-600' : 'bg-green-600');
+        }
 
-    let colorClass = 'text-gray-500';
-    if (type === 'error') colorClass = 'text-status-error font-semibold';
-    else if (type === 'warn') colorClass = 'text-status-warn';
-    else if (type === 'trade') colorClass = 'text-status-active font-medium';
-    else if (type === 'system') colorClass = 'text-gray-800';
+        // --- FIRESTORE / TIER LOGIC ---
 
-    el.className = colorClass;
-    el.textContent = `[${timestamp} | ${type.toUpperCase()}] ${message}`;
-    logOutput.appendChild(el);
-    logOutput.scrollTop = logOutput.scrollHeight;
-  }
+        /**
+         * Defines tiers and applies settings based on balance and Safe Mode.
+         * MUST be called after every balance update.
+         */
+        function determineTier(balance) {
+            const safeMode = document.getElementById('safe-mode-toggle').checked;
+            const isUnlocked = !document.getElementById('unlock-settings-btn').textContent.includes('Lock'); // Check if unlocked text is shown
 
-  function showConfirmation(title, message, requiresInput = false, requiredText = '') {
-    return new Promise(resolve => {
-      modalTitle.textContent = title;
-      modalMessage.textContent = message;
+            // 1. Tier Definitions
+            let tier = {
+                name: 'BLOCKED (Low Balance)',
+                stake: 0,
+                maxTrades: 0,
+                cooldown: 0,
+                maxLossStreak: 0,
+                dailyLossCap: 0,
+                isBlocked: true,
+            };
 
-      modalInput.classList.toggle('hidden', !requiresInput);
-      modalInput.value = '';
+            if (balance >= 1000) {
+                tier = { name: 'Tier 3 (High)', stake: 10.0, maxTrades: 3, cooldown: 10, maxLossStreak: 5, dailyLossCap: 7.0, isBlocked: false };
+            } else if (balance >= 250) {
+                tier = { name: 'Tier 2 (Medium)', stake: 2.0, maxTrades: 2, cooldown: 30, maxLossStreak: 4, dailyLossCap: 6.0, isBlocked: false };
+            } else if (balance >= 10) {
+                tier = { name: 'Tier 1 (Base)', stake: 0.35, maxTrades: 1, cooldown: 60, maxLossStreak: 3, dailyLossCap: 5.0, isBlocked: false };
+            }
 
-      modalConfirmBtn.disabled = requiresInput;
-      modalConfirmBtn.classList.toggle('opacity-50', requiresInput);
-      modalConfirmBtn.classList.toggle('cursor-not-allowed', requiresInput);
+            state.currentTierName = tier.name;
+            state.isBlockedByTier = tier.isBlocked;
+            
+            // 2. Read Manual UI Values
+            const uiStake = parseFloat(document.getElementById('stake-amount').value) || 0.35;
+            const uiMaxTrades = parseInt(document.getElementById('max-trades-per-signal').value) || 1;
+            const uiCooldown = parseInt(document.getElementById('cooldown-duration').value) || 60;
+            const uiMaxLossStreak = parseInt(document.getElementById('max-loss-streak').value) || 3;
+            const uiDailyLossCap = parseFloat(document.getElementById('daily-loss-cap-percent').value) || 5.0;
 
-      modalOverlay.classList.remove('hidden');
-      modalOverlay.classList.add('flex');
+            // 3. Apply Settings based on Safe Mode / Unlock Status
+            if (safeMode) {
+                // Safe Mode ON: Tier settings override
+                state.stakeAmount = tier.stake;
+                state.maxTradesPerSignal = tier.maxTrades;
+                state.cooldownDuration = tier.cooldown;
+                state.maxLossStreak = tier.maxLossStreak;
+                state.dailyLossCapPercent = tier.dailyLossCap;
+                log(`Safe Mode ON. Applied ${tier.name} settings.`, 'system');
+            } else if (isUnlocked) {
+                // Safe Mode OFF & Unlocked: Use manual UI settings
+                state.stakeAmount = uiStake;
+                state.maxTradesPerSignal = uiMaxTrades;
+                state.cooldownDuration = uiCooldown;
+                state.maxLossStreak = uiMaxLossStreak;
+                state.dailyLossCapPercent = uiDailyLossCap;
+                log('Safe Mode OFF & Unlocked. Applied manual UI settings.', 'system');
+            } else {
+                // Safe Mode OFF & Locked: Fallback to Tier settings
+                state.stakeAmount = tier.stake;
+                state.maxTradesPerSignal = tier.maxTrades;
+                state.cooldownDuration = tier.cooldown;
+                state.maxLossStreak = tier.maxLossStreak;
+                state.dailyLossCapPercent = tier.dailyLossCap;
+                log(`Safe Mode OFF & Locked. Applied ${tier.name} settings as fallback.`, 'system');
+            }
 
-      const confirmHandler = () => {
-        if (requiresInput && modalInput.value !== requiredText) return;
-        cleanup(true);
-      };
-      const cancelHandler = () => cleanup(false);
-      const inputHandler = () => {
-        const match = modalInput.value === requiredText;
-        modalConfirmBtn.disabled = !match;
-        modalConfirmBtn.classList.toggle('opacity-50', !match);
-        modalConfirmBtn.classList.toggle('cursor-not-allowed', !match);
-      };
+            // Enforce minimum stake if not blocked
+            if (!state.isBlockedByTier && state.stakeAmount < 0.35) {
+                state.stakeAmount = 0.35;
+                log('Stake amount set to minimum $0.35.', 'warning');
+            }
 
-      function cleanup(val) {
-        modalOverlay.classList.add('hidden');
-        modalOverlay.classList.remove('flex');
-        modalConfirmBtn.removeEventListener('click', confirmHandler);
-        modalCancelBtn.removeEventListener('click', cancelHandler);
-        modalInput.removeEventListener('input', inputHandler);
-        resolve(val);
-      }
+            updateUI();
+        }
 
-      modalConfirmBtn.addEventListener('click', confirmHandler);
-      modalCancelBtn.addEventListener('click', cancelHandler);
-      if (requiresInput) modalInput.addEventListener('input', inputHandler);
-    });
-  }
+        async function saveDailyState() {
+            if (!userId || !db) return;
+            const docRef = firebase.doc(db, `artifacts/${appId}/users/${userId}/settings/botConfig`);
+            try {
+                await firebase.setDoc(docRef, {
+                    initialDailyBalance: state.initialDailyBalance,
+                    lastDailyReset: state.lastDailyReset,
+                    dailyLossCapTriggered: state.dailyLossCapTriggered,
+                }, { merge: true });
+            } catch (error) {
+                log(`Error saving daily state: ${error.message}`, 'error');
+            }
+        }
 
-  function nowMs() { return Date.now(); }
+        async function loadConfigAndAuth() {
+            if (Object.keys(firebaseConfig).length === 0) {
+                log('Firebase config is missing. Persistence disabled.', 'warning');
+                isAuthReady = true; // Mark ready anyway for the bot logic
+                return;
+            }
 
-  function resetDailyIfNeeded() {
-    const d = new Date().getDate();
-    if (d !== state.lastClosedDay) {
-      state.lastClosedDay = d;
-      state.dailyProfitLossUSD = 0;
-      state.dailyLossCapTriggered = false;
-      state.initialDailyBalance = state.currentBalance || state.initialDailyBalance || 0;
-      log("Daily counters reset (new day).", "system");
-    }
-  }
+            try {
+                app = firebase.initializeApp(firebaseConfig);
+                db = firebase.getFirestore(app);
+                auth = firebase.getAuth(app);
+                firebase.setLogLevel('silent'); // Keep console clean unless error
 
-  function checkDailyCap() {
-    if (!state.initialDailyBalance || state.initialDailyBalance <= 0) return false;
-    const pct = (Math.abs(state.dailyProfitLossUSD) / state.initialDailyBalance) * 100;
-    const hit = pct >= state.dailyLossCapPercent && state.dailyProfitLossUSD < 0;
-    state.dailyLossCapTriggered = !!hit;
-    return !!hit;
-  }
+                // Authentication
+                const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                if (token) {
+                    await firebase.signInWithCustomToken(auth, token);
+                } else {
+                    await firebase.signInAnonymously(auth);
+                }
 
-  // --- FIREBASE ---
-  async function initializeFirebaseAndAuth() {
-    if (!firebaseConfig) {
-      log('Firebase config missing. Persistence will not work.', 'error');
-      return;
-    }
+                firebase.onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        log(`Firebase authenticated. User ID: ${userId}`, 'system');
+                        isAuthReady = true;
 
-    try {
-      const app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
-      auth = getAuth(app);
-      setLogLevel('debug');
+                        // Load persisted daily state
+                        const docRef = firebase.doc(db, `artifacts/${appId}/users/${userId}/settings/botConfig`);
+                        const docSnap = await firebase.getDoc(docRef);
 
-      await new Promise(resolve => {
-        const unsub = onAuthStateChanged(auth, async (user) => {
-          if (user) {
-            userId = user.uid;
-            isFirebaseReady = true;
-            log(`Authenticated. User ID
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            state.initialDailyBalance = data.initialDailyBalance || 0;
+                            state.lastDailyReset = data.lastDailyReset || null;
+                            state.dailyLossCapTriggered = data.dailyLossCapTriggered || false;
+                            log('Loaded persisted daily state.', 'system');
+                        }
+
+                    } else {
+                        log('Firebase signed out/anonymous.', 'system');
+                        isAuthReady = true;
+                    }
+                });
+
+            } catch (error) {
+                log(`Firebase Init/Auth Error: ${error.message}`, 'error');
+                isAuthReady = true;
+            }
+        }
+
+        // --- DERIV WEBSOCKET LOGIC ---
+
+        function connectWebSocket() {
+            if (state.ws && (state.ws.readyState === WebSocket.OPEN || state.ws.readyState === WebSocket.CONNECTING)) {
+                log('WebSocket is already open or connecting.', 'warning');
+                return;
+            }
+
+            const token = document.getElementById('api-token').value.trim();
+            if (!token) {
+                log('Please enter a Deriv API Token.', 'error');
+                state.isRunning = false;
+                updateUI();
+                return;
+            }
+
+            state.ws = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
+
+            state.ws.onopen = () => {
+                log('WebSocket connected. Authorizing...', 'info');
+                state.isAuthenticated = false;
+                state.isSubscribed = { balance: false, ticks: false, contracts: false };
+                send({ authorize: token });
+                updateUI();
+            };
+
+            state.ws.onmessage = (msg) => {
+                const data = JSON.parse(msg.data);
+                handleIncoming(data);
+            };
+
+            state.ws.onclose = () => {
+                log('WebSocket closed.', 'error');
+                state.isAuthenticated = false;
+                state.isRunning = false;
+                state.activeContract = null;
+                state.activeContractId = null;
+                state.entryInProgress = false;
+                state.tickBuffer = [];
+                updateUI();
+            };
+
+            state.ws.onerror = (e) => {
+                log(`WebSocket error: ${e.message}`, 'error');
+            };
+        }
+
+        function disconnectWebSocket() {
+            if (state.ws) {
+                state.ws.close();
+            }
+            // Clear cooldown timer if running
+            if (state.cooldownTimer) {
+                clearTimeout(state.cooldownTimer);
+                state.cooldownTimer = null;
+            }
+        }
+
+        function handleIncoming(data) {
+            if (data.error) {
+                log(`API Error: ${data.error.message}`, 'error');
+                return;
+            }
+
+            switch (data.msg_type) {
+                case 'authorize':
+                    if (data.authorize) {
+                        state.isAuthenticated = true;
+                        log(`Authorized successfully. Account: ${data.authorize.loginid} (${data.authorize.currency})`, 'success');
+                        
+                        // Subscribe after auth
+                        if (!state.isSubscribed.balance) send({ balance: 1, subscribe: 1 });
+                        if (!state.isSubscribed.ticks) send({ ticks: "R_25", subscribe: 1 });
+                        if (!state.isSubscribed.contracts) send({ proposal_open_contract: 1, subscribe: 1 });
+
+                    } else {
+                        log('Authorization failed.', 'error');
+                        disconnectWebSocket();
+                    }
+                    break;
+                
+                case 'balance':
+                    if (data.balance) {
+                        state.isSubscribed.balance = true;
+                        const newBalance = parseFloat(data.balance.balance);
+
+                        // Daily Reset Logic
+                        const today = new Date().toDateString();
+                        if (state.lastDailyReset !== today || state.initialDailyBalance === 0) {
+                            state.initialDailyBalance = newBalance;
+                            state.lastDailyReset = today;
+                            state.dailyLossCapTriggered = false;
+                            state.tradeCounter = 0;
+                            state.lossStreak = 0;
+                            saveDailyState();
+                            log('Daily trading period reset. Initial balance set.', 'system');
+                        }
+
+                        state.currentBalance = newBalance;
+                        determineTier(state.currentBalance); // Apply tier rules
+
+                        // Daily Loss Cap Check
+                        const drawdownUSD = state.initialDailyBalance - state.currentBalance;
+                        const drawdownPercent = (drawdownUSD / state.initialDailyBalance) * 100;
+                        if (drawdownPercent >= state.dailyLossCapPercent && !state.dailyLossCapTriggered) {
+                            state.dailyLossCapTriggered = true;
+                            log(`Daily Loss Cap (${state.dailyLossCapPercent}%) hit! Drawdown: $${drawdownUSD.toFixed(2)}. Stopping bot.`, 'error');
+                            state.isRunning = false;
+                            saveDailyState();
+                        }
+                    }
+                    break;
+                
+                case 'tick':
+                    if (data.tick && state.isRunning) {
+                        state.isSubscribed.ticks = true;
+                        handleTick(parseFloat(data.tick.quote));
+                    }
+                    break;
+
+                case 'proposal_open_contract':
+                    state.isSubscribed.contracts = true;
+                    if (data.proposal_open_contract) {
+                        state.activeContract = data.proposal_open_contract;
+                        state.activeContractId = data.proposal_open_contract.contract_id;
+                        handleContractUpdate(data.proposal_open_contract);
+                    } else {
+                        // Contract closed or not active
+                        if (state.activeContractId && !data.proposal_open_contract) {
+                            handleTradeClosed();
+                        }
+                        state.activeContract = null;
+                        state.activeContractId = null;
+                    }
+                    break;
+                
+                case 'buy':
+                    if (data.buy) {
+                        handleBuyResponse(data.buy);
+                    }
+                    break;
+
+                case 'sell':
+                    if (data.sell) {
+                        // Sell confirmation received. The proposal_open_contract update will handle the final closure.
+                        log(`Sell confirmed for contract ID: ${data.sell.contract_id}`, 'success');
+                    }
+                    break;
+            }
+            updateUI();
+        }
+
+        // --- TRADING LOGIC ---
+
+        function getTradingGuards() {
+            let reason = '';
+            if (!state.isRunning) reason = 'Bot is STOPPED.';
+            else if (!state.isAuthenticated) reason = 'Not authorized.';
+            else if (state.isBlockedByTier) reason = `Tier Blocked: ${state.currentTierName}.`;
+            else if (state.dailyLossCapTriggered) reason = 'Daily loss cap hit.';
+            else if (state.cooldownActive) reason = 'Cooldown active.';
+            else if (state.activeContractId) reason = 'Trade is already active.';
+            else if (state.entryInProgress) reason = 'Entry in progress.';
+            else if (state.tradeCounter >= state.maxTradesPerSignal) reason = 'Max trades per signal reached.';
+            else if (state.lossStreak >= state.maxLossStreak) reason = 'Max loss streak reached.';
+
+            return reason;
+        }
+
+        function handleTick(tick) {
+            // 1. Update Tick Buffer
+            state.tickBuffer.push(tick);
+            if (state.tickBuffer.length > 8) {
+                state.tickBuffer.shift(); // Remove oldest
+            }
+
+            // 2. Check Trading Guards
+            const guardReason = getTradingGuards();
+            if (guardReason) {
+                // log(`Guard active: ${guardReason}`, 'info'); // Too noisy
+                return;
+            }
+
+            // 3. Momentum Detection (requires full buffer)
+            if (state.tickBuffer.length < 8) return;
+
+            const firstTick = state.tickBuffer[0];
+            const lastTick = state.tickBuffer[7];
+            const move = lastTick - firstTick;
+            const MOMENTUM_THRESHOLD = 0.02;
+
+            if (Math.abs(move) >= MOMENTUM_THRESHOLD) {
+                // Valid entry detected
+                state.entryInProgress = true;
+                state.tickBuffer = []; // Clear buffer after signal used
+
+                const type = move > 0 ? 'CALL' : 'PUT';
+                log(`Momentum detected (${type}): Move = ${move.toFixed(4)}. Executing trade...`, 'warning');
+                
+                // Safety: Reset trade counter on a new signal
+                if (state.tradeCounter >= state.maxTradesPerSignal) {
+                     state.tradeCounter = 0; // The guard should prevent this, but for safety
+                }
+
+                executeTrade(type);
+                
+                // Entry Timeout Guard
+                state.entryTimeout = setTimeout(() => {
+                    if (state.entryInProgress) {
+                        log('⚠️ Entry timeout (8s) reached. Resetting entryInProgress flag.', 'warning');
+                        state.entryInProgress = false;
+                        updateUI();
+                    }
+                }, 8000);
+            }
+        }
+
+        function executeTrade(type) {
+            const contractType = type === 'CALL' ? 'CALL' : 'PUT';
+            const stake = state.stakeAmount;
+
+            const req = {
+                buy: 1,
+                price: stake, // Expected price is the stake amount
+                parameters: {
+                    amount: stake,
+                    basis: "stake",
+                    contract_type: contractType,
+                    currency: "USD",
+                    duration: 5,
+                    duration_unit: "t",
+                    symbol: "R_25"
+                }
+            };
+            send(req);
+            log(`BUY Request sent: Type=${type}, Stake=$${stake.toFixed(2)}`, 'info');
+            state.tradeCounter++;
+            updateUI();
+        }
+
+        function handleBuyResponse(response) {
+            // Clear entry timeout
+            if (state.entryTimeout) {
+                clearTimeout(state.entryTimeout);
+            }
+
+            if (response.contract_id) {
+                state.entryInProgress = false;
+                state.activeContractId = response.contract_id;
+                state.activeContract = { contract_id: response.contract_id, profit: 0 }; // Temporary object until first contract update
+                log(`Trade bought successfully. ID: ${response.contract_id}`, 'success');
+            } else {
+                state.entryInProgress = false;
+                log('Trade execution failed (no contract ID in response).', 'error');
+            }
+        }
+
+        function handleContractUpdate(contract) {
+            if (contract.is_sold) {
+                // The contract has fully closed (after a sell request). Wait for the next proposal_open_contract: null update.
+                return;
+            }
+
+            const profit = parseFloat(contract.profit);
+            const TP_LEVEL = 0.10; // Take Profit: $0.10
+            const SL_LEVEL = -0.10; // Stop Loss: -$0.10
+            const contractId = contract.contract_id;
+
+            // Check for Auto-Close condition
+            if (contractId === state.activeContractId && !state.closeRequestedForContractId) {
+                if (profit >= TP_LEVEL) {
+                    log(`✅ TP Hit! Profit: $${profit.toFixed(2)}. Sending sell request.`, 'success');
+                    closeActiveContract(contractId);
+                } else if (profit <= SL_LEVEL) {
+                    log(`❌ SL Hit! Profit: $${profit.toFixed(2)}. Sending sell request.`, 'error');
+                    closeActiveContract(contractId);
+                }
+            }
+        }
+
+        function closeActiveContract(contractId) {
+            if (state.closeRequestedForContractId === contractId) return; // Prevent sell spam
+
+            state.closeRequestedForContractId = contractId;
+            send({ sell: contractId, price: 0 }); // price: 0 for market sell
+        }
+
+        function startCooldown() {
+            if (state.cooldownActive) return;
+
+            state.cooldownActive = true;
+            state.tradeCounter = 0; // Reset trade counter for the next signal batch
+            log(`Cooldown started for ${state.cooldownDuration} seconds.`, 'warning');
+            
+            const cooldownEl = document.getElementById('block-reason-display');
+            let timeLeft = state.cooldownDuration;
+            
+            // Cooldown countdown
+            state.cooldownTimer = setInterval(() => {
+                timeLeft--;
+                cooldownEl.textContent = `Cooldown Active (${timeLeft}s remaining)`;
+                if (timeLeft <= 0) {
+                    clearInterval(state.cooldownTimer);
+                    state.cooldownTimer = null;
+                    state.cooldownActive = false;
+                    state.lossStreak = 0; // Reset streak after cooldown
+                    log('Cooldown finished. Loss streak reset.', 'success');
+                    updateUI();
+                }
+            }, 1000);
+        }
+
+        function handleTradeClosed() {
+            // This is called when proposal_open_contract returns null or an old contract
+            const closedContract = state.activeContract;
+
+            if (!closedContract) return;
+
+            const finalProfit = parseFloat(closedContract.profit);
+            const isWin = finalProfit > 0;
+            const message = isWin ? 
+                `WIN: Contract ${closedContract.contract_id} closed for $${finalProfit.toFixed(2)}.` : 
+                `LOSS: Contract ${closedContract.contract_id} closed for $${finalProfit.toFixed(2)}.`;
+            log(message, isWin ? 'success' : 'error');
+
+            // 1. Update Loss Streak
+            if (isWin) {
+                state.lossStreak = 0;
+            } else {
+                state.lossStreak++;
+            }
+
+            // 2. Check for Max Loss Streak Cooldown
+            if (state.lossStreak >= state.maxLossStreak && !state.cooldownActive) {
+                startCooldown();
+            }
+
+            // 3. Reset State for Next Trade
+            state.activeContract = null;
+            state.activeContractId = null;
+            state.entryInProgress = false;
+            state.closeRequestedForContractId = null;
+            state.tickBuffer = []; // Reset buffer
+            
+            updateUI();
+        }
+
+        // --- UI HANDLERS ---
+
+        function toggleBot() {
+            state.isRunning = !state.isRunning;
+            if (state.isRunning) {
+                log('Bot STARTING...', 'system');
+                connectWebSocket();
+            } else {
+                log('Bot STOPPING...', 'system');
+                disconnectWebSocket();
+            }
+            updateUI();
+        }
+
+        function toggleSettingsLock() {
+            const isLocked = document.getElementById('unlock-settings-btn').textContent.includes('Lock');
+            const newLocked = !isLocked;
+            const inputs = document.querySelectorAll('.config-item input');
+
+            inputs.forEach(input => {
+                input.disabled = newLocked;
+            });
+
+            document.getElementById('unlock-settings-btn').textContent = newLocked ? 'Unlock Settings' : 'Lock Settings';
+            
+            // Re-apply tier logic to update state based on new lock status
+            determineTier(state.currentBalance);
+        }
+
+        // --- INITIALIZATION ---
+
+        window.onload = () => {
+            loadConfigAndAuth();
+            document.getElementById('toggle-bot-btn').addEventListener('click', toggleBot);
+            document.getElementById('unlock-settings-btn').addEventListener('click', toggleSettingsLock);
+            document.getElementById('safe-mode-toggle').addEventListener('change', () => determineTier(state.currentBalance));
+            
+            // Initial UI setup
+            updateUI();
+
+            // Set up a periodic UI refresh (in case of subtle state changes not caught by WS events)
+            setInterval(updateUI, 1000);
+        };
+    </script>
+</body>
+</html>
