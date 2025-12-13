@@ -2,22 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Official V25 H4 Runner Bot Interface - v2.4 (Beginner $1 FIXED)</title>
-  <meta name="theme-color" content="#007aff" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Official V25 Bot Interface - Mode Select (Scalp/H4)</title>
+  <meta name="theme-color" content="#007aff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
     body { font-family:'Inter',sans-serif; background:#f0f0f5; padding-top:env(safe-area-inset-top,16px); padding-bottom:env(safe-area-inset-bottom,16px); }
     .official-card{ background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 6px -1px rgba(0,0,0,.08),0 2px 4px -2px rgba(0,0,0,.05); border:1px solid #e5e5e5; }
-    .ios-input{ padding:12px 16px; min-height:44px; background:#fff; border:1px solid #d1d5db; border-radius:8px; color:#1f2937; transition:all .2s ease-in-out; box-shadow:inset 0 1px 3px rgba(0,0,0,.06); font-size:16px; }
+    .ios-input{ padding:12px 16px; min-height:44px; background:#fff; border:1px solid #d1d5db; border-radius:8px; color:#1f2937; box-shadow:inset 0 1px 3px rgba(0,0,0,.06); font-size:16px; }
     .ios-input:focus{ border-color:#007aff; outline:none; box-shadow:0 0 0 3px rgba(0,122,255,.3) }
     .ios-input:disabled{ background:#f7f7f7; color:#9ca3af }
     .ios-btn-primary{ font-weight:600; border-radius:10px; min-height:48px; transition:background-color .2s, box-shadow .2s; box-shadow:0 3px 6px rgba(0,122,255,.3); }
-    .ios-btn-primary:hover{ opacity:.95; box-shadow:0 5px 10px rgba(0,122,255,.35) }
     #log-output{ background:#f7f7f7; border:1px solid #e5e5e5 }
     .status-label{ font-size:.875rem; color:#6b7280; margin-bottom:2px }
     .status-value{ font-weight:700; color:#1f2937 }
@@ -25,47 +24,53 @@
     .text-status-warn{ color:#ff9500 }
     .text-status-error{ color:#ff3b30 }
     .text-status-neutral{ color:#5a5a5a }
-
-    .preference-modal{ background:#fff; border-radius:16px; max-width:600px; max-height:90vh; overflow-y:auto }
-    .preference-card{ transition:all .2s ease-in-out; cursor:pointer; border:2px solid transparent }
-    .preference-card:hover{ border-color:#007aff }
-    .preference-card.selected{ border-color:#007aff; box-shadow:0 0 0 4px rgba(0,122,255,.3); background:#e6f0ff }
-
-    .mode-ios .ios-input{ font-size:16px !important; }
-    .mode-ios .max-w-4xl.mx-auto{ padding-bottom:calc(1rem + env(safe-area-inset-bottom)) }
-    .mode-android .official-card{ box-shadow:0 6px 10px rgba(0,0,0,.1) }
+    .pill{display:inline-block;padding:.25rem .5rem;border-radius:999px;font-weight:700;font-size:.75rem}
   </style>
 </head>
 
 <body>
   <div class="max-w-4xl mx-auto p-4 sm:p-8">
-    <header class="mb-8 text-center">
-      <h1 class="text-3xl font-bold text-gray-800 mb-2">V25 Breakout Strategy Runner</h1>
-      <p class="text-gray-500">Beginner-safe interface + guarded subscriptions + FIXED True H4 candles + sell guards.</p>
+    <header class="mb-6 text-center">
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">V25 Bot (Mode Select)</h1>
+      <p class="text-gray-500">Pick a mode → bot uses that mode’s rules + presets.</p>
       <p class="text-xs text-gray-400 mt-2">Trading involves risk. This tool adds guardrails but cannot guarantee profits.</p>
     </header>
 
-    <div id="protected-defaults-card" class="official-card mb-6 space-y-4">
-      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b pb-2 mb-4">
-        <h2 class="text-xl font-semibold text-gray-700 mb-2 sm:mb-0">Protected Defaults
-          <span id="safe-mode-indicator" class="text-sm font-bold ml-2 py-1 px-2 rounded-full text-white bg-green-500">Safe Mode: ON</span>
+    <!-- PROTECTED DEFAULTS -->
+    <div class="official-card mb-6 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b pb-2 mb-2">
+        <h2 class="text-xl font-semibold text-gray-700 mb-2 sm:mb-0">
+          Protected Defaults
+          <span id="safe-mode-indicator" class="pill text-white bg-green-500 ml-2">Safe Mode: ON</span>
+          <span id="mode-pill" class="pill text-white bg-blue-500 ml-2">MODE: SCALP</span>
         </h2>
+
         <div class="flex space-x-2">
-          <button id="change-preference-btn" class="text-sm py-1 px-3 bg-gray-400 text-white rounded-lg transition hover:bg-gray-500 min-h-[32px]">
-            Change Preference
-          </button>
           <button id="unlock-settings-btn" class="text-sm py-1 px-3 bg-blue-500 text-white rounded-lg transition hover:bg-blue-600 min-h-[32px]">
             Unlock Settings 🔒
           </button>
         </div>
       </div>
 
-      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-        <label for="safe-mode-toggle" class="font-medium text-gray-700">Safe Mode</label>
-        <input type="checkbox" id="safe-mode-toggle" checked class="form-checkbox h-5 w-5 text-green-500 rounded-full" />
+      <!-- MODE SELECT -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="relative">
+          <label class="text-sm font-semibold text-gray-600">Mode (Bot will use this)</label>
+          <select id="mode-select" class="ios-input w-full">
+            <option value="SCALP">SCALP (fast tap-out)</option>
+            <option value="H4">H4 RUNNER (slow + selective)</option>
+          </select>
+          <p class="text-xs text-gray-400 mt-1">Changing mode loads presets + rules immediately (even if Safe Mode ON).</p>
+        </div>
+
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mt-6 sm:mt-0">
+          <label for="safe-mode-toggle" class="font-medium text-gray-700">Safe Mode</label>
+          <input type="checkbox" id="safe-mode-toggle" checked class="form-checkbox h-5 w-5 text-green-500 rounded-full" />
+        </div>
       </div>
 
-      <div id="settings-area" class="space-y-4">
+      <!-- SETTINGS -->
+      <div id="settings-area" class="space-y-4 pt-2">
         <h3 class="font-semibold text-gray-600 pt-2 border-t border-gray-100">Market & Limits</h3>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -74,108 +79,95 @@
             <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Symbol</span>
           </div>
           <div class="relative">
-            <input id="timeframe-input" type="text" value="True H4 Candles (14400s) + Retest on Ticks" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Timeframe</span>
-          </div>
-        </div>
-
-        <div class="relative">
-          <input id="max-trades-input" type="number" value="2" disabled class="ios-input w-full" />
-          <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Max Trades Per Signal 🔒</span>
-        </div>
-
-        <div class="flex flex-col sm:flex-row gap-4">
-          <div class="relative flex-1">
-            <input id="balance-min-input" type="number" value="0.90" step="0.01" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Min Balance ($) 🔒</span>
-          </div>
-          <div class="relative flex-1">
-            <input id="balance-max-input" type="number" value="999999" step="1" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Max Balance ($) 🔒</span>
-          </div>
-        </div>
-
-        <h3 class="font-semibold text-gray-600 pt-2 border-t border-gray-100">Position Size & Safety</h3>
-
-        <div class="flex flex-col sm:flex-row gap-4">
-          <div class="relative flex-1">
-            <input id="stake-amount" type="number" value="1.00" step="0.01" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Stake ($) 🔒</span>
-          </div>
-
-          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg w-full sm:w-1/3">
-            <label for="auto-scale-toggle" class="font-medium text-gray-700 text-sm">Auto-Scale</label>
-            <input type="checkbox" id="auto-scale-toggle" disabled class="form-checkbox h-5 w-5 text-blue-500 rounded-full" />
+            <input id="timeframe-input" type="text" value="Mode-driven (SCALP or H4)" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Logic</span>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="relative">
-            <input id="cooldown-input" type="number" value="3" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Cooldown (min) 🔒</span>
+            <input id="stake-amount" type="number" value="0.01" step="0.01" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Stake ($)</span>
           </div>
           <div class="relative">
-            <input id="max-loss-streak-input" type="number" value="2" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Max Loss Streak 🔒</span>
+            <input id="duration-input" type="number" value="5" step="1" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Duration</span>
+          </div>
+          <div class="relative">
+            <input id="duration-unit-input" type="text" value="t" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Unit (t/m)</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="relative">
+            <input id="tp-input" type="number" value="0.05" step="0.01" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">TP ($ profit)</span>
+          </div>
+          <div class="relative">
+            <input id="sl-input" type="number" value="0.05" step="0.01" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">SL ($ loss)</span>
+          </div>
+          <div class="relative">
+            <input id="max-trades-input" type="number" value="1" step="1" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Max Trades/Signal</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="relative">
+            <input id="cooldown-input" type="number" value="2" step="1" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Cooldown (min)</span>
+          </div>
+          <div class="relative">
+            <input id="max-loss-streak-input" type="number" value="2" step="1" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Max Loss Streak</span>
           </div>
           <div class="relative">
             <input id="daily-cap-input" type="number" value="5" step="0.5" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Daily Loss Cap (%) 🔒</span>
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Daily Loss Cap (%)</span>
           </div>
         </div>
 
-        <h3 class="font-semibold text-gray-600 pt-2 border-t border-gray-100">Targets (Editable only when Safe Mode OFF + Unlocked)</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="relative">
-            <input id="tp-quick-input" type="number" value="0.90" step="0.01" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">TP Quick ($)</span>
-          </div>
-          <div class="relative">
-            <input id="tp-clean-input" type="number" value="1.20" step="0.01" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">TP Clean ($)</span>
-          </div>
-          <div class="relative">
-            <input id="sl-input" type="number" value="0.20" step="0.01" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Stop Loss ($)</span>
-          </div>
-        </div>
+        <p id="edit-hint" class="text-xs text-gray-400">
+          Safe Mode ON: presets locked. Turn Safe Mode OFF + Unlock to edit manually.
+        </p>
       </div>
     </div>
 
-    <div id="config-card" class="official-card mb-6 space-y-4">
-      <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">API Connection</h2>
+    <!-- API -->
+    <div class="official-card mb-6 space-y-4">
+      <h2 class="text-xl font-semibold mb-2 border-b pb-2 text-gray-700">API Connection</h2>
       <input id="api-token" type="password" placeholder="Deriv API Token (required)" class="ios-input w-full" />
       <button id="toggle-bot-btn" class="w-full py-3 text-lg ios-btn-primary bg-blue-500 text-white">Start Bot</button>
     </div>
 
-    <div id="status-card" class="official-card mb-6">
+    <!-- STATUS -->
+    <div class="official-card mb-6">
       <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">Live Status Board</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div><p class="status-label">API Connection:</p><p id="connection-status" class="text-status-error status-value">DISCONNECTED</p></div>
         <div><p class="status-label">Safe Mode:</p><p id="safe-mode-status" class="text-status-active status-value">ON</p></div>
+        <div><p class="status-label">Mode:</p><p id="mode-status" class="text-status-neutral status-value">SCALP</p></div>
         <div><p class="status-label">Trade Active:</p><p id="trade-active-status" class="text-status-neutral status-value">FALSE</p></div>
-        <div><p class="status-label">H4 Bias / Level:</p><p id="breakout-level-display" class="text-status-neutral status-value">N/A | 0.0000</p></div>
 
-        <div><p class="status-label">Current Balance:</p><p id="current-balance-display" class="text-status-neutral status-value">$0.00</p></div>
-        <div><p class="status-label">Trades This Signal:</p><p id="trades-this-signal-display" class="text-status-neutral status-value">0/2</p></div>
+        <div><p class="status-label">Balance:</p><p id="current-balance-display" class="text-status-neutral status-value">$0.00</p></div>
         <div><p class="status-label">Current P/L ($):</p><p id="current-profit-display" class="text-status-neutral status-value">$0.00</p></div>
-        <div><p class="status-label">Daily Loss Cap:</p><p id="daily-cap-status" class="status-value text-status-active">OK</p></div>
-
-        <div><p class="status-label">Locked Profit:</p><p id="locked-profit-level-display" class="text-status-neutral status-value">None</p></div>
-        <div><p class="status-label">Balance Tier:</p><p id="balance-tier-display" class="text-status-neutral status-value">BLOCKED</p></div>
+        <div><p class="status-label">Sellability:</p><p id="sellable-display" class="text-status-neutral status-value">N/A</p></div>
         <div><p class="status-label">Block Reason:</p><p id="block-reason-display" class="text-status-neutral status-value">Awaiting Start</p></div>
       </div>
     </div>
 
+    <!-- LOG -->
     <div class="official-card p-4">
       <h2 class="text-xl font-semibold mb-3 border-b pb-2 text-gray-700">System Log</h2>
       <div id="log-output" class="p-3 h-64 overflow-y-auto text-sm rounded-lg space-y-1 text-gray-800">
-        <p class="text-gray-500">[SYSTEM] Ready. Enter API Token and click Start.</p>
+        <p class="text-gray-500">[SYSTEM] Ready. Select mode, enter API Token, click Start.</p>
       </div>
     </div>
   </div>
 
-  <!-- Confirm modal -->
+  <!-- MODAL -->
   <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
     <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full space-y-4" role="dialog" aria-modal="true">
       <h3 id="modal-title" class="text-lg font-bold text-red-600">Confirmation Required</h3>
@@ -188,102 +180,131 @@
     </div>
   </div>
 
-  <!-- Preference modal -->
-  <div id="preference-modal-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden">
-    <div class="preference-modal p-6 w-full space-y-6" role="dialog" aria-modal="true">
-      <h3 class="text-2xl font-bold text-gray-800 text-center">Select Your Preferred Experience</h3>
-      <p class="text-gray-500 text-center">Optimizes layout for your device.</p>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div data-mode="web" class="preference-card official-card p-4 text-center" tabindex="0"><h4 class="font-semibold">Web</h4></div>
-        <div data-mode="ios" class="preference-card official-card p-4 text-center" tabindex="0"><h4 class="font-semibold">iOS</h4></div>
-        <div data-mode="android" class="preference-card official-card p-4 text-center" tabindex="0"><h4 class="font-semibold">Android</h4></div>
-      </div>
-      <div class="pt-4">
-        <button id="preference-continue-btn" disabled class="w-full py-3 text-lg ios-btn-primary bg-blue-500 text-white opacity-50 cursor-not-allowed">Continue</button>
-      </div>
-    </div>
-  </div>
-
   <script>
+    // =========================
+    // DERIV CONFIG
+    // =========================
     const APP_ID = 1089;
     const SYMBOL = "R_25";
     const API_URL = `wss://ws.binaryws.com/websockets/v3?app_id=${APP_ID}`;
 
-    // Beginner default: 5 ticks (so TP/SL "sell" can actually happen)
-    const DEFAULT_DURATION_TICKS = 5;
-
-    const TIER_CONFIGS = {
-      BLOCKED: { min: 0.00, max: 0.89, name: "BLOCKED (< $0.90)", isBlocked: true,  maxTradesPerSignal: 0, cooldownDuration: 0,   maxLossStreak: 999, dailyLossCapPercent: 100 },
-      MICRO:   { min: 0.90, max: 4.99, name: "MICRO ($0.90-$4.99)", isBlocked: false, maxTradesPerSignal: 1, cooldownDuration: 300, maxLossStreak: 1,   dailyLossCapPercent: 3 },
-      LOW:     { min: 5.00, max: 9.99, name: "LOW ($5-$9.99)", isBlocked: false,      maxTradesPerSignal: 2, cooldownDuration: 180, maxLossStreak: 2,   dailyLossCapPercent: 4 },
-      STANDARD:{ min: 10.0, max: 999999, name: "STANDARD+ (>= $10)", isBlocked: false, maxTradesPerSignal: 3, cooldownDuration: 180, maxLossStreak: 2,   dailyLossCapPercent: 5 }
+    // =========================
+    // MODE PRESETS (THIS IS THE KEY)
+    // =========================
+    const MODE_PRESETS = {
+      SCALP: {
+        modeName: "SCALP",
+        stakeAmount: 0.01,
+        duration: 5,
+        durationUnit: "t",   // ticks
+        tp: 0.05,            // profit dollars (fast tap-out)
+        sl: 0.05,            // loss dollars
+        maxTradesPerSignal: 1,
+        cooldownMin: 2,
+        entryStyle: "FAST"   // tick-based
+      },
+      H4: {
+        modeName: "H4",
+        stakeAmount: 0.01,
+        duration: 1,
+        durationUnit: "m",   // minutes so it’s usually sellable earlier than tiny tick contracts
+        tp: 0.20,
+        sl: 0.10,
+        maxTradesPerSignal: 2,
+        cooldownMin: 3,
+        entryStyle: "SLOW"   // needs H4 signal + retest
+      }
     };
 
+    // =========================
+    // STATE
+    // =========================
     let state = {
-      ws:null, apiToken:"", isBotRunning:false,
-      safeMode:true, settingsLocked:true,
-      currentTier:TIER_CONFIGS.BLOCKED,
+      ws: null,
+      isBotRunning: false,
+      apiToken: "",
 
-      stakeAmount:1.00, maxTradesPerSignal:2, balanceMin:0.90, balanceMax:999999,
-      cooldownDuration:180, maxLossStreak:2, dailyLossCapPercent:5,
-      autoScaleEnabled:false,
+      mode: "SCALP",            // default
+      safeMode: true,
+      settingsLocked: true,
 
-      tpQuickUSD:0.90, tpCleanUSD:1.20, stopLossUSD:0.20,
+      // execution values
+      stakeAmount: MODE_PRESETS.SCALP.stakeAmount,
+      duration: MODE_PRESETS.SCALP.duration,
+      durationUnit: MODE_PRESETS.SCALP.durationUnit,
+      tpUSD: MODE_PRESETS.SCALP.tp,
+      slUSD: MODE_PRESETS.SCALP.sl,
+      maxTradesPerSignal: MODE_PRESETS.SCALP.maxTradesPerSignal,
+      cooldownDuration: MODE_PRESETS.SCALP.cooldownMin * 60,
+      maxLossStreak: 2,
+      dailyLossCapPercent: 5,
 
-      bias:"", breakoutLevel:0, breakoutStrength:0,
-      tradeCounter:0, lossStreak:0, cooldown:false,
-      dailyLossCapTriggered:false,
-      currentBalance:0, initialDailyBalance:0, dailyProfitLossUSD:0,
-      activeContract:null, activeContractId:null,
-      lockedProfitLevel:"None", blockReason:"Awaiting Start",
+      // live data
+      currentBalance: 0,
+      initialDailyBalance: 0,
+      dailyProfitLossUSD: 0,
+      lossStreak: 0,
+      cooldown: false,
+      blockReason: "Awaiting Start",
 
-      entryInProgress:false,
+      // entry signal / management
+      bias: "",
+      breakoutLevel: 0,
+      breakoutStrength: 0,
+      tradeCounter: 0,
 
-      subs:{
-        balance:{subscribed:false,subscribing:false},
-        poc:{subscribed:false,subscribing:false},
-        ticks:{subscribed:false,subscribing:false}
+      // contract tracking
+      activeContract: null,
+      activeContractId: null,
+
+      // IMPORTANT GUARDS
+      entryInProgress: false,
+      closeRequestedForContractId: null, // prevents repeated sell spam
+      subs: {
+        balance: { subscribed:false, subscribing:false },
+        poc: { subscribed:false, subscribing:false },
+        ticks: { subscribed:false, subscribing:false }
       },
 
-      logicInterval:null
+      logicInterval: null
     };
 
+    // =========================
     // DOM
+    // =========================
+    const modeSelect = document.getElementById("mode-select");
+    const modePill = document.getElementById("mode-pill");
+
     const tokenInput = document.getElementById("api-token");
+    const safeModeToggle = document.getElementById("safe-mode-toggle");
+    const safeModeIndicator = document.getElementById("safe-mode-indicator");
+    const unlockBtn = document.getElementById("unlock-settings-btn");
+    const toggleBtn = document.getElementById("toggle-bot-btn");
+
     const stakeInput = document.getElementById("stake-amount");
+    const durationInput = document.getElementById("duration-input");
+    const durationUnitInput = document.getElementById("duration-unit-input");
+    const tpInput = document.getElementById("tp-input");
+    const slInput = document.getElementById("sl-input");
     const maxTradesInput = document.getElementById("max-trades-input");
-    const balanceMinInput = document.getElementById("balance-min-input");
-    const balanceMaxInput = document.getElementById("balance-max-input");
     const cooldownInput = document.getElementById("cooldown-input");
     const maxLossStreakInput = document.getElementById("max-loss-streak-input");
     const dailyCapInput = document.getElementById("daily-cap-input");
-    const autoScaleToggle = document.getElementById("auto-scale-toggle");
+    const editHint = document.getElementById("edit-hint");
 
-    const tpQuickInput = document.getElementById("tp-quick-input");
-    const tpCleanInput = document.getElementById("tp-clean-input");
-    const slInput = document.getElementById("sl-input");
-
-    const safeModeToggle = document.getElementById("safe-mode-toggle");
-    const unlockBtn = document.getElementById("unlock-settings-btn");
-    const safeModeIndicator = document.getElementById("safe-mode-indicator");
-    const toggleBtn = document.getElementById("toggle-bot-btn");
     const logOutput = document.getElementById("log-output");
-
-    const statusDisplay = {
+    const status = {
       connection: document.getElementById("connection-status"),
       safeMode: document.getElementById("safe-mode-status"),
+      mode: document.getElementById("mode-status"),
       active: document.getElementById("trade-active-status"),
-      level: document.getElementById("breakout-level-display"),
       balance: document.getElementById("current-balance-display"),
-      trades: document.getElementById("trades-this-signal-display"),
-      currentProfit: document.getElementById("current-profit-display"),
-      lockedProfit: document.getElementById("locked-profit-level-display"),
-      tier: document.getElementById("balance-tier-display"),
-      cap: document.getElementById("daily-cap-status"),
-      block: document.getElementById("block-reason-display")
+      profit: document.getElementById("current-profit-display"),
+      sellable: document.getElementById("sellable-display"),
+      block: document.getElementById("block-reason-display"),
     };
 
-    // Modal
+    // modal
     const modalOverlay = document.getElementById("modal-overlay");
     const modalTitle = document.getElementById("modal-title");
     const modalMessage = document.getElementById("modal-message");
@@ -291,29 +312,34 @@
     const modalCancelBtn = document.getElementById("modal-cancel-btn");
     const modalConfirmBtn = document.getElementById("modal-confirm-btn");
 
-    function log(message,type="info"){
-      const now=new Date().toLocaleTimeString();
-      let c="text-gray-500";
-      if(type==="error") c="text-status-error";
-      if(type==="success") c="text-status-active";
-      if(type==="warn") c="text-status-warn";
-      if(type==="action") c="text-blue-500";
-      const p=document.createElement("p");
-      p.className=c;
-      p.textContent=`[${now}] [${type.toUpperCase()}] ${message}`;
+    // =========================
+    // UI HELPERS
+    // =========================
+    function log(message, type="info"){
+      const now = new Date().toLocaleTimeString();
+      let cls = "text-gray-500";
+      if(type==="error") cls="text-status-error";
+      if(type==="success") cls="text-status-active";
+      if(type==="warn") cls="text-status-warn";
+      if(type==="action") cls="text-blue-500";
+      const p = document.createElement("p");
+      p.className = cls;
+      p.textContent = `[${now}] [${type.toUpperCase()}] ${message}`;
       logOutput.prepend(p);
-      if(logOutput.children.length>90) logOutput.removeChild(logOutput.lastChild);
+      if(logOutput.children.length>100) logOutput.removeChild(logOutput.lastChild);
     }
 
     function showModal(title,msg,requiresInput,onConfirm,onCancel){
       modalTitle.textContent=title;
       modalMessage.textContent=msg;
-      modalInput.classList.toggle("hidden",!requiresInput);
+      modalInput.classList.toggle("hidden", !requiresInput);
       modalInput.value="";
       modalOverlay.classList.remove("hidden"); modalOverlay.classList.add("flex");
 
       modalConfirmBtn.onclick=()=>{
-        if(requiresInput && modalInput.value!=="UNLOCK"){ log("Wrong confirmation text.","error"); return; }
+        if(requiresInput && modalInput.value!=="UNLOCK"){
+          log("Wrong confirmation text.","error"); return;
+        }
         modalOverlay.classList.add("hidden"); modalOverlay.classList.remove("flex");
         onConfirm && onConfirm();
       };
@@ -323,79 +349,106 @@
       };
     }
 
-    function resetSubs(){
-      Object.keys(state.subs).forEach(k=>{ state.subs[k].subscribed=false; state.subs[k].subscribing=false; });
+    function setMode(modeKey){
+      state.mode = modeKey;
+      const preset = MODE_PRESETS[modeKey];
+
+      // Always load presets (THIS is what you asked)
+      state.stakeAmount = preset.stakeAmount;
+      state.duration = preset.duration;
+      state.durationUnit = preset.durationUnit;
+      state.tpUSD = preset.tp;
+      state.slUSD = preset.sl;
+      state.maxTradesPerSignal = preset.maxTradesPerSignal;
+      state.cooldownDuration = preset.cooldownMin * 60;
+
+      // If SafeMode ON -> keep locked and reflect preset in UI
+      if(state.safeMode){
+        state.settingsLocked = true;
+      }
+
+      // reset “in-progress” flags safely
+      state.entryInProgress = false;
+      state.closeRequestedForContractId = null;
+
+      // reflect in UI
+      stakeInput.value = state.stakeAmount.toFixed(2);
+      durationInput.value = state.duration;
+      durationUnitInput.value = state.durationUnit;
+      tpInput.value = state.tpUSD.toFixed(2);
+      slInput.value = state.slUSD.toFixed(2);
+      maxTradesInput.value = state.maxTradesPerSignal;
+      cooldownInput.value = (state.cooldownDuration/60).toFixed(0);
+
+      modePill.textContent = `MODE: ${preset.modeName}`;
+      status.mode.textContent = preset.modeName;
+
+      log(`Mode set to ${preset.modeName}. Bot will use these rules now.`, "action");
+      applyLockState();
+      updateUI();
     }
 
-    function send(req){
-      if(!state.ws || state.ws.readyState!==WebSocket.OPEN) return;
-      state.ws.send(JSON.stringify(req));
-    }
+    function syncFromUI_ifManualAllowed(){
+      // Only allow manual edits when SafeMode OFF + Unlocked
+      const manualAllowed = (!state.safeMode && !state.settingsLocked);
+      if(!manualAllowed) return;
 
-    // Guarded subscriptions
-    function subscribeBalanceOnce(){
-      if(state.subs.balance.subscribed || state.subs.balance.subscribing) return;
-      state.subs.balance.subscribing=true;
-      send({balance:1, subscribe:1});
-      log("Balance stream subscribed (guarded).","info");
-    }
-    function subscribePOCOnce(){
-      if(state.subs.poc.subscribed || state.subs.poc.subscribing) return;
-      state.subs.poc.subscribing=true;
-      send({proposal_open_contract:1, subscribe:1});
-      log("Open-contract stream subscribed (guarded).","info");
-    }
-    function subscribeTicksOnce(){
-      if(state.subs.ticks.subscribed || state.subs.ticks.subscribing) return;
-      state.subs.ticks.subscribing=true;
-      send({ticks:SYMBOL, subscribe:1});
-      log("Tick stream subscribed (guarded).","info");
-    }
-
-    function syncStateFromUI(){
-      state.stakeAmount=parseFloat(stakeInput.value)||1.00;
-      state.maxTradesPerSignal=parseInt(maxTradesInput.value)||2;
-      state.balanceMin=parseFloat(balanceMinInput.value)||0.90;
-      state.balanceMax=parseFloat(balanceMaxInput.value)||999999;
-      state.cooldownDuration=(parseFloat(cooldownInput.value)||3)*60;
-      state.maxLossStreak=parseInt(maxLossStreakInput.value)||2;
-      state.dailyLossCapPercent=parseFloat(dailyCapInput.value)||5;
-      state.autoScaleEnabled=!!autoScaleToggle.checked;
-
-      state.tpQuickUSD=parseFloat(tpQuickInput.value)||0.90;
-      state.tpCleanUSD=parseFloat(tpCleanInput.value)||1.20;
-      state.stopLossUSD=parseFloat(slInput.value)||0.20;
+      state.stakeAmount = parseFloat(stakeInput.value) || state.stakeAmount;
+      state.duration = parseInt(durationInput.value) || state.duration;
+      state.durationUnit = (durationUnitInput.value || state.durationUnit).trim();
+      state.tpUSD = parseFloat(tpInput.value) || state.tpUSD;
+      state.slUSD = parseFloat(slInput.value) || state.slUSD;
+      state.maxTradesPerSignal = parseInt(maxTradesInput.value) || state.maxTradesPerSignal;
+      state.cooldownDuration = (parseFloat(cooldownInput.value)|| (state.cooldownDuration/60)) * 60;
+      state.maxLossStreak = parseInt(maxLossStreakInput.value) || state.maxLossStreak;
+      state.dailyLossCapPercent = parseFloat(dailyCapInput.value) || state.dailyLossCapPercent;
     }
 
     function applyLockState(){
-      const editable = (!state.safeMode && !state.settingsLocked);
-      const inputs=[stakeInput,maxTradesInput,balanceMinInput,balanceMaxInput,cooldownInput,maxLossStreakInput,dailyCapInput,autoScaleToggle,tpQuickInput,tpCleanInput,slInput];
+      const manualAllowed = (!state.safeMode && !state.settingsLocked);
 
-      // default locked
-      inputs.forEach(i=> i.disabled = true);
+      const inputs = [
+        stakeInput, durationInput, durationUnitInput, tpInput, slInput,
+        maxTradesInput, cooldownInput, maxLossStreakInput, dailyCapInput
+      ];
 
-      // allow manual only when SafeMode OFF + unlocked
-      if(editable) inputs.forEach(i=> i.disabled = false);
+      inputs.forEach(i => i.disabled = true);
+      if(manualAllowed) inputs.forEach(i => i.disabled = false);
 
-      unlockBtn.textContent = state.safeMode ? "Safe Mode ON (Locked) ✅" : (state.settingsLocked ? "Unlock Settings 🔒" : "Settings Unlocked 🔓");
-      unlockBtn.classList.toggle("bg-green-500", state.safeMode);
-      unlockBtn.classList.toggle("bg-blue-500", !state.safeMode && state.settingsLocked);
-      unlockBtn.classList.toggle("bg-red-500", !state.safeMode && !state.settingsLocked);
+      if(state.safeMode){
+        unlockBtn.textContent = "Safe Mode ON (Locked) ✅";
+        unlockBtn.className = "text-sm py-1 px-3 bg-green-500 text-white rounded-lg transition min-h-[32px]";
+        editHint.textContent = "Safe Mode ON: presets locked. Turn Safe Mode OFF + Unlock to edit manually.";
+      } else {
+        unlockBtn.textContent = state.settingsLocked ? "Unlock Settings 🔒" : "Settings Unlocked 🔓";
+        unlockBtn.className = state.settingsLocked
+          ? "text-sm py-1 px-3 bg-blue-500 text-white rounded-lg transition hover:bg-blue-600 min-h-[32px]"
+          : "text-sm py-1 px-3 bg-red-500 text-white rounded-lg transition hover:bg-red-600 min-h-[32px]";
+        editHint.textContent = manualAllowed
+          ? "Manual editing ACTIVE (Safe Mode OFF + Unlocked)."
+          : "Safe Mode OFF: click Unlock to edit manual values.";
+      }
     }
 
     function updateUI(){
-      statusDisplay.safeMode.textContent = state.safeMode ? "ON" : "OFF";
-      statusDisplay.active.textContent = state.activeContract ? "TRUE" : "FALSE";
-      statusDisplay.level.textContent = `${state.bias ? state.bias.toUpperCase() : "N/A"} | ${state.breakoutLevel.toFixed(4)}`;
-      statusDisplay.balance.textContent = `$${state.currentBalance.toFixed(2)}`;
-      statusDisplay.trades.textContent = `${state.tradeCounter}/${state.maxTradesPerSignal}`;
-      statusDisplay.lockedProfit.textContent = state.lockedProfitLevel;
-      statusDisplay.tier.textContent = state.currentTier.name;
-      statusDisplay.cap.textContent = state.dailyLossCapTriggered ? "CAPPED" : "OK";
-      statusDisplay.block.textContent = state.blockReason;
+      status.safeMode.textContent = state.safeMode ? "ON" : "OFF";
+      status.active.textContent = state.activeContract ? "TRUE" : "FALSE";
+      status.balance.textContent = `$${(state.currentBalance||0).toFixed(2)}`;
 
       const profit = state.activeContract ? (parseFloat(state.activeContract.profit)||0) : 0;
-      statusDisplay.currentProfit.textContent = `$${profit.toFixed(2)}`;
+      status.profit.textContent = `$${profit.toFixed(2)}`;
+
+      // sellability display
+      if(state.activeContract){
+        const sellable = (state.activeContract.is_sellable === 1);
+        status.sellable.textContent = sellable ? "SELLABLE ✅" : "EXPIRY-ONLY ❌";
+        status.sellable.className = sellable ? "text-status-active status-value" : "text-status-warn status-value";
+      } else {
+        status.sellable.textContent = "N/A";
+        status.sellable.className = "text-status-neutral status-value";
+      }
+
+      status.block.textContent = state.blockReason;
 
       toggleBtn.textContent = state.isBotRunning ? "Stop Bot (Running)" : "Start Bot";
       toggleBtn.className = state.isBotRunning
@@ -403,24 +456,42 @@
         : "w-full py-3 text-lg ios-btn-primary bg-blue-500 hover:bg-blue-600 text-white";
     }
 
-    function detectTier(){
-      const b=state.currentBalance;
-      if(b>=TIER_CONFIGS.STANDARD.min) state.currentTier=TIER_CONFIGS.STANDARD;
-      else if(b>=TIER_CONFIGS.LOW.min && b<=TIER_CONFIGS.LOW.max) state.currentTier=TIER_CONFIGS.LOW;
-      else if(b>=TIER_CONFIGS.MICRO.min && b<=TIER_CONFIGS.MICRO.max) state.currentTier=TIER_CONFIGS.MICRO;
-      else state.currentTier=TIER_CONFIGS.BLOCKED;
+    // =========================
+    // SUBSCRIPTION GUARDS
+    // =========================
+    function resetSubs(){
+      Object.keys(state.subs).forEach(k => {
+        state.subs[k].subscribed = false;
+        state.subs[k].subscribing = false;
+      });
+    }
+    function send(req){
+      if(!state.ws || state.ws.readyState !== WebSocket.OPEN) return;
+      state.ws.send(JSON.stringify(req));
+    }
+    function subscribeBalanceOnce(){
+      if(state.subs.balance.subscribed || state.subs.balance.subscribing) return;
+      state.subs.balance.subscribing = true;
+      send({ balance: 1, subscribe: 1 });
+      log("Balance stream subscribed (guarded).", "info");
+    }
+    function subscribePOCOnce(){
+      if(state.subs.poc.subscribed || state.subs.poc.subscribing) return;
+      state.subs.poc.subscribing = true;
+      send({ proposal_open_contract: 1, subscribe: 1 });
+      log("Open-contract stream subscribed (guarded).", "info");
+    }
+    function subscribeTicksOnce(){
+      if(state.subs.ticks.subscribed || state.subs.ticks.subscribing) return;
+      state.subs.ticks.subscribing = true;
+      send({ ticks: SYMBOL, subscribe: 1 });
+      log("Tick stream subscribed (guarded).", "info");
     }
 
-    function applyTierIfSafeMode(){
-      if(!state.safeMode) return;
-      const t=state.currentTier;
-      state.maxTradesPerSignal = t.maxTradesPerSignal;
-      state.cooldownDuration = t.cooldownDuration;
-      state.maxLossStreak = t.maxLossStreak;
-      state.dailyLossCapPercent = t.dailyLossCapPercent;
-    }
-
-    // ✅ FIXED: True H4 candles request
+    // =========================
+    // BASIC ENTRY SIGNAL
+    // (kept simple + stable; mode controls how aggressive)
+    // =========================
     function requestH4Candles(){
       send({
         ticks_history: SYMBOL,
@@ -432,45 +503,44 @@
     }
 
     function detectH4Structure(candle){
-      const close=parseFloat(candle.close), open=parseFloat(candle.open), high=parseFloat(candle.high), low=parseFloat(candle.low);
-      const range=Math.max(1e-9, high-low);
-      const body=Math.abs(close-open);
-      const bodyRatio=body/range;
+      const close = parseFloat(candle.close), open = parseFloat(candle.open);
+      const high = parseFloat(candle.high), low = parseFloat(candle.low);
+      const range = Math.max(1e-9, high-low);
+      const body = Math.abs(close-open);
+      const bodyRatio = body/range;
 
-      const bullish=(close>open) && (close>=open + range*0.6);
-      const bearish=(close<open) && (close<=open - range*0.6);
+      const bullish = (close>open) && (close >= open + range*0.6);
+      const bearish = (close<open) && (close <= open - range*0.6);
 
       let newBias="", newLevel=0;
       if(bullish){ newBias="bullish"; newLevel=high; }
       if(bearish){ newBias="bearish"; newLevel=low; }
 
       if(newBias && (newBias!==state.bias || newLevel!==state.breakoutLevel)){
-        state.bias=newBias;
-        state.breakoutLevel=newLevel;
-        state.breakoutStrength=Math.min(1,Math.max(0,bodyRatio));
-        state.tradeCounter=0;
-        state.entryInProgress=false;
-        log(`H4 Breakout: ${newBias.toUpperCase()} | Level ${newLevel.toFixed(4)} | Strength ${(state.breakoutStrength*100).toFixed(0)}%`,"success");
+        state.bias = newBias;
+        state.breakoutLevel = newLevel;
+        state.breakoutStrength = Math.min(1, Math.max(0, bodyRatio));
+        state.tradeCounter = 0;
+        state.entryInProgress = false;
+        log(`H4 Signal: ${newBias.toUpperCase()} | Level ${newLevel.toFixed(4)} | Strength ${(state.breakoutStrength*100).toFixed(0)}%`, "success");
       }
     }
 
     function validRetestTick(price){
-      const tol=Math.max(0.0003, price*0.00008);
-      return state.bias && state.breakoutLevel && (Math.abs(price-state.breakoutLevel)<=tol);
+      const tol = Math.max(0.0003, price * 0.00008);
+      return state.bias && state.breakoutLevel && (Math.abs(price - state.breakoutLevel) <= tol);
     }
 
-    function isCleanBreakout(){ return state.breakoutStrength>=0.70; }
-
+    // =========================
+    // TRADE FLOW (proposal -> buy)
+    // =========================
     function takeTrade(bias){
-      if(!state.ws || state.ws.readyState!==WebSocket.OPEN) return;
+      if(!state.ws || state.ws.readyState !== WebSocket.OPEN) return;
       if(state.entryInProgress) return;
 
-      state.entryInProgress=true;
-      const contract_type = (bias==="bullish") ? "CALL" : "PUT";
+      state.entryInProgress = true;
 
-      // ✅ Use 5 ticks by default so sells can work
-      const duration = DEFAULT_DURATION_TICKS;
-      const duration_unit = "t";
+      const contract_type = (bias==="bullish") ? "CALL" : "PUT";
 
       const proposalReq = {
         proposal: 1,
@@ -478,22 +548,22 @@
         basis: "stake",
         contract_type,
         currency: "USD",
-        duration,
-        duration_unit,
+        duration: state.duration,
+        duration_unit: state.durationUnit,
         symbol: SYMBOL
       };
 
       const handler = (evt) => {
         const data = JSON.parse(evt.data);
         if(data.error){
-          log(`Proposal error: ${data.error.message}`,"error");
-          state.entryInProgress=false;
+          log(`Proposal error: ${data.error.message}`, "error");
+          state.entryInProgress = false;
           state.ws.removeEventListener("message", handler);
           return;
         }
-        if(data.msg_type==="proposal" && data.proposal?.id){
+        if(data.msg_type === "proposal" && data.proposal?.id){
           send({ buy: data.proposal.id, price: state.stakeAmount });
-          log(`BUY sent (${contract_type}) stake $${state.stakeAmount.toFixed(2)} | ${duration} ticks`,"action");
+          log(`BUY sent (${contract_type}) stake $${state.stakeAmount.toFixed(2)} | ${state.duration}${state.durationUnit}`, "action");
           state.ws.removeEventListener("message", handler);
         }
       };
@@ -502,90 +572,89 @@
       send(proposalReq);
     }
 
-    // ✅ FIXED: expiry-only guard + valid-to-sell guard
-    function closePosition(contract, reason){
-      if(!contract?.contract_id) return;
+    // =========================
+    // CLOSE GUARD + SELLABILITY CHECK
+    // =========================
+    function closePosition(reason){
+      const c = state.activeContract;
+      if(!c || !c.contract_id) return;
 
-      // contract already closed/expired?
-      if(contract.is_sold || contract.is_expired){
-        state.lockedProfitLevel = "Expired/Closed (no sell)";
-        log(`Skip sell: already expired/closed. (${reason})`,"warn");
+      // Stop repeated sell spam
+      if(state.closeRequestedForContractId === c.contract_id) return;
+
+      // If not sellable, do NOT try sell (prevents your errors)
+      if(c.is_sellable !== 1){
+        state.closeRequestedForContractId = c.contract_id; // prevents repeated attempts
+        log(`Not sellable (expiry-only). Will let it expire. Reason: ${reason}`, "warn");
         return;
       }
 
-      // can it be sold?
-      if(contract.is_valid_to_sell !== 1){
-        state.lockedProfitLevel = "Expiry-only (no sell)";
-        log(`No sell allowed (expiry-only). Letting it expire. (${reason})`,"warn");
-        return;
-      }
-
-      send({ sell: contract.contract_id, price: 0 });
-      log(`Close requested: ${reason}`,"warn");
+      state.closeRequestedForContractId = c.contract_id;
+      send({ sell: c.contract_id, price: 0 });
+      log(`Close requested: ${reason}`, "warn");
     }
 
     function runTradeManagement(){
-      if(!state.activeContract) return;
-      const profit=parseFloat(state.activeContract.profit||0);
+      const c = state.activeContract;
+      if(!c) return;
 
-      const target = isCleanBreakout() ? state.tpCleanUSD : state.tpQuickUSD;
-      const stop = -Math.abs(state.stopLossUSD);
+      const profit = parseFloat(c.profit || 0);
+      const tp = state.tpUSD;
+      const sl = -Math.abs(state.slUSD);
 
-      if(profit >= 0.10) state.lockedProfitLevel="BE Lock (soft)";
-      if(profit >= 0.20) state.lockedProfitLevel="Partial Lock (soft)";
-
-      if(profit >= target){
-        closePosition(state.activeContract, `TP Hit (+$${profit.toFixed(2)})`);
-      } else if(profit <= stop){
-        closePosition(state.activeContract, `SL Hit ($${profit.toFixed(2)})`);
+      // Fast tap-out logic (both modes still use profit-based TP/SL)
+      if(profit >= tp){
+        closePosition(`TP Hit (+$${profit.toFixed(2)})`);
+      } else if(profit <= sl){
+        closePosition(`SL Hit ($${profit.toFixed(2)})`);
       }
     }
 
     function handleTradeClose(c){
-      const buy=parseFloat(c.buy_price||0);
-      const sell=parseFloat(c.sell_price||0);
-      const pnl=sell-buy;
+      const buy = parseFloat(c.buy_price||0);
+      const sell = parseFloat(c.sell_price||0);
+      const pnl = sell - buy;
 
       state.dailyProfitLossUSD += pnl;
-      state.activeContract=null;
-      state.activeContractId=null;
-      state.entryInProgress=false;
+      state.activeContract = null;
+      state.activeContractId = null;
+      state.entryInProgress = false;
+      state.closeRequestedForContractId = null;
 
-      state.lockedProfitLevel="None";
-
-      if(pnl<0){
+      if(pnl < 0){
         state.lossStreak++;
-        log(`TRADE CLOSED LOSS: $${pnl.toFixed(2)} | Streak ${state.lossStreak}/${state.maxLossStreak}`,"error");
+        log(`TRADE CLOSED LOSS: $${pnl.toFixed(2)} | Streak ${state.lossStreak}/${state.maxLossStreak}`, "error");
       } else {
-        state.lossStreak=0;
-        log(`TRADE CLOSED PROFIT: +$${pnl.toFixed(2)}`,"success");
+        state.lossStreak = 0;
+        log(`TRADE CLOSED PROFIT: +$${pnl.toFixed(2)}`, "success");
       }
 
-      if(state.lossStreak>=state.maxLossStreak){
-        state.cooldown=true;
-        log(`Cooldown started: ${(state.cooldownDuration/60).toFixed(0)} min`,"warn");
+      if(state.lossStreak >= state.maxLossStreak){
+        state.cooldown = true;
+        log(`Cooldown started: ${(state.cooldownDuration/60).toFixed(0)} min`, "warn");
         setTimeout(()=>{
-          state.cooldown=false;
-          state.lossStreak=0;
-          log("Cooldown finished. Ready.","info");
+          state.cooldown = false;
+          state.lossStreak = 0;
+          log("Cooldown finished. Ready.", "info");
           updateUI();
-        }, state.cooldownDuration*1000);
+        }, state.cooldownDuration * 1000);
       }
     }
 
+    // =========================
+    // MESSAGE HANDLER
+    // =========================
     function handleMessage(data){
       if(data?.error?.message?.includes("already subscribed to balance")){
         state.subs.balance.subscribed=true; state.subs.balance.subscribing=false;
-        log("Balance already subscribed (ignored).","warn");
+        log("Balance already subscribed (ignored).", "warn");
         return;
       }
 
       if(data.msg_type==="authorize" && data.authorize){
-        log(`Authorized: ${data.authorize.loginid}`,"success");
-        state.currentBalance=parseFloat(data.authorize.balance||0);
-        if(!state.initialDailyBalance) state.initialDailyBalance=state.currentBalance;
-
-        detectTier(); applyTierIfSafeMode();
+        log(`Authorized: ${data.authorize.loginid}`, "success");
+        state.currentBalance = parseFloat(data.authorize.balance||0);
+        if(!state.initialDailyBalance) state.initialDailyBalance = state.currentBalance;
 
         subscribeBalanceOnce();
         subscribePOCOnce();
@@ -598,14 +667,12 @@
 
       if(data.msg_type==="balance" && data.balance){
         state.subs.balance.subscribed=true; state.subs.balance.subscribing=false;
-        state.currentBalance=parseFloat(data.balance.balance);
-        detectTier(); applyTierIfSafeMode();
+        state.currentBalance = parseFloat(data.balance.balance);
         updateUI();
         return;
       }
 
-      // ✅ FIXED: candles arrive as msg_type="candles"
-      if(data.msg_type==="candles" && Array.isArray(data.candles) && data.candles.length){
+      if(data.msg_type==="ticks_history" && data.candles?.length){
         const h4 = data.candles[data.candles.length-1];
         detectH4Structure(h4);
         return;
@@ -613,15 +680,33 @@
 
       if(data.msg_type==="tick" && data.tick){
         state.subs.ticks.subscribed=true; state.subs.ticks.subscribing=false;
-        const px=parseFloat(data.tick.quote);
+        const px = parseFloat(data.tick.quote);
 
-        if(state.isBotRunning && !state.cooldown && !state.dailyLossCapTriggered && !state.activeContract && state.bias && validRetestTick(px)){
-          if(state.tradeCounter < state.maxTradesPerSignal && !state.entryInProgress){
-            log(`Retest confirmed near ${state.breakoutLevel.toFixed(4)}. Taking trade.`,"warn");
-            takeTrade(state.bias);
+        // ENTRY RULES BY MODE
+        if(state.isBotRunning && !state.cooldown && !state.activeContract && !state.entryInProgress){
+          // SCALP: enter faster (requires at least bias; if no bias yet, keep waiting)
+          if(state.mode==="SCALP"){
+            if(state.bias && validRetestTick(px) && state.tradeCounter < state.maxTradesPerSignal){
+              state.blockReason = "SCALP: retest hit → entering";
+              takeTrade(state.bias);
+            } else {
+              state.blockReason = state.bias ? "SCALP: waiting retest" : "SCALP: waiting H4 bias";
+            }
+          }
+
+          // H4: more strict (needs bias + decent strength)
+          if(state.mode==="H4"){
+            const strongEnough = state.breakoutStrength >= 0.65;
+            if(state.bias && strongEnough && validRetestTick(px) && state.tradeCounter < state.maxTradesPerSignal){
+              state.blockReason = "H4: strong retest → entering";
+              takeTrade(state.bias);
+            } else {
+              state.blockReason = state.bias ? "H4: waiting strong retest" : "H4: waiting H4 breakout";
+            }
           }
         }
 
+        // MANAGEMENT
         if(state.activeContract) runTradeManagement();
         updateUI();
         return;
@@ -629,74 +714,81 @@
 
       if(data.msg_type==="proposal_open_contract" && data.proposal_open_contract){
         state.subs.poc.subscribed=true; state.subs.poc.subscribing=false;
-        const c=data.proposal_open_contract;
+        const c = data.proposal_open_contract;
 
-        if(state.activeContractId && c.contract_id && c.contract_id!==state.activeContractId) return;
+        // track contract
+        state.activeContract = c;
+        state.activeContractId = c.contract_id || state.activeContractId;
 
-        state.activeContract=c;
-        state.entryInProgress = !!c.contract_id;
+        // increment trades once contract truly exists
+        if(c.contract_id && state.tradeCounter===0 && !c.is_sold){
+          // do nothing here; buy handler increments
+        }
 
         if(c.is_sold){
-          state.tradeCounter++;
           handleTradeClose(c);
+          state.tradeCounter = Math.min(state.maxTradesPerSignal, state.tradeCounter + 1);
         }
         updateUI();
         return;
       }
 
       if(data.msg_type==="buy" && data.buy){
-        state.activeContractId=data.buy.contract_id;
-        log(`TRADE BOUGHT: Contract ${state.activeContractId}`,"success");
-        state.entryInProgress=true;
+        state.activeContractId = data.buy.contract_id;
+        state.tradeCounter++;
+        log(`TRADE BOUGHT: Contract ${state.activeContractId}`, "success");
         updateUI();
         return;
       }
     }
 
+    // =========================
+    // CONNECT / LOOP
+    // =========================
     function connect(){
       if(state.ws && (state.ws.readyState===WebSocket.OPEN || state.ws.readyState===WebSocket.CONNECTING)) return;
 
       state.apiToken = tokenInput.value.trim();
-      if(!state.apiToken){ log("API Token is required.","error"); return; }
+      if(!state.apiToken){ log("API Token is required.", "error"); return; }
 
-      log("Connecting to Deriv API...","info");
-      state.ws=new WebSocket(API_URL);
+      log("Connecting to Deriv API...", "info");
+      state.ws = new WebSocket(API_URL);
 
-      state.ws.onopen=()=>{
+      state.ws.onopen = () => {
         resetSubs();
-        statusDisplay.connection.textContent="CONNECTED";
-        statusDisplay.connection.className="text-status-active status-value";
+        status.connection.textContent = "CONNECTED";
+        status.connection.className = "text-status-active status-value";
         send({ authorize: state.apiToken });
       };
 
-      state.ws.onmessage=(evt)=>{
-        const data=JSON.parse(evt.data);
+      state.ws.onmessage = (evt) => {
+        const data = JSON.parse(evt.data);
         if(data.error){
-          log(`API Error: ${data.error.message}`,"error");
+          log(`API Error: ${data.error.message}`, "error");
           if(/invalid token/i.test(data.error.message)) stopBot("Invalid token.");
           return;
         }
         handleMessage(data);
       };
 
-      state.ws.onclose=()=>{
-        statusDisplay.connection.textContent="DISCONNECTED";
-        statusDisplay.connection.className="text-status-error status-value";
-        state.ws=null;
+      state.ws.onclose = () => {
+        status.connection.textContent = "DISCONNECTED";
+        status.connection.className = "text-status-error status-value";
+        state.ws = null;
         resetSubs();
-        if(state.isBotRunning){ stopLogicLoop(); state.isBotRunning=false; }
+        stopLogicLoop();
+        state.isBotRunning = false;
         updateUI();
-        log("Connection closed.","warn");
+        log("Connection closed.", "warn");
       };
     }
 
     function startLogicLoop(){
       if(state.logicInterval) return;
       mainLogic();
-      state.logicInterval=setInterval(mainLogic, 60000);
-      log("Main logic loop started (60s).","info");
+      state.logicInterval = setInterval(mainLogic, 60000);
+      log("Main logic loop started (60s).", "info");
     }
-
     function stopLogicLoop(){
       if(state.logicInterval){ clearInterval(state.logicInterval); state.logicInterval=null; }
     }
@@ -704,32 +796,26 @@
     function mainLogic(){
       if(!state.isBotRunning) return;
 
-      syncStateFromUI();
-      detectTier();
-      applyTierIfSafeMode();
+      // allow manual edits only if SafeMode OFF + Unlocked
+      syncFromUI_ifManualAllowed();
 
-      const minBal = state.safeMode ? TIER_CONFIGS.MICRO.min : state.balanceMin;
-      const maxBal = state.balanceMax;
+      // request H4 candles to keep bias updated (both modes use bias)
+      requestH4Candles();
 
-      if(state.currentBalance < minBal){ state.blockReason=`BLOCKED (Min $${minBal.toFixed(2)})`; updateUI(); return; }
-      if(state.currentBalance > maxBal){ state.blockReason=`BLOCKED (Max $${maxBal.toFixed(2)})`; updateUI(); return; }
-
-      if(state.dailyLossCapTriggered){ state.blockReason="Daily Loss Cap Triggered"; updateUI(); return; }
+      // simple risk checks
       if(state.cooldown){ state.blockReason="Cooldown Active"; updateUI(); return; }
       if(state.activeContract){ state.blockReason="Trade Active - Managing"; updateUI(); return; }
-      if(state.tradeCounter >= state.maxTradesPerSignal){ state.blockReason="Trade Limit Reached for Signal"; updateUI(); return; }
+      if(state.tradeCounter >= state.maxTradesPerSignal){ state.blockReason="Trade limit reached"; updateUI(); return; }
 
-      // ✅ FIXED: This will now actually update bias/level because candles handler works
-      state.blockReason = state.bias ? "Armed: waiting retest on ticks" : "Waiting H4 breakout";
-      requestH4Candles();
       updateUI();
     }
 
     function toggleBot(){
-      syncStateFromUI();
+      syncFromUI_ifManualAllowed();
+
       if(!state.isBotRunning){
-        state.isBotRunning=true;
-        log(`Bot started. SafeMode: ${state.safeMode?"ON":"OFF"} | Stake: $${state.stakeAmount.toFixed(2)}`,"info");
+        state.isBotRunning = true;
+        log(`Bot started | MODE: ${state.mode} | Stake: $${state.stakeAmount.toFixed(2)} | Dur: ${state.duration}${state.durationUnit}`, "info");
         connect();
         startLogicLoop();
       } else {
@@ -744,63 +830,47 @@
       state.activeContract=null;
       state.activeContractId=null;
       state.entryInProgress=false;
+      state.closeRequestedForContractId=null;
       state.tradeCounter=0;
-      log(`Bot stopped: ${reason}`,"warn");
+      log(`Bot stopped: ${reason}`, "warn");
       if(state.ws && state.ws.readyState===WebSocket.OPEN) state.ws.close();
       state.ws=null;
       resetSubs();
       updateUI();
     }
 
-    function showPreferenceModal(){
-      const modal=document.getElementById("preference-modal-overlay");
-      const btn=document.getElementById("preference-continue-btn");
-      modal.classList.remove("hidden");
-      btn.disabled=true; btn.classList.add("opacity-50","cursor-not-allowed");
-
-      document.querySelectorAll(".preference-card").forEach(card=>{
-        card.onclick=()=>{
-          document.querySelectorAll(".preference-card").forEach(c=>c.classList.remove("selected"));
-          card.classList.add("selected");
-          const mode=card.getAttribute("data-mode");
-          btn.disabled=false; btn.classList.remove("opacity-50","cursor-not-allowed");
-          btn.onclick=()=>{
-            document.body.className="";
-            document.body.classList.add(`mode-${mode}`);
-            localStorage.setItem("preferredPlatform",mode);
-            modal.classList.add("hidden");
-            log(`Platform set: ${mode.toUpperCase()}`,"info");
-          };
-        };
-      });
-    }
-
+    // =========================
+    // SAFE MODE / UNLOCK
+    // =========================
     function handleUnlock(){
       if(state.safeMode){
-        log("Unlock blocked: Turn Safe Mode OFF first.","error");
-        showModal("Safe Mode ON", "Turn Safe Mode OFF first. Manual editing is only allowed when Safe Mode is OFF.", false, null, null);
+        log("Unlock blocked: Turn Safe Mode OFF first.", "error");
+        showModal("Safe Mode ON", "Turn Safe Mode OFF first. Manual editing allowed only when Safe Mode is OFF.", false, null, null);
         return;
       }
       showModal("Unlock Settings", "Type UNLOCK to enable manual editing.", true, ()=>{
-        state.settingsLocked=false;
+        state.settingsLocked = false;
         applyLockState();
-        log("Settings unlocked. Manual values now editable.","warn");
+        log("Settings unlocked. Manual values editable.", "warn");
       }, ()=>{});
     }
 
     function handleSafeModeToggle(){
       if(safeModeToggle.checked){
-        state.safeMode=true;
-        state.settingsLocked=true;
+        state.safeMode = true;
+        state.settingsLocked = true;
         safeModeIndicator.textContent="Safe Mode: ON";
         safeModeIndicator.classList.remove("bg-red-500"); safeModeIndicator.classList.add("bg-green-500");
-        log("Safe Mode ENABLED. Settings forced locked.","success");
+        log("Safe Mode ENABLED. Presets locked.", "success");
+
+        // reload current mode preset (ensures it stays “what the bot uses”)
+        setMode(state.mode);
       } else {
         showModal("WARNING: Safe Mode OFF", "Safe Mode OFF uses ONLY your manual values. Continue?", false, ()=>{
           state.safeMode=false;
           safeModeIndicator.textContent="Safe Mode: OFF";
           safeModeIndicator.classList.remove("bg-green-500"); safeModeIndicator.classList.add("bg-red-500");
-          log("Safe Mode DISABLED. You may unlock to edit manual values.","warn");
+          log("Safe Mode DISABLED. You may unlock to edit manual values.", "warn");
           applyLockState();
           updateUI();
         }, ()=>{
@@ -811,34 +881,27 @@
       updateUI();
     }
 
+    // =========================
+    // EVENTS
+    // =========================
     toggleBtn.addEventListener("click", toggleBot);
     unlockBtn.addEventListener("click", handleUnlock);
     safeModeToggle.addEventListener("change", handleSafeModeToggle);
-    document.getElementById("change-preference-btn").addEventListener("click", showPreferenceModal);
+
+    modeSelect.addEventListener("change", (e)=>{
+      const next = e.target.value;
+      setMode(next);
+    });
 
     document.addEventListener("DOMContentLoaded", ()=>{
-      const pref=localStorage.getItem("preferredPlatform");
-      if(pref){ document.body.classList.add(`mode-${pref}`); } else { showPreferenceModal(); }
-
-      stakeInput.value=state.stakeAmount.toFixed(2);
-      maxTradesInput.value=state.maxTradesPerSignal;
-      balanceMinInput.value=state.balanceMin.toFixed(2);
-      balanceMaxInput.value=state.balanceMax.toFixed(0);
-      cooldownInput.value=(state.cooldownDuration/60).toFixed(0);
-      maxLossStreakInput.value=state.maxLossStreak;
-      dailyCapInput.value=state.dailyLossCapPercent;
-
-      tpQuickInput.value=state.tpQuickUSD.toFixed(2);
-      tpCleanInput.value=state.tpCleanUSD.toFixed(2);
-      slInput.value=state.stopLossUSD.toFixed(2);
-
-      autoScaleToggle.checked=false;
+      // default mode
+      modeSelect.value = "SCALP";
+      setMode("SCALP");
 
       applyLockState();
       updateUI();
-      log("Initialization complete (v2.4). True H4 candle feed fixed.","info");
+      log("Initialization complete.", "info");
     });
   </script>
 </body>
 </html>
-       
