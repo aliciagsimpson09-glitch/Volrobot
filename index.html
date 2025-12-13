@@ -1,97 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-  />
-  <title>Official V25 Peak Sauce Runner Bot - v3.0 (H4+Retest, MA50, Range Filter)</title>
-  <meta name="theme-color" content="#007aff" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Official V25 H4 Runner Bot Interface - v2.3 (Beginner $1)</title>
+  <meta name="theme-color" content="#007aff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    body { font-family:'Inter',sans-serif; background:#f0f0f5; padding-top:env(safe-area-inset-top,16px); padding-bottom:env(safe-area-inset-bottom,16px); }
+    .official-card{ background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 6px -1px rgba(0,0,0,.08),0 2px 4px -2px rgba(0,0,0,.05); border:1px solid #e5e5e5; }
+    .ios-input{ padding:12px 16px; min-height:44px; background:#fff; border:1px solid #d1d5db; border-radius:8px; color:#1f2937; transition:all .2s ease-in-out; box-shadow:inset 0 1px 3px rgba(0,0,0,.06); font-size:16px; }
+    .ios-input:focus{ border-color:#007aff; outline:none; box-shadow:0 0 0 3px rgba(0,122,255,.3) }
+    .ios-input:disabled{ background:#f7f7f7; color:#9ca3af }
+    .ios-btn-primary{ font-weight:600; border-radius:10px; min-height:48px; transition:background-color .2s, box-shadow .2s; box-shadow:0 3px 6px rgba(0,122,255,.3); }
+    .ios-btn-primary:hover{ opacity:.95; box-shadow:0 5px 10px rgba(0,122,255,.35) }
+    #log-output{ background:#f7f7f7; border:1px solid #e5e5e5 }
+    .status-label{ font-size:.875rem; color:#6b7280; margin-bottom:2px }
+    .status-value{ font-weight:700; color:#1f2937 }
+    .text-status-active{ color:#34c759 }
+    .text-status-warn{ color:#ff9500 }
+    .text-status-error{ color:#ff3b30 }
+    .text-status-neutral{ color:#5a5a5a }
 
-    body{
-      font-family:'Inter',sans-serif;
-      background:#f0f0f5;
-      padding-top:env(safe-area-inset-top,16px);
-      padding-bottom:env(safe-area-inset-bottom,16px);
-    }
-    .official-card{
-      background:#fff;
-      padding:20px;
-      border-radius:12px;
-      border:1px solid #e5e5e5;
-      box-shadow:0 4px 6px -1px rgba(0,0,0,.08),0 2px 4px -2px rgba(0,0,0,.05);
-    }
-    .ios-input{
-      padding:12px 16px;
-      min-height:44px;
-      background:#fff;
-      border:1px solid #d1d5db;
-      border-radius:8px;
-      color:#1f2937;
-      transition:all .2s;
-      box-shadow:inset 0 1px 3px rgba(0,0,0,.06);
-      font-size:16px;
-    }
-    .ios-input:focus{
-      border-color:#007aff;
-      outline:none;
-      box-shadow:0 0 0 3px rgba(0,122,255,.3);
-    }
-    .ios-btn-primary{
-      font-weight:600;
-      border-radius:10px;
-      min-height:48px;
-      transition:background-color .2s, box-shadow .2s;
-      box-shadow:0 3px 6px rgba(0,122,255,.3);
-    }
-    .ios-btn-primary:hover{ opacity:.95; box-shadow:0 5px 10px rgba(0,122,255,.4); }
-    #log-output{ background:#f7f7f7; border:1px solid #e5e5e5; }
-    #log-output::-webkit-scrollbar{ width:6px; }
-    #log-output::-webkit-scrollbar-thumb{ background:#c0c0c0; border-radius:3px; }
+    .preference-modal{ background:#fff; border-radius:16px; max-width:600px; max-height:90vh; overflow-y:auto }
+    .preference-card{ transition:all .2s ease-in-out; cursor:pointer; border:2px solid transparent }
+    .preference-card:hover{ border-color:#007aff }
+    .preference-card.selected{ border-color:#007aff; box-shadow:0 0 0 4px rgba(0,122,255,.3); background:#e6f0ff }
 
-    .status-label{ font-size:.875rem; color:#6b7280; margin-bottom:2px; }
-    .status-value{ font-weight:700; color:#1f2937; }
-    .text-status-active{ color:#34c759; }
-    .text-status-warn{ color:#ff9500; }
-    .text-status-error{ color:#ff3b30; }
-    .text-status-neutral{ color:#5a5a5a; }
-
-    .preference-modal{ background:#fff; border-radius:16px; max-width:600px; max-height:90vh; overflow-y:auto; }
-    .preference-card{ transition:all .2s; cursor:pointer; border:2px solid transparent; }
-    .preference-card:hover{ border-color:#007aff; }
-    .preference-card.selected{
-      border-color:#007aff;
-      box-shadow:0 0 0 4px rgba(0,122,255,.3);
-      background:#e6f0ff;
-    }
-    .mode-ios .max-w-4xl.mx-auto{ padding-bottom:calc(1rem + env(safe-area-inset-bottom)); }
-    .mode-android .official-card{ box-shadow:0 6px 10px rgba(0,0,0,.1); }
-
-    @media (prefers-reduced-motion: reduce){
-      *{ transition:none !important; animation:none !important; }
-    }
+    .mode-ios .ios-input{ font-size:16px !important; }
+    .mode-ios .max-w-4xl.mx-auto{ padding-bottom:calc(1rem + env(safe-area-inset-bottom)) }
+    .mode-android .official-card{ box-shadow:0 6px 10px rgba(0,0,0,.1) }
   </style>
 </head>
 
 <body>
   <div class="max-w-4xl mx-auto p-4 sm:p-8">
     <header class="mb-8 text-center">
-      <h1 class="text-3xl font-bold text-gray-800 mb-2">V25 Peak Sauce Runner (H4 + Retest)</h1>
-      <p class="text-gray-500">Multipliers Up/Down • MA50(H1) bias • M5 range filter • Hard-stop shield • Runner giveback lock</p>
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">V25 Breakout Strategy Runner</h1>
+      <p class="text-gray-500">Beginner-safe interface + guarded subscriptions + no entry spam.</p>
+      <p class="text-xs text-gray-400 mt-2">Trading involves risk. This tool adds guardrails but cannot guarantee profits.</p>
     </header>
 
-    <!-- Protected Defaults -->
-    <div class="official-card mb-6 space-y-4">
+    <div id="protected-defaults-card" class="official-card mb-6 space-y-4">
       <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b pb-2 mb-4">
-        <h2 class="text-xl font-semibold text-gray-700 mb-2 sm:mb-0">
-          Protected Defaults
+        <h2 class="text-xl font-semibold text-gray-700 mb-2 sm:mb-0">Protected Defaults
           <span id="safe-mode-indicator" class="text-sm font-bold ml-2 py-1 px-2 rounded-full text-white bg-green-500">Safe Mode: ON</span>
         </h2>
         <div class="flex space-x-2">
@@ -110,165 +66,118 @@
       </div>
 
       <div id="settings-area" class="space-y-4">
-        <h3 class="font-semibold text-gray-600 pt-2 border-t border-gray-100">Market</h3>
+        <h3 class="font-semibold text-gray-600 pt-2 border-t border-gray-100">Market & Limits</h3>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="relative">
-            <input id="symbol-input" type="text" value="Volatility 25 (1s) Index (R_25)" disabled class="ios-input w-full" />
+            <input id="symbol-input" type="text" value="Volatility 25 (1s) Index" disabled class="ios-input w-full" />
             <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Symbol</span>
           </div>
           <div class="relative">
-            <input id="timeframe-input" type="text" value="H4 Breakout + Retest | H1 MA50 Bias | M5 Entry" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Logic</span>
+            <input id="timeframe-input" type="text" value="True H4 Candles + Retest on Ticks" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Timeframe</span>
           </div>
         </div>
 
-        <h3 class="font-semibold text-gray-600 pt-2 border-t border-gray-100">Risk & Daily Limits</h3>
+        <div class="relative">
+          <input id="max-trades-input" type="number" value="2" disabled class="ios-input w-full" />
+          <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Max Trades Per Signal 🔒</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="relative flex-1">
+            <input id="balance-min-input" type="number" value="0.90" step="0.01" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Min Balance ($) 🔒</span>
+          </div>
+          <div class="relative flex-1">
+            <input id="balance-max-input" type="number" value="999999" step="1" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Max Balance ($) 🔒</span>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-gray-600 pt-2 border-t border-gray-100">Position Size & Safety</h3>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="relative flex-1">
+            <input id="stake-amount" type="number" value="1.00" step="0.01" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Stake ($) 🔒</span>
+          </div>
+
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg w-full sm:w-1/3">
+            <label for="auto-scale-toggle" class="font-medium text-gray-700 text-sm">Auto-Scale</label>
+            <input type="checkbox" id="auto-scale-toggle" disabled class="form-checkbox h-5 w-5 text-blue-500 rounded-full" />
+          </div>
+        </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="relative">
-            <input id="max-trades-day-input" type="number" value="3" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Max Trades/Day 🔒</span>
+            <input id="cooldown-input" type="number" value="3" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Cooldown (min) 🔒</span>
           </div>
           <div class="relative">
             <input id="max-loss-streak-input" type="number" value="2" disabled class="ios-input w-full" />
             <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Max Loss Streak 🔒</span>
           </div>
           <div class="relative">
-            <input id="daily-loss-cap-input" type="number" value="6" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Daily Loss Cap % 🔒</span>
+            <input id="daily-cap-input" type="number" value="5" step="0.5" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Daily Loss Cap (%) 🔒</span>
           </div>
         </div>
 
-        <h3 class="font-semibold text-gray-600 pt-2 border-t border-gray-100">Trade Targets</h3>
-
+        <h3 class="font-semibold text-gray-600 pt-2 border-t border-gray-100">Targets (Editable only when Safe Mode OFF + Unlocked)</h3>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="relative">
-            <input id="normal-tp-input" type="number" value="0.20" step="0.01" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Normal TP ($) 🔒</span>
+            <input id="tp-quick-input" type="number" value="0.90" step="0.01" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">TP Quick ($)</span>
           </div>
           <div class="relative">
-            <input id="normal-sl-input" type="number" value="0.10" step="0.01" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Normal SL ($) 🔒</span>
+            <input id="tp-clean-input" type="number" value="1.20" step="0.01" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">TP Clean ($)</span>
           </div>
           <div class="relative">
-            <input id="cooldown-input" type="number" value="15" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Cooldown (min) 🔒</span>
-          </div>
-        </div>
-
-        <h3 class="font-semibold text-gray-600 pt-2 border-t border-gray-100">Runner Mode Targets</h3>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="relative">
-            <input id="quick-tp-input" type="number" value="0.90" step="0.01" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Quick TP ($) 🔒</span>
-          </div>
-          <div class="relative">
-            <input id="runner-tp-input" type="number" value="1.20" step="0.01" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Runner TP ($) 🔒</span>
-          </div>
-          <div class="relative">
-            <input id="runner-sl-input" type="number" value="0.20" step="0.01" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Runner SL ($) 🔒</span>
-          </div>
-        </div>
-
-        <h3 class="font-semibold text-gray-600 pt-2 border-t border-gray-100">Stake (Auto by Balance)</h3>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="relative">
-            <input id="stake-display" type="text" value="Auto" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Stake chosen by balance</span>
-          </div>
-          <div class="relative">
-            <input id="multiplier-display" type="text" value="Multiplier: 20 (fixed)" disabled class="ios-input w-full" />
-            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Multiplier</span>
+            <input id="sl-input" type="number" value="0.20" step="0.01" disabled class="ios-input w-full" />
+            <span class="absolute right-3 top-3 text-gray-500 text-xs pointer-events-none">Stop Loss ($)</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- API -->
-    <div class="official-card mb-6 space-y-4">
+    <div id="config-card" class="official-card mb-6 space-y-4">
       <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">API Connection</h2>
-
-      <input id="api-token" type="password" placeholder="Deriv API Token (Demo or Real)" class="ios-input w-full" />
-
-      <button id="toggle-bot-btn" class="w-full py-3 text-lg ios-btn-primary bg-blue-500 text-white">
-        Start Bot
-      </button>
+      <input id="api-token" type="password" placeholder="Deriv API Token (required)" class="ios-input w-full" />
+      <button id="toggle-bot-btn" class="w-full py-3 text-lg ios-btn-primary bg-blue-500 text-white">Start Bot</button>
     </div>
 
-    <!-- Status -->
-    <div class="official-card mb-6">
+    <div id="status-card" class="official-card mb-6">
       <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">Live Status Board</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div>
-          <p class="status-label">API Connection:</p>
-          <p id="connection-status" class="text-status-error status-value">DISCONNECTED</p>
-        </div>
-        <div>
-          <p class="status-label">Safe Mode:</p>
-          <p id="safe-mode-status" class="text-status-active status-value">ON</p>
-        </div>
-        <div>
-          <p class="status-label">Bot Enabled:</p>
-          <p id="bot-enabled-status" class="text-status-neutral status-value">FALSE</p>
-        </div>
-        <div>
-          <p class="status-label">Mode:</p>
-          <p id="mode-status" class="text-status-neutral status-value">NORMAL</p>
-        </div>
+        <div><p class="status-label">API Connection:</p><p id="connection-status" class="text-status-error status-value">DISCONNECTED</p></div>
+        <div><p class="status-label">Safe Mode:</p><p id="safe-mode-status" class="text-status-active status-value">ON</p></div>
+        <div><p class="status-label">Trade Active:</p><p id="trade-active-status" class="text-status-neutral status-value">FALSE</p></div>
+        <div><p class="status-label">H4 Bias / Level:</p><p id="breakout-level-display" class="text-status-neutral status-value">N/A | 0.00</p></div>
 
-        <div>
-          <p class="status-label">Balance:</p>
-          <p id="balance-status" class="text-status-neutral status-value">$0.00</p>
-        </div>
-        <div>
-          <p class="status-label">Trades Today:</p>
-          <p id="trades-status" class="text-status-neutral status-value">0/3</p>
-        </div>
-        <div>
-          <p class="status-label">Net P/L Today:</p>
-          <p id="net-status" class="text-status-neutral status-value">$0.00</p>
-        </div>
-        <div>
-          <p class="status-label">Loss Streak:</p>
-          <p id="streak-status" class="text-status-neutral status-value">0/2</p>
-        </div>
+        <div><p class="status-label">Current Balance:</p><p id="current-balance-display" class="text-status-neutral status-value">$0.00</p></div>
+        <div><p class="status-label">Trades This Signal:</p><p id="trades-this-signal-display" class="text-status-neutral status-value">0/2</p></div>
+        <div><p class="status-label">Current P/L ($):</p><p id="current-profit-display" class="text-status-neutral status-value">$0.00</p></div>
+        <div><p class="status-label">Daily Loss Cap:</p><p id="daily-cap-status" class="status-value text-status-active">OK</p></div>
 
-        <div>
-          <p class="status-label">Bias (H1 MA50):</p>
-          <p id="bias-status" class="text-status-neutral status-value">NO TRADE</p>
-        </div>
-        <div>
-          <p class="status-label">H4 Breakout Level:</p>
-          <p id="level-status" class="text-status-neutral status-value">0.0000</p>
-        </div>
-        <div>
-          <p class="status-label">M5 Range(20):</p>
-          <p id="range-status" class="text-status-neutral status-value">0.00</p>
-        </div>
-        <div>
-          <p class="status-label">Block Reason:</p>
-          <p id="block-status" class="text-status-warn status-value">Awaiting Start</p>
-        </div>
+        <div><p class="status-label">Locked Profit:</p><p id="locked-profit-level-display" class="text-status-neutral status-value">None</p></div>
+        <div><p class="status-label">Balance Tier:</p><p id="balance-tier-display" class="text-status-neutral status-value">BLOCKED</p></div>
+        <div><p class="status-label">Block Reason:</p><p id="block-reason-display" class="text-status-neutral status-value">Awaiting Start</p></div>
       </div>
     </div>
 
-    <!-- Log -->
     <div class="official-card p-4">
       <h2 class="text-xl font-semibold mb-3 border-b pb-2 text-gray-700">System Log</h2>
       <div id="log-output" class="p-3 h-64 overflow-y-auto text-sm rounded-lg space-y-1 text-gray-800">
-        <p class="text-gray-500">[SYSTEM] Ready. Paste API token and click Start.</p>
+        <p class="text-gray-500">[SYSTEM] Ready. Enter API Token and click Start.</p>
       </div>
     </div>
   </div>
 
-  <!-- Confirm Modal -->
+  <!-- Confirm modal -->
   <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
-    <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full space-y-4 max-h-[90vh] overflow-y-auto">
+    <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full space-y-4" role="dialog" aria-modal="true">
       <h3 id="modal-title" class="text-lg font-bold text-red-600">Confirmation Required</h3>
       <p id="modal-message" class="text-gray-700">Are you sure?</p>
       <input type="text" id="modal-input" placeholder="Type UNLOCK" class="ios-input w-full hidden" />
@@ -279,116 +188,99 @@
     </div>
   </div>
 
-  <!-- Preference Modal -->
+  <!-- Preference modal -->
   <div id="preference-modal-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden">
-    <div class="preference-modal p-6 w-full space-y-6">
+    <div class="preference-modal p-6 w-full space-y-6" role="dialog" aria-modal="true">
       <h3 class="text-2xl font-bold text-gray-800 text-center">Select Your Preferred Experience</h3>
-      <p class="text-gray-500 text-center">Optimizes layout/touch behavior for your device.</p>
-
+      <p class="text-gray-500 text-center">Optimizes layout for your device.</p>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div data-mode="web" class="preference-card official-card p-4 text-center" tabindex="0">
-          <h4 class="font-semibold text-gray-800">Web/Desktop</h4>
-          <p class="text-sm text-gray-500">Mouse friendly</p>
-        </div>
-        <div data-mode="ios" class="preference-card official-card p-4 text-center" tabindex="0">
-          <h4 class="font-semibold text-gray-800">iOS</h4>
-          <p class="text-sm text-gray-500">No zoom, safe areas</p>
-        </div>
-        <div data-mode="android" class="preference-card official-card p-4 text-center" tabindex="0">
-          <h4 class="font-semibold text-gray-800">Android</h4>
-          <p class="text-sm text-gray-500">WebView optimized</p>
-        </div>
+        <div data-mode="web" class="preference-card official-card p-4 text-center" tabindex="0"><h4 class="font-semibold">Web</h4></div>
+        <div data-mode="ios" class="preference-card official-card p-4 text-center" tabindex="0"><h4 class="font-semibold">iOS</h4></div>
+        <div data-mode="android" class="preference-card official-card p-4 text-center" tabindex="0"><h4 class="font-semibold">Android</h4></div>
       </div>
-
-      <button id="preference-continue-btn" disabled class="w-full py-3 text-lg ios-btn-primary bg-blue-500 text-white opacity-50 cursor-not-allowed">
-        Continue
-      </button>
+      <div class="pt-4">
+        <button id="preference-continue-btn" disabled class="w-full py-3 text-lg ios-btn-primary bg-blue-500 text-white opacity-50 cursor-not-allowed">Continue</button>
+      </div>
     </div>
   </div>
 
   <script>
-    /***********************
-     *  V25 PEAK SAUCE v3.0
-     *  - Multipliers Up/Down
-     *  - Stake by balance
-     *  - Hard-stop shield: daily loss 6%, loss streak 2, trades/day 3
-     *  - H1 MA50 bias filter
-     *  - M5 range filter (20 candles, range >= 0.30) + spike candle skip
-     *  - TRUE H4 breakout + retest + M5 confirmation
-     *  - Runner: BE lock + partial lock + giveback exit
-     *  - Quick TP = $0.90 if "1-tick clean breakout"; else Runner TP = $1.20
-     ***********************/
-
-    // --- CONSTANTS ---
     const APP_ID = 1089;
     const SYMBOL = "R_25";
     const API_URL = `wss://ws.binaryws.com/websockets/v3?app_id=${APP_ID}`;
-    const CURRENCY = "USD";
-    const MULTIPLIER = 20;
 
-    // Timeframes (granularity in seconds)
-    const TF_M5 = 300;
-    const TF_H1 = 3600;
-    const TF_H4 = 14400;
+    const TIER_CONFIGS = {
+      BLOCKED: { min: 0.00, max: 0.89, name: "BLOCKED (< $0.90)", isBlocked: true,  maxTradesPerSignal: 0, cooldownDuration: 0,   maxLossStreak: 999, dailyLossCapPercent: 100 },
+      MICRO:   { min: 0.90, max: 4.99, name: "MICRO ($0.90-$4.99)", isBlocked: false, maxTradesPerSignal: 1, cooldownDuration: 300, maxLossStreak: 1,   dailyLossCapPercent: 3 },
+      LOW:     { min: 5.00, max: 9.99, name: "LOW ($5-$9.99)", isBlocked: false,      maxTradesPerSignal: 2, cooldownDuration: 180, maxLossStreak: 2,   dailyLossCapPercent: 4 },
+      STANDARD:{ min: 10.0, max: 999999, name: "STANDARD+ (>= $10)", isBlocked: false, maxTradesPerSignal: 3, cooldownDuration: 180, maxLossStreak: 2,   dailyLossCapPercent: 5 }
+    };
 
-    // Entry filters
-    const RANGE_MIN = 0.30;      // M5 range over last 20 candles
-    const SPIKE_MULT = 2.5;      // spike if last candle range > avgRange * SPIKE_MULT
-    const MA_NO_TRADE_BAND = 0.05; // if price too close to MA50 -> no trade
+    let state = {
+      ws:null, apiToken:"", isBotRunning:false,
+      safeMode:true, settingsLocked:true,
+      currentTier:TIER_CONFIGS.BLOCKED,
 
-    // Retest band around breakout level
-    const RETEST_BAND = 0.10; // price must come within +/- band to count retest
+      stakeAmount:1.00, maxTradesPerSignal:2, balanceMin:0.90, balanceMax:999999,
+      cooldownDuration:180, maxLossStreak:2, dailyLossCapPercent:5,
+      autoScaleEnabled:false,  // OFF by default for $1 stake
 
-    // Cooldown
-    const COOLDOWN_MINUTES = 15;
+      tpQuickUSD:0.90, tpCleanUSD:1.20, stopLossUSD:0.20,
 
-    // Hard stop shield
-    const MAX_TRADES_PER_DAY = 3;
-    const MAX_LOSSES_IN_ROW = 2;
-    const DAILY_LOSS_LIMIT_PCT = 6;
+      bias:"", breakoutLevel:0, breakoutStrength:0,
+      tradeCounter:0, lossStreak:0, cooldown:false,
+      dailyLossCapTriggered:false,
+      currentBalance:0, initialDailyBalance:0, dailyProfitLossUSD:0,
+      activeContract:null, activeContractId:null,
+      lockedProfitLevel:"None", blockReason:"Awaiting Start",
 
-    // Normal mode TP/SL per trade (USD profit on contract)
-    const NORMAL_TP = 0.20;
-    const NORMAL_SL = 0.10;
+      entryInProgress:false,
 
-    // Runner/Quick targets you requested
-    const QUICK_TP = 0.90;     // "quick 1 tick to profit" close
-    const RUNNER_TP = 1.20;    // if clean breakout, let it run
-    const RUNNER_SL = 0.20;    // runner stop loss (USD)
+      subs:{
+        balance:{subscribed:false,subscribing:false},
+        poc:{subscribed:false,subscribing:false},
+        ticks:{subscribed:false,subscribing:false}
+      },
 
-    // Runner locks + giveback
-    const LOCK_BE_AT = 0.20;       // lock BE after +0.20
-    const LOCK_PLUS_AT = 0.40;     // after +0.40 lock at least +0.10
-    const LOCK_PLUS_VALUE = 0.10;
-    const GIVEBACK_PCT = 0.40;     // exit if profit drops 40% from max_profit
-    const MAX_GIVEBACKS_PER_DAY = 2;
+      logicInterval:null
+    };
 
-    // --- UI ELEMENTS ---
+    // DOM
     const tokenInput = document.getElementById("api-token");
+    const stakeInput = document.getElementById("stake-amount");
+    const maxTradesInput = document.getElementById("max-trades-input");
+    const balanceMinInput = document.getElementById("balance-min-input");
+    const balanceMaxInput = document.getElementById("balance-max-input");
+    const cooldownInput = document.getElementById("cooldown-input");
+    const maxLossStreakInput = document.getElementById("max-loss-streak-input");
+    const dailyCapInput = document.getElementById("daily-cap-input");
+    const autoScaleToggle = document.getElementById("auto-scale-toggle");
+
+    const tpQuickInput = document.getElementById("tp-quick-input");
+    const tpCleanInput = document.getElementById("tp-clean-input");
+    const slInput = document.getElementById("sl-input");
+
+    const safeModeToggle = document.getElementById("safe-mode-toggle");
+    const unlockBtn = document.getElementById("unlock-settings-btn");
+    const safeModeIndicator = document.getElementById("safe-mode-indicator");
     const toggleBtn = document.getElementById("toggle-bot-btn");
     const logOutput = document.getElementById("log-output");
 
-    const safeModeToggle = document.getElementById("safe-mode-toggle");
-    const safeModeIndicator = document.getElementById("safe-mode-indicator");
-    const unlockBtn = document.getElementById("unlock-settings-btn");
-
-    const status = {
+    const statusDisplay = {
       connection: document.getElementById("connection-status"),
       safeMode: document.getElementById("safe-mode-status"),
-      enabled: document.getElementById("bot-enabled-status"),
-      mode: document.getElementById("mode-status"),
-      balance: document.getElementById("balance-status"),
-      trades: document.getElementById("trades-status"),
-      net: document.getElementById("net-status"),
-      streak: document.getElementById("streak-status"),
-      bias: document.getElementById("bias-status"),
-      level: document.getElementById("level-status"),
-      range: document.getElementById("range-status"),
-      block: document.getElementById("block-status"),
-      stakeDisplay: document.getElementById("stake-display"),
+      active: document.getElementById("trade-active-status"),
+      level: document.getElementById("breakout-level-display"),
+      balance: document.getElementById("current-balance-display"),
+      trades: document.getElementById("trades-this-signal-display"),
+      currentProfit: document.getElementById("current-profit-display"),
+      lockedProfit: document.getElementById("locked-profit-level-display"),
+      tier: document.getElementById("balance-tier-display"),
+      cap: document.getElementById("daily-cap-status"),
+      block: document.getElementById("block-reason-display")
     };
 
-    // Modals
+    // Modal
     const modalOverlay = document.getElementById("modal-overlay");
     const modalTitle = document.getElementById("modal-title");
     const modalMessage = document.getElementById("modal-message");
@@ -396,872 +288,528 @@
     const modalCancelBtn = document.getElementById("modal-cancel-btn");
     const modalConfirmBtn = document.getElementById("modal-confirm-btn");
 
-    // Preference modal
-    const prefOverlay = document.getElementById("preference-modal-overlay");
-    const prefContinueBtn = document.getElementById("preference-continue-btn");
-    const changePrefBtn = document.getElementById("change-preference-btn");
-
-    // --- STATE ---
-    const S = {
-      ws: null,
-      apiToken: "",
-      bot_enabled: false,
-      safeMode: true,
-      settingsLocked: true,
-
-      // Account day tracking
-      dayKey: "",
-      start_balance: 0,
-      net_profit_today: 0,
-      daily_loss: 0,
-      daily_loss_limit: 0,
-      trade_count: 0,
-      loss_streak: 0,
-      giveback_count: 0,
-
-      // Cooldown
-      cooldown_until: 0,
-
-      // Market data cache
-      last_tick: null,
-      tickHistory: [], // keep last ~20 ticks for "quick tick" detect
-
-      // Filters
-      bias: "NO TRADE", // BUY / SELL / NO TRADE
-      h1_ma50: null,
-      m5_range: 0,
-      spikeSkipOneCycle: false,
-
-      // H4 breakout & retest
-      breakout_level: 0,
-      breakout_dir: null,      // "BUY" / "SELL"
-      breakout_confirmed: false,
-      retest_seen: false,
-      retest_confirmed: false,
-
-      // Trade management
-      activeContractId: null,
-      runner_mode: false,
-      max_profit: 0,
-      be_locked: false,
-      plus_locked: false,
-      locked_floor: 0, // floor profit to protect (simulated via sell trigger)
-    };
-
-    // --- LOG ---
-    function log(msg, type="info"){
-      const now = new Date().toLocaleTimeString();
-      const p = document.createElement("p");
-      let cls = "text-gray-500";
-      if(type==="error") cls="text-status-error";
-      if(type==="warn") cls="text-status-warn";
-      if(type==="success") cls="text-status-active";
-      if(type==="action") cls="text-blue-500";
-      p.className = cls;
-      p.textContent = `[${now}] [${type.toUpperCase()}] ${msg}`;
-      logOutput.appendChild(p);
-      logOutput.scrollTop = logOutput.scrollHeight;
-      if(logOutput.children.length > 250) logOutput.removeChild(logOutput.firstChild);
+    function log(message,type="info"){
+      const now=new Date().toLocaleTimeString();
+      let c="text-gray-500";
+      if(type==="error") c="text-status-error";
+      if(type==="success") c="text-status-active";
+      if(type==="warn") c="text-status-warn";
+      if(type==="action") c="text-blue-500";
+      const p=document.createElement("p");
+      p.className=c;
+      p.textContent=`[${now}] [${type.toUpperCase()}] ${message}`;
+      logOutput.prepend(p);
+      if(logOutput.children.length>90) logOutput.removeChild(logOutput.lastChild);
     }
 
-    // --- HELPERS ---
-    function todayKey(){
-      // local day key
-      const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-    }
-
-    function stakeByBalance(balance){
-      if(balance < 20) return 0.20;
-      if(balance >= 20 && balance < 50) return 0.30;
-      return 0.50;
-    }
-
-    function inCooldown(){
-      return Date.now() < S.cooldown_until;
-    }
-
-    function setCooldown(minutes){
-      S.cooldown_until = Date.now() + minutes*60*1000;
-      log(`Cooldown started: ${minutes} minutes`, "warn");
-    }
-
-    function hardStop(reason){
-      S.bot_enabled = false;
-      S.activeContractId = null;
-      updateUI(reason, true);
-      log(`HARD STOP: ${reason}`, "error");
-      try{ if(S.ws) S.ws.close(); }catch(e){}
-    }
-
-    function updateUI(blockReason="Ready", blocked=false){
-      status.enabled.textContent = S.bot_enabled ? "TRUE" : "FALSE";
-      status.enabled.className = `status-value ${S.bot_enabled ? "text-status-active":"text-status-neutral"}`;
-
-      status.safeMode.textContent = S.safeMode ? "ON":"OFF";
-      status.safeMode.className = `status-value ${S.safeMode ? "text-status-active":"text-status-warn"}`;
-
-      status.balance.textContent = `$${Number(S.last_balance||0).toFixed(2)}`;
-      status.trades.textContent = `${S.trade_count}/${MAX_TRADES_PER_DAY}`;
-      status.net.textContent = `$${Number(S.net_profit_today||0).toFixed(2)}`;
-      status.streak.textContent = `${S.loss_streak}/${MAX_LOSSES_IN_ROW}`;
-
-      status.bias.textContent = S.bias;
-      status.level.textContent = Number(S.breakout_level||0).toFixed(4);
-      status.range.textContent = Number(S.m5_range||0).toFixed(2);
-
-      status.mode.textContent = S.runner_mode ? "RUNNER" : "NORMAL";
-      status.mode.className = `status-value ${S.runner_mode ? "text-status-warn":"text-status-neutral"}`;
-
-      status.block.textContent = blockReason;
-      status.block.className = `status-value ${
-        blocked ? "text-status-error" :
-        blockReason.includes("Cooldown") ? "text-status-warn" :
-        "text-status-active"
-      }`;
-
-      status.stakeDisplay.value = (S.last_balance!=null) ? `$${stakeByBalance(S.last_balance).toFixed(2)}` : "Auto";
-    }
-
-    // --- SIMPLE MA CALC ---
-    function sma(values){
-      if(!values.length) return null;
-      const sum = values.reduce((a,b)=>a+b,0);
-      return sum/values.length;
-    }
-
-    // --- API SEND ---
-    function send(req){
-      if(S.ws && S.ws.readyState === WebSocket.OPEN){
-        S.ws.send(JSON.stringify(req));
-      }
-    }
-
-    // --- CONNECT ---
-    function connect(){
-      if(S.ws) try{ S.ws.close(); }catch(e){}
-      S.ws = new WebSocket(API_URL);
-
-      S.ws.onopen = ()=>{
-        status.connection.textContent = "CONNECTED";
-        status.connection.className = "text-status-active status-value";
-        log("Connected. Authorizing…", "success");
-        send({ authorize: S.apiToken });
-      };
-
-      S.ws.onclose = ()=>{
-        status.connection.textContent = "DISCONNECTED";
-        status.connection.className = "text-status-error status-value";
-        log("Connection closed.", "warn");
-        if(S.bot_enabled){
-          // Keep it simple: stop on disconnect (you can add retry if you want)
-          S.bot_enabled = false;
-          updateUI("Disconnected (stopped)", true);
-        }
-      };
-
-      S.ws.onerror = (e)=>{
-        log("WebSocket error (check console).", "error");
-        console.error(e);
-      };
-
-      S.ws.onmessage = (msg)=>{
-        const data = JSON.parse(msg.data);
-        if(data.error){
-          log(`API Error: ${data.error.message}`, "error");
-          // stop only if serious
-          updateUI(`API Error: ${data.error.message}`, true);
-          return;
-        }
-        handleMessage(data);
-      };
-    }
-
-    // --- DAILY RESET ---
-    function ensureDailyReset(){
-      const key = todayKey();
-      if(S.dayKey !== key){
-        S.dayKey = key;
-        S.net_profit_today = 0;
-        S.daily_loss = 0;
-        S.trade_count = 0;
-        S.loss_streak = 0;
-        S.giveback_count = 0;
-        S.cooldown_until = 0;
-        S.runner_mode = false;
-        S.max_profit = 0;
-        S.be_locked = false;
-        S.plus_locked = false;
-        S.locked_floor = 0;
-        log(`Daily reset: ${key}`, "action");
-      }
-    }
-
-    // --- REQUEST DATA ---
-    function requestTickStream(){
-      send({ forget_all: "ticks" });
-      send({ ticks: SYMBOL, subscribe: 1 });
-    }
-
-    function requestBalance(){
-      send({ balance: 1, subscribe: 1 });
-    }
-
-    function requestCandles(granularity, count, req_id){
-      send({
-        ticks_history: SYMBOL,
-        end: "latest",
-        count,
-        granularity,
-        style: "candles",
-        req_id
-      });
-    }
-
-    // --- H4 BREAKOUT DETECTION (TRUE H4 close beyond prev structure) ---
-    // We use last 3 H4 candles:
-    // - structure candle: candle[-2] high/low as breakout_level
-    // - breakout candle: candle[-1] close beyond level + strong close (top/bottom 30%)
-    function computeH4Breakout(h4){
-      if(!h4 || h4.length < 3) return;
-
-      const c0 = h4[h4.length-3];
-      const c1 = h4[h4.length-2]; // structure reference
-      const c2 = h4[h4.length-1]; // most recent CLOSED H4 candle
-
-      const sHigh = Number(c1.high);
-      const sLow  = Number(c1.low);
-
-      const o = Number(c2.open), h = Number(c2.high), l = Number(c2.low), cl = Number(c2.close);
-      const rng = Math.max(0.0000001, h-l);
-
-      const closePos = (cl - l) / rng; // 0..1
-
-      // BUY breakout: close above sHigh, and close in top 30% (closePos >= 0.70)
-      const buyBreak = (cl > sHigh) && (closePos >= 0.70);
-
-      // SELL breakout: close below sLow, and close in bottom 30% (closePos <= 0.30)
-      const sellBreak = (cl < sLow) && (closePos <= 0.30);
-
-      if(buyBreak){
-        S.breakout_dir = "BUY";
-        S.breakout_level = sHigh;
-        S.breakout_confirmed = true;
-        S.retest_seen = false;
-        S.retest_confirmed = false;
-        log(`H4 BREAKOUT BUY confirmed. Level=${S.breakout_level.toFixed(4)}`, "success");
-      } else if(sellBreak){
-        S.breakout_dir = "SELL";
-        S.breakout_level = sLow;
-        S.breakout_confirmed = true;
-        S.retest_seen = false;
-        S.retest_confirmed = false;
-        log(`H4 BREAKOUT SELL confirmed. Level=${S.breakout_level.toFixed(4)}`, "success");
-      }
-      updateUI("H4 updated");
-    }
-
-    // --- H1 MA50 Bias ---
-    function computeH1MA50(h1){
-      if(!h1 || h1.length < 55) return;
-      const closes = h1.slice(-50).map(c=>Number(c.close));
-      const ma50 = sma(closes);
-      S.h1_ma50 = ma50;
-      // Bias will be set on live tick, because we compare current price to MA.
-    }
-
-    // --- M5 RANGE FILTER + SPIKE FILTER ---
-    function computeM5Range(m5){
-      if(!m5 || m5.length < 21) return;
-      const last20 = m5.slice(-20);
-      const highs = last20.map(c=>Number(c.high));
-      const lows  = last20.map(c=>Number(c.low));
-      const recent_high = Math.max(...highs);
-      const recent_low  = Math.min(...lows);
-      const range = recent_high - recent_low;
-      S.m5_range = range;
-
-      // spike candle detection
-      const ranges = last20.map(c=>Number(c.high) - Number(c.low));
-      const avgR = ranges.reduce((a,b)=>a+b,0)/ranges.length;
-      const last = ranges[ranges.length-1];
-      if(last > avgR * SPIKE_MULT){
-        S.spikeSkipOneCycle = true; // skip next entry cycle
-        log(`Spike candle detected (M5). Skipping next cycle.`, "warn");
-      }
-    }
-
-    // --- RETEST + CONFIRMATION (M5 candle based) ---
-    // We request last 3 M5 candles:
-    // Retest_seen: price touches band around breakout_level
-    // Retest_confirmed:
-    //  BUY: candle[-1] low <= level+band AND close > level AND close > open (bullish)
-    //  SELL: candle[-1] high >= level-band AND close < level AND close < open (bearish)
-    function confirmRetest(m5){
-      if(!S.breakout_confirmed || !S.breakout_dir) return;
-      if(!m5 || m5.length < 3) return;
-
-      const c = m5[m5.length-1];
-      const o = Number(c.open), h = Number(c.high), l = Number(c.low), cl = Number(c.close);
-
-      const lvl = Number(S.breakout_level);
-      const band = RETEST_BAND;
-
-      // "seen" if candle hits retest zone
-      if(S.breakout_dir === "BUY"){
-        if(l <= (lvl + band) && h >= (lvl - band)) S.retest_seen = true;
-      } else {
-        if(h >= (lvl - band) && l <= (lvl + band)) S.retest_seen = true;
-      }
-
-      if(!S.retest_seen) return;
-
-      if(S.breakout_dir === "BUY"){
-        const bullishReject = (cl > lvl) && (cl > o);
-        const touched = l <= (lvl + band);
-        if(touched && bullishReject){
-          S.retest_confirmed = true;
-          log("H4+Retest CONFIRMED (BUY).", "success");
-        }
-      } else {
-        const bearishReject = (cl < lvl) && (cl < o);
-        const touched = h >= (lvl - band);
-        if(touched && bearishReject){
-          S.retest_confirmed = true;
-          log("H4+Retest CONFIRMED (SELL).", "success");
-        }
-      }
-    }
-
-    // --- QUICK 1-TICK CLEAN BREAKOUT DETECT ---
-    // If last tick move is strong in breakout direction and NOT spiky/choppy:
-    // - We treat it as "clean" and aim for QUICK_TP ($0.90) then decide runner if still clean.
-    function isCleanOneTickBreakout(){
-      if(!S.breakout_dir || S.tickHistory.length < 5) return false;
-      const last = S.tickHistory[S.tickHistory.length-1];
-      const prev = S.tickHistory[S.tickHistory.length-2];
-      const delta = Math.abs(last - prev);
-
-      // "clean" = delta small enough to not be a spike, but directional and price beyond level
-      // (We keep it conservative: delta between 0.0002 and 0.0020)
-      if(delta < 0.0002 || delta > 0.0020) return false;
-
-      const lvl = Number(S.breakout_level||0);
-      if(S.breakout_dir === "BUY") return last > lvl;
-      return last < lvl;
-    }
-
-    // --- BIAS UPDATE ON TICK ---
-    function updateBiasWithMA(currentPrice){
-      if(!S.h1_ma50){
-        S.bias = "NO TRADE";
-        return;
-      }
-      const dist = currentPrice - S.h1_ma50;
-      if(Math.abs(dist) <= MA_NO_TRADE_BAND){
-        S.bias = "NO TRADE";
-      } else if(dist > 0){
-        S.bias = "BUY";
-      } else {
-        S.bias = "SELL";
-      }
-    }
-
-    // --- HARD STOP CHECKS ---
-    function canTradeNow(){
-      ensureDailyReset();
-
-      if(!S.bot_enabled) return { ok:false, reason:"Bot disabled" };
-      if(S.activeContractId) return { ok:false, reason:"Trade active" };
-
-      // cooldown
-      if(inCooldown()) return { ok:false, reason:"Cooldown active" };
-
-      // trades/day
-      if(S.trade_count >= MAX_TRADES_PER_DAY) return { ok:false, reason:"Max trades/day reached" };
-
-      // loss streak
-      if(S.loss_streak >= MAX_LOSSES_IN_ROW) return { ok:false, reason:"Loss streak limit reached" };
-
-      // daily loss limit
-      S.daily_loss_limit = S.start_balance * (DAILY_LOSS_LIMIT_PCT/100);
-      if(S.daily_loss >= S.daily_loss_limit) return { ok:false, reason:"Daily loss limit reached" };
-
-      // trade #3 rule (only if net positive OR loss_streak==0)
-      if(S.trade_count === 2){
-        if(!(S.net_profit_today > 0 || S.loss_streak === 0)){
-          return { ok:false, reason:"Trade #3 blocked (not net+ and loss_streak!=0)" };
-        }
-      }
-
-      // runner giveback daily
-      if(S.giveback_count >= MAX_GIVEBACKS_PER_DAY) return { ok:false, reason:"Giveback limit reached" };
-
-      // range filter
-      if(S.m5_range < RANGE_MIN) return { ok:false, reason:`Range too low (${S.m5_range.toFixed(2)} < ${RANGE_MIN})` };
-
-      // spike skip
-      if(S.spikeSkipOneCycle){
-        S.spikeSkipOneCycle = false;
-        return { ok:false, reason:"Spike skip cycle" };
-      }
-
-      // Need breakout + retest confirmed
-      if(!S.breakout_confirmed || !S.retest_confirmed) return { ok:false, reason:"Waiting H4 breakout + retest" };
-
-      // Need H1 bias match breakout direction
-      if(S.bias === "NO TRADE") return { ok:false, reason:"MA50 says NO TRADE" };
-      if(S.bias !== S.breakout_dir) return { ok:false, reason:`Bias mismatch (bias=${S.bias}, breakout=${S.breakout_dir})` };
-
-      return { ok:true, reason:"Ready" };
-    }
-
-    // --- MULTIPLIER BUY ---
-    async function placeTrade(direction){
-      // direction: "BUY" -> MULTUP, "SELL" -> MULTDOWN
-      const stake = stakeByBalance(S.last_balance || 0);
-      const contract_type = (direction === "BUY") ? "MULTUP" : "MULTDOWN";
-
-      // Decide runner vs normal:
-      // If clean 1-tick breakout => quick plan (TP 0.90, if STILL clean, allow runner TP 1.20)
-      const clean = isCleanOneTickBreakout();
-      S.runner_mode = !!clean; // runner enabled only for "clean" breakout
-
-      // Targets:
-      const take_profit = S.runner_mode ? RUNNER_TP : NORMAL_TP;
-      const stop_loss   = S.runner_mode ? RUNNER_SL : NORMAL_SL;
-
-      // For “quick close at $0.90”, we do it in management:
-      // - initial TP remains RUNNER_TP (1.20) so winners can run,
-      // - but we will SELL early at QUICK_TP if it hits first and conditions are NOT still clean.
-      // This gives you both behaviors without losing runner potential.
-      S.quick_tp = QUICK_TP;
-
-      log(`Placing ${contract_type} stake=$${stake.toFixed(2)} TP=$${take_profit.toFixed(2)} SL=$${stop_loss.toFixed(2)} (runner=${S.runner_mode})`, "action");
-
-      // Request proposal
-      const req_id = Math.floor(Math.random()*1e9);
-      S._pendingProposal = { req_id, stake, contract_type, take_profit, stop_loss, multiplier: MULTIPLIER };
-
-      send({
-        proposal: 1,
-        amount: stake,
-        basis: "stake",
-        contract_type,
-        currency: CURRENCY,
-        symbol: SYMBOL,
-        multiplier: MULTIPLIER,
-        // Many accounts support limit_order for multipliers; if API rejects, we fallback to manual management
-        limit_order: { take_profit, stop_loss },
-        req_id
-      });
-    }
-
-    function buyFromProposal(proposal){
-      const p = S._pendingProposal;
-      if(!p) return;
-
-      // Buy contract
-      send({ buy: proposal.id, price: p.stake });
-
-      // Init management state
-      S.trade_count += 1;
-      S.max_profit = 0;
-      S.be_locked = false;
-      S.plus_locked = false;
-      S.locked_floor = 0;
-
-      setCooldown(COOLDOWN_MINUTES);
-      updateUI("Trade sent");
-    }
-
-    // --- SELL ACTIVE ---
-    function sellActive(reason){
-      if(!S.activeContractId) return;
-      log(`SELL triggered: ${reason}`, "error");
-      send({ sell: S.activeContractId, price: 0 }); // price=0 sells at market
-    }
-
-    // --- TRADE MANAGEMENT (profit locks + giveback + quick TP) ---
-    function manageOpenContract(c){
-      const profit = Number(c.profit || 0);
-      S.max_profit = Math.max(S.max_profit, profit);
-
-      // Quick TP behavior:
-      // If hits +0.90 quickly, we can lock it; if still clean breakout, keep running to 1.20.
-      if(S.runner_mode && profit >= S.quick_tp){
-        // "still clean" check: price still beyond level + directional + no spike recently
-        const stillClean = isCleanOneTickBreakout();
-        if(!stillClean){
-          sellActive(`Quick TP hit ($${S.quick_tp.toFixed(2)})`);
-          return;
-        } else {
-          // Keep running
-          // (We do not spam log every tick)
-        }
-      }
-
-      // BE lock
-      if(!S.be_locked && profit >= LOCK_BE_AT){
-        S.be_locked = true;
-        S.locked_floor = Math.max(S.locked_floor, 0); // effectively BE
-        log(`BE lock armed at +$${LOCK_BE_AT.toFixed(2)}`, "warn");
-      }
-
-      // +0.10 lock after +0.40
-      if(!S.plus_locked && profit >= LOCK_PLUS_AT){
-        S.plus_locked = true;
-        S.locked_floor = Math.max(S.locked_floor, LOCK_PLUS_VALUE);
-        log(`Profit lock armed: floor +$${LOCK_PLUS_VALUE.toFixed(2)}`, "warn");
-      }
-
-      // Giveback exit (runner)
-      if(S.runner_mode && S.max_profit >= LOCK_PLUS_AT){
-        const threshold = S.max_profit * (1 - GIVEBACK_PCT);
-        if(profit <= threshold){
-          S.giveback_count += 1;
-          sellActive(`Runner giveback (${(GIVEBACK_PCT*100).toFixed(0)}%)`);
-          return;
-        }
-      }
-
-      // Manual floor protection:
-      // If we have a locked_floor and profit falls below it, sell to protect.
-      if(S.locked_floor > 0 && profit < S.locked_floor){
-        sellActive(`Locked floor protection (+$${S.locked_floor.toFixed(2)})`);
-        return;
-      }
-    }
-
-    // --- FINALIZE TRADE ---
-    function finalizeTrade(pnl){
-      // pnl is sell_price - buy_price (contract P/L)
-      S.net_profit_today += pnl;
-      if(pnl < 0){
-        S.daily_loss += Math.abs(pnl);
-        S.loss_streak += 1;
-        log(`Trade CLOSED LOSS: ${pnl.toFixed(2)} | Net Today: ${S.net_profit_today.toFixed(2)}`, "error");
-      } else {
-        S.loss_streak = 0;
-        log(`Trade CLOSED WIN: +${pnl.toFixed(2)} | Net Today: ${S.net_profit_today.toFixed(2)}`, "success");
-      }
-
-      // Reset trade state
-      S.activeContractId = null;
-      S.runner_mode = false;
-      S.max_profit = 0;
-      S.be_locked = false;
-      S.plus_locked = false;
-      S.locked_floor = 0;
-
-      // Hard stop triggers
-      if(S.loss_streak >= MAX_LOSSES_IN_ROW){
-        hardStop("2 losses in a row (day stop)");
-        return;
-      }
-      S.daily_loss_limit = S.start_balance * (DAILY_LOSS_LIMIT_PCT/100);
-      if(S.daily_loss >= S.daily_loss_limit){
-        hardStop(`Daily loss >= ${DAILY_LOSS_LIMIT_PCT}% (day stop)`);
-        return;
-      }
-      if(S.trade_count >= MAX_TRADES_PER_DAY){
-        hardStop("Max trades/day reached (day stop)");
-        return;
-      }
-      if(S.giveback_count >= MAX_GIVEBACKS_PER_DAY){
-        hardStop("Runner giveback limit reached (day stop)");
-        return;
-      }
-
-      updateUI("Awaiting next setup");
-    }
-
-    // --- MESSAGE HANDLER ---
-    function handleMessage(data){
-      // Authorize
-      if(data.msg_type === "authorize"){
-        log(`Authorized: ${data.authorize.loginid}`, "success");
-        requestBalance();
-        requestTickStream();
-
-        // Warm up candles
-        requestCandles(TF_H4, 3, 401);
-        requestCandles(TF_H1, 60, 402);
-        requestCandles(TF_M5, 25, 403);
-
-        updateUI("Authorized");
-        return;
-      }
-
-      // Balance
-      if(data.msg_type === "balance"){
-        ensureDailyReset();
-
-        const bal = Number(data.balance.balance);
-        S.last_balance = bal;
-
-        // set start balance for the day once (on first balance after reset)
-        if(!S.start_balance || S.start_balance === 0){
-          S.start_balance = bal;
-          S.daily_loss_limit = S.start_balance * (DAILY_LOSS_LIMIT_PCT/100);
-          log(`Start balance set: $${S.start_balance.toFixed(2)} | Daily loss limit: $${S.daily_loss_limit.toFixed(2)}`, "action");
-        }
-
-        updateUI("Balance updated");
-        return;
-      }
-
-      // Candles response
-      if(data.msg_type === "candles" || data.msg_type === "history"){
-        // Deriv sometimes returns `candles` or `history` depending request.
-      }
-
-      if(data.msg_type === "candles" && data.candles && data.req_id){
-        const candles = data.candles;
-
-        if(data.req_id === 401){ // H4
-          computeH4Breakout(candles);
-        }
-        if(data.req_id === 402){ // H1
-          computeH1MA50(candles);
-        }
-        if(data.req_id === 403){ // M5
-          computeM5Range(candles);
-          confirmRetest(candles);
-        }
-        return;
-      }
-
-      // Tick
-      if(data.msg_type === "tick"){
-        const price = Number(data.tick.quote);
-        S.last_tick = price;
-        S.tickHistory.push(price);
-        if(S.tickHistory.length > 30) S.tickHistory.shift();
-
-        // Update bias using MA50
-        updateBiasWithMA(price);
-
-        // Poll candles periodically using tick as heartbeat (lightweight)
-        // (Every ~20 ticks)
-        if(S.tickHistory.length % 20 === 0){
-          requestCandles(TF_H4, 3, 401);
-          requestCandles(TF_H1, 60, 402);
-          requestCandles(TF_M5, 25, 403);
-          requestBalance();
-        }
-
-        // If trade is active, we just keep updating UI; open-contract stream handles management.
-        updateUI(inCooldown() ? "Cooldown active" : "Monitoring");
-
-        // Entry attempt
-        const gate = canTradeNow();
-        if(gate.ok){
-          updateUI("Entry conditions met");
-          placeTrade(S.breakout_dir);
-        } else {
-          updateUI(gate.reason);
-        }
-        return;
-      }
-
-      // Proposal
-      if(data.msg_type === "proposal" && data.proposal){
-        // Only act if matches pending req
-        const p = S._pendingProposal;
-        if(!p) return;
-
-        // If proposal came back without limit_order support, still buy and manage manually
-        buyFromProposal(data.proposal);
-
-        // After buy, subscribe to open contract updates
-        // (buy response will give contract_id, but we also subscribe global open contract stream)
-        send({ proposal_open_contract: 1, subscribe: 1 });
-        return;
-      }
-
-      // Buy response
-      if(data.msg_type === "buy" && data.buy){
-        const id = Number(data.buy.contract_id);
-        S.activeContractId = id;
-        log(`BOUGHT contract_id=${id} | Trade ${S.trade_count}/${MAX_TRADES_PER_DAY}`, "success");
-        updateUI("Trade active");
-        return;
-      }
-
-      // Open contract updates
-      if(data.msg_type === "proposal_open_contract" && data.proposal_open_contract){
-        const c = data.proposal_open_contract;
-
-        if(S.activeContractId && Number(c.contract_id) === Number(S.activeContractId)){
-          if(c.is_sold){
-            const pnl = Number(c.sell_price) - Number(c.buy_price);
-            finalizeTrade(pnl);
-          } else {
-            manageOpenContract(c);
-          }
-        }
-        return;
-      }
-    }
-
-    // --- SAFE MODE / LOCK UI (kept simple) ---
-    function showModal(title, message, requiresInput, onConfirm, onCancel){
-      modalTitle.textContent = title;
-      modalMessage.textContent = message;
-      modalInput.classList.toggle("hidden", !requiresInput);
-      modalInput.value = "";
-      modalOverlay.classList.remove("hidden");
-      modalOverlay.classList.add("flex");
-
-      modalConfirmBtn.onclick = ()=>{
-        if(requiresInput && modalInput.value !== "UNLOCK"){
-          log("Incorrect UNLOCK text.", "error");
-          return;
-        }
-        modalOverlay.classList.add("hidden");
-        modalOverlay.classList.remove("flex");
+    function showModal(title,msg,requiresInput,onConfirm,onCancel){
+      modalTitle.textContent=title;
+      modalMessage.textContent=msg;
+      modalInput.classList.toggle("hidden",!requiresInput);
+      modalInput.value="";
+      modalOverlay.classList.remove("hidden"); modalOverlay.classList.add("flex");
+
+      modalConfirmBtn.onclick=()=>{
+        if(requiresInput && modalInput.value!=="UNLOCK"){ log("Wrong confirmation text.","error"); return; }
+        modalOverlay.classList.add("hidden"); modalOverlay.classList.remove("flex");
         onConfirm && onConfirm();
       };
-      modalCancelBtn.onclick = ()=>{
-        modalOverlay.classList.add("hidden");
-        modalOverlay.classList.remove("flex");
+      modalCancelBtn.onclick=()=>{
+        modalOverlay.classList.add("hidden"); modalOverlay.classList.remove("flex");
         onCancel && onCancel();
       };
     }
 
-    function handleUnlock(){
-      showModal(
-        "Unlock Confirmation",
-        "To unlock settings (not recommended), type UNLOCK and confirm.",
-        true,
-        ()=>{
-          S.settingsLocked = false;
-          unlockBtn.textContent = "Settings Unlocked 🔓";
-          unlockBtn.classList.remove("bg-blue-500");
-          unlockBtn.classList.add("bg-red-500");
-          log("Settings unlocked (visual only in this build).", "warn");
-        },
-        ()=>{}
-      );
+    function resetSubs(){
+      Object.keys(state.subs).forEach(k=>{ state.subs[k].subscribed=false; state.subs[k].subscribing=false; });
     }
 
-    function handleSafeMode(){
-      // In this build, Safe Mode ON is the full protection. OFF just reduces warning visuals.
-      if(safeModeToggle.checked){
-        S.safeMode = true;
-        safeModeIndicator.textContent = "Safe Mode: ON";
-        safeModeIndicator.classList.remove("bg-red-500");
-        safeModeIndicator.classList.add("bg-green-500");
-        log("Safe Mode enabled (protections enforced).", "success");
-      } else {
-        showModal(
-          "WARNING",
-          "Turning Safe Mode OFF is not recommended. Confirm?",
-          false,
-          ()=>{
-            S.safeMode = false;
-            safeModeIndicator.textContent = "Safe Mode: OFF";
-            safeModeIndicator.classList.remove("bg-green-500");
-            safeModeIndicator.classList.add("bg-red-500");
-            log("Safe Mode disabled (visual only; hard stops still apply).", "warn");
-          },
-          ()=>{
-            safeModeToggle.checked = true;
-          }
-        );
-      }
-      updateUI("SafeMode updated");
+    function send(req){
+      if(!state.ws || state.ws.readyState!==WebSocket.OPEN) return;
+      state.ws.send(JSON.stringify(req));
     }
 
-    // --- PLATFORM PREFERENCE ---
-    let selectedPlatform = null;
+    function subscribeBalanceOnce(){
+      if(state.subs.balance.subscribed || state.subs.balance.subscribing) return;
+      state.subs.balance.subscribing=true;
+      send({balance:1, subscribe:1});
+      log("Balance stream subscribed (guarded).","info");
+    }
+    function subscribePOCOnce(){
+      if(state.subs.poc.subscribed || state.subs.poc.subscribing) return;
+      state.subs.poc.subscribing=true;
+      send({proposal_open_contract:1, subscribe:1});
+      log("Open-contract stream subscribed (guarded).","info");
+    }
+    function subscribeTicksOnce(){
+      if(state.subs.ticks.subscribed || state.subs.ticks.subscribing) return;
+      state.subs.ticks.subscribing=true;
+      send({ticks:SYMBOL, subscribe:1});
+      log("Tick stream subscribed (guarded).","info");
+    }
 
-    function applyPlatformMode(mode){
-      document.body.className = "";
-      document.body.classList.add(`mode-${mode}`);
-      localStorage.setItem("preferredPlatform", mode);
-      selectedPlatform = mode;
+    function syncStateFromUI(){
+      state.stakeAmount=parseFloat(stakeInput.value)||1.00;
+      state.maxTradesPerSignal=parseInt(maxTradesInput.value)||2;
+      state.balanceMin=parseFloat(balanceMinInput.value)||0.90;
+      state.balanceMax=parseFloat(balanceMaxInput.value)||999999;
+      state.cooldownDuration=(parseFloat(cooldownInput.value)||3)*60;
+      state.maxLossStreak=parseInt(maxLossStreakInput.value)||2;
+      state.dailyLossCapPercent=parseFloat(dailyCapInput.value)||5;
+      state.autoScaleEnabled=!!autoScaleToggle.checked;
 
-      document.querySelectorAll(".preference-card").forEach(card=>{
-        card.classList.toggle("selected", card.getAttribute("data-mode") === mode);
+      state.tpQuickUSD=parseFloat(tpQuickInput.value)||0.90;
+      state.tpCleanUSD=parseFloat(tpCleanInput.value)||1.20;
+      state.stopLossUSD=parseFloat(slInput.value)||0.20;
+    }
+
+    function applyLockState(){
+      const editable = (!state.safeMode && !state.settingsLocked);
+      const inputs=[stakeInput,maxTradesInput,balanceMinInput,balanceMaxInput,cooldownInput,maxLossStreakInput,dailyCapInput,autoScaleToggle,tpQuickInput,tpCleanInput,slInput];
+      inputs.forEach(i=> i.disabled = true);
+      if(editable) inputs.forEach(i=> i.disabled = false);
+
+      unlockBtn.textContent = state.safeMode ? "Safe Mode ON (Locked) ✅" : (state.settingsLocked ? "Unlock Settings 🔒" : "Settings Unlocked 🔓");
+      unlockBtn.classList.toggle("bg-green-500", state.safeMode);
+      unlockBtn.classList.toggle("bg-blue-500", !state.safeMode && state.settingsLocked);
+      unlockBtn.classList.toggle("bg-red-500", !state.safeMode && !state.settingsLocked);
+    }
+
+    function updateUI(){
+      statusDisplay.safeMode.textContent = state.safeMode ? "ON" : "OFF";
+      statusDisplay.active.textContent = state.activeContract ? "TRUE" : "FALSE";
+      statusDisplay.level.textContent = `${state.bias ? state.bias.toUpperCase() : "N/A"} | ${state.breakoutLevel.toFixed(4)}`;
+      statusDisplay.balance.textContent = `$${state.currentBalance.toFixed(2)}`;
+      statusDisplay.trades.textContent = `${state.tradeCounter}/${state.maxTradesPerSignal}`;
+      statusDisplay.lockedProfit.textContent = state.lockedProfitLevel;
+      statusDisplay.tier.textContent = state.currentTier.name;
+      statusDisplay.cap.textContent = state.dailyLossCapTriggered ? "CAPPED" : "OK";
+      statusDisplay.block.textContent = state.blockReason;
+
+      const profit = state.activeContract ? (parseFloat(state.activeContract.profit)||0) : 0;
+      statusDisplay.currentProfit.textContent = `$${profit.toFixed(2)}`;
+
+      toggleBtn.textContent = state.isBotRunning ? "Stop Bot (Running)" : "Start Bot";
+      toggleBtn.className = state.isBotRunning
+        ? "w-full py-3 text-lg ios-btn-primary bg-red-500 hover:bg-red-600 text-white"
+        : "w-full py-3 text-lg ios-btn-primary bg-blue-500 hover:bg-blue-600 text-white";
+    }
+
+    function detectTier(){
+      const b=state.currentBalance;
+      if(b>=TIER_CONFIGS.STANDARD.min) state.currentTier=TIER_CONFIGS.STANDARD;
+      else if(b>=TIER_CONFIGS.LOW.min && b<=TIER_CONFIGS.LOW.max) state.currentTier=TIER_CONFIGS.LOW;
+      else if(b>=TIER_CONFIGS.MICRO.min && b<=TIER_CONFIGS.MICRO.max) state.currentTier=TIER_CONFIGS.MICRO;
+      else state.currentTier=TIER_CONFIGS.BLOCKED;
+    }
+
+    function applyTierIfSafeMode(){
+      if(!state.safeMode) return;
+      const t=state.currentTier;
+      state.maxTradesPerSignal = t.maxTradesPerSignal;
+      state.cooldownDuration = t.cooldownDuration;
+      state.maxLossStreak = t.maxLossStreak;
+      state.dailyLossCapPercent = t.dailyLossCapPercent;
+    }
+
+    function requestH4Candles(){
+      send({
+        ticks_history: SYMBOL,
+        end: "latest",
+        count: 3,
+        granularity: 14400,
+        style: "candles"
       });
+    }
 
-      document.body.classList.remove("overflow-hidden");
-      log(`Platform mode set: ${mode.toUpperCase()}`, "action");
+    function detectH4Structure(candle){
+      const close=parseFloat(candle.close), open=parseFloat(candle.open), high=parseFloat(candle.high), low=parseFloat(candle.low);
+      const range=Math.max(1e-9, high-low);
+      const body=Math.abs(close-open);
+      const bodyRatio=body/range;
+
+      const bullish=(close>open) && (close>=open + range*0.6);
+      const bearish=(close<open) && (close<=open - range*0.6);
+
+      let newBias="", newLevel=0;
+      if(bullish){ newBias="bullish"; newLevel=high; }
+      if(bearish){ newBias="bearish"; newLevel=low; }
+
+      if(newBias && (newBias!==state.bias || newLevel!==state.breakoutLevel)){
+        state.bias=newBias;
+        state.breakoutLevel=newLevel;
+        state.breakoutStrength=Math.min(1,Math.max(0,bodyRatio));
+        state.tradeCounter=0;
+        state.entryInProgress=false;
+        log(`H4 Breakout: ${newBias.toUpperCase()} | Level ${newLevel.toFixed(4)} | Strength ${(state.breakoutStrength*100).toFixed(0)}%`,"success");
+      }
+    }
+
+    function validRetestTick(price){
+      const tol=Math.max(0.0003, price*0.00008);
+      return state.bias && state.breakoutLevel && (Math.abs(price-state.breakoutLevel)<=tol);
+    }
+
+    function isCleanBreakout(){ return state.breakoutStrength>=0.70; }
+
+    function takeTrade(bias){
+      if(!state.ws || state.ws.readyState!==WebSocket.OPEN) return;
+      if(state.entryInProgress) return;
+
+      state.entryInProgress=true;
+      const contract_type = (bias==="bullish") ? "CALL" : "PUT";
+
+      const duration = 1;
+      const duration_unit = "t";
+
+      const proposalReq = {
+        proposal: 1,
+        amount: state.stakeAmount,
+        basis: "stake",
+        contract_type,
+        currency: "USD",
+        duration,
+        duration_unit,
+        symbol: SYMBOL
+      };
+
+      const handler = (evt) => {
+        const data = JSON.parse(evt.data);
+        if(data.error){
+          log(`Proposal error: ${data.error.message}`,"error");
+          state.entryInProgress=false;
+          state.ws.removeEventListener("message", handler);
+          return;
+        }
+        if(data.msg_type==="proposal" && data.proposal?.id){
+          send({ buy: data.proposal.id, price: state.stakeAmount });
+          log(`BUY sent (${contract_type}) stake $${state.stakeAmount.toFixed(2)}`,"action");
+          state.ws.removeEventListener("message", handler);
+        }
+      };
+
+      state.ws.addEventListener("message", handler);
+      send(proposalReq);
+    }
+
+    function closePosition(contractId, reason){
+      if(!contractId) return;
+      send({ sell: contractId, price: 0 });
+      log(`Close requested: ${reason}`,"warn");
+    }
+
+    function runTradeManagement(){
+      if(!state.activeContract) return;
+      const profit=parseFloat(state.activeContract.profit||0);
+
+      const target = isCleanBreakout() ? state.tpCleanUSD : state.tpQuickUSD;
+      const stop = -Math.abs(state.stopLossUSD);
+
+      if(profit >= 0.10) state.lockedProfitLevel="BE Lock (soft)";
+      if(profit >= 0.20) state.lockedProfitLevel="Partial Lock (soft)";
+
+      if(profit >= target){
+        closePosition(state.activeContract.contract_id, `TP Hit (+$${profit.toFixed(2)})`);
+      } else if(profit <= stop){
+        closePosition(state.activeContract.contract_id, `SL Hit ($${profit.toFixed(2)})`);
+      }
+    }
+
+    function handleTradeClose(c){
+      const buy=parseFloat(c.buy_price||0);
+      const sell=parseFloat(c.sell_price||0);
+      const pnl=sell-buy;
+
+      state.dailyProfitLossUSD += pnl;
+      state.activeContract=null;
+      state.activeContractId=null;
+      state.lockedProfitLevel="None";
+      state.entryInProgress=false;
+
+      if(pnl<0){
+        state.lossStreak++;
+        log(`TRADE CLOSED LOSS: $${pnl.toFixed(2)} | Streak ${state.lossStreak}/${state.maxLossStreak}`,"error");
+      } else {
+        state.lossStreak=0;
+        log(`TRADE CLOSED PROFIT: +$${pnl.toFixed(2)}`,"success");
+      }
+
+      if(state.lossStreak>=state.maxLossStreak){
+        state.cooldown=true;
+        log(`Cooldown started: ${(state.cooldownDuration/60).toFixed(0)} min`,"warn");
+        setTimeout(()=>{
+          state.cooldown=false;
+          state.lossStreak=0;
+          log("Cooldown finished. Ready.","info");
+          updateUI();
+        }, state.cooldownDuration*1000);
+      }
+    }
+
+    function handleMessage(data){
+      if(data?.error?.message?.includes("already subscribed to balance")){
+        state.subs.balance.subscribed=true; state.subs.balance.subscribing=false;
+        log("Balance already subscribed (ignored).","warn");
+        return;
+      }
+
+      if(data.msg_type==="authorize" && data.authorize){
+        log(`Authorized: ${data.authorize.loginid}`,"success");
+        state.currentBalance=parseFloat(data.authorize.balance||0);
+        if(!state.initialDailyBalance) state.initialDailyBalance=state.currentBalance;
+
+        detectTier(); applyTierIfSafeMode();
+
+        subscribeBalanceOnce();
+        subscribePOCOnce();
+        subscribeTicksOnce();
+
+        startLogicLoop();
+        updateUI();
+        return;
+      }
+
+      if(data.msg_type==="balance" && data.balance){
+        state.subs.balance.subscribed=true; state.subs.balance.subscribing=false;
+        state.currentBalance=parseFloat(data.balance.balance);
+        detectTier(); applyTierIfSafeMode();
+        updateUI();
+        return;
+      }
+
+      if(data.msg_type==="ticks_history" && data.candles?.length){
+        const h4 = data.candles[data.candles.length-1];
+        detectH4Structure(h4);
+        return;
+      }
+
+      if(data.msg_type==="tick" && data.tick){
+        state.subs.ticks.subscribed=true; state.subs.ticks.subscribing=false;
+        const px=parseFloat(data.tick.quote);
+
+        if(state.isBotRunning && !state.cooldown && !state.dailyLossCapTriggered && !state.activeContract && state.bias && validRetestTick(px)){
+          if(state.tradeCounter < state.maxTradesPerSignal && !state.entryInProgress){
+            log(`Retest confirmed near ${state.breakoutLevel.toFixed(4)}. Taking trade.`,"warn");
+            takeTrade(state.bias);
+          }
+        }
+
+        if(state.activeContract) runTradeManagement();
+        updateUI();
+        return;
+      }
+
+      if(data.msg_type==="proposal_open_contract" && data.proposal_open_contract){
+        state.subs.poc.subscribed=true; state.subs.poc.subscribing=false;
+        const c=data.proposal_open_contract;
+
+        if(state.activeContractId && c.contract_id && c.contract_id!==state.activeContractId) return;
+
+        state.activeContract=c;
+        state.entryInProgress = !!c.contract_id;
+
+        if(c.is_sold){
+          state.tradeCounter++;
+          handleTradeClose(c);
+        }
+        updateUI();
+        return;
+      }
+
+      if(data.msg_type==="buy" && data.buy){
+        state.activeContractId=data.buy.contract_id;
+        log(`TRADE BOUGHT: Contract ${state.activeContractId}`,"success");
+        state.entryInProgress=true;
+        updateUI();
+        return;
+      }
+    }
+
+    function connect(){
+      if(state.ws && (state.ws.readyState===WebSocket.OPEN || state.ws.readyState===WebSocket.CONNECTING)) return;
+
+      state.apiToken = tokenInput.value.trim();
+      if(!state.apiToken){ log("API Token is required.","error"); return; }
+
+      log("Connecting to Deriv API...","info");
+      state.ws=new WebSocket(API_URL);
+
+      state.ws.onopen=()=>{
+        resetSubs();
+        statusDisplay.connection.textContent="CONNECTED";
+        statusDisplay.connection.className="text-status-active status-value";
+        send({ authorize: state.apiToken });
+      };
+
+      state.ws.onmessage=(evt)=>{
+        const data=JSON.parse(evt.data);
+        if(data.error){
+          log(`API Error: ${data.error.message}`,"error");
+          if(/invalid token/i.test(data.error.message)) stopBot("Invalid token.");
+          return;
+        }
+        handleMessage(data);
+      };
+
+      state.ws.onclose=()=>{
+        statusDisplay.connection.textContent="DISCONNECTED";
+        statusDisplay.connection.className="text-status-error status-value";
+        state.ws=null;
+        resetSubs();
+        if(state.isBotRunning){ stopLogicLoop(); state.isBotRunning=false; }
+        updateUI();
+        log("Connection closed.","warn");
+      };
+    }
+
+    function startLogicLoop(){
+      if(state.logicInterval) return;
+      mainLogic();
+      state.logicInterval=setInterval(mainLogic, 60000);
+      log("Main logic loop started (60s).","info");
+    }
+
+    function stopLogicLoop(){
+      if(state.logicInterval){ clearInterval(state.logicInterval); state.logicInterval=null; }
+    }
+
+    function mainLogic(){
+      if(!state.isBotRunning) return;
+
+      syncStateFromUI();
+      detectTier();
+      applyTierIfSafeMode();
+
+      const minBal = state.safeMode ? TIER_CONFIGS.MICRO.min : state.balanceMin;
+      const maxBal = state.balanceMax;
+
+      if(state.currentBalance < minBal){ state.blockReason=`BLOCKED (Min $${minBal.toFixed(2)})`; updateUI(); return; }
+      if(state.currentBalance > maxBal){ state.blockReason=`BLOCKED (Max $${maxBal.toFixed(2)})`; updateUI(); return; }
+
+      if(state.dailyLossCapTriggered){ state.blockReason="Daily Loss Cap Triggered"; updateUI(); return; }
+      if(state.cooldown){ state.blockReason="Cooldown Active"; updateUI(); return; }
+      if(state.activeContract){ state.blockReason="Trade Active - Managing"; updateUI(); return; }
+      if(state.tradeCounter >= state.maxTradesPerSignal){ state.blockReason="Trade Limit Reached for Signal"; updateUI(); return; }
+
+      state.blockReason = state.bias ? "Armed: waiting retest on ticks" : "Waiting H4 breakout";
+      requestH4Candles();
+      updateUI();
+    }
+
+    function toggleBot(){
+      syncStateFromUI();
+      if(!state.isBotRunning){
+        state.isBotRunning=true;
+        log(`Bot started. SafeMode: ${state.safeMode?"ON":"OFF"} | Stake: $${state.stakeAmount.toFixed(2)}`,"info");
+        connect();
+        startLogicLoop();
+      } else {
+        stopBot("Manual stop.");
+      }
+      updateUI();
+    }
+
+    function stopBot(reason){
+      state.isBotRunning=false;
+      stopLogicLoop();
+      state.activeContract=null;
+      state.activeContractId=null;
+      state.entryInProgress=false;
+      state.tradeCounter=0;
+      log(`Bot stopped: ${reason}`,"warn");
+      if(state.ws && state.ws.readyState===WebSocket.OPEN) state.ws.close();
+      state.ws=null;
+      resetSubs();
+      updateUI();
     }
 
     function showPreferenceModal(){
-      prefOverlay.classList.remove("hidden");
-      prefOverlay.classList.add("flex");
-      document.body.classList.add("overflow-hidden");
-
-      prefContinueBtn.disabled = true;
-      prefContinueBtn.classList.add("opacity-50","cursor-not-allowed");
+      const modal=document.getElementById("preference-modal-overlay");
+      const btn=document.getElementById("preference-continue-btn");
+      modal.classList.remove("hidden");
+      btn.disabled=true; btn.classList.add("opacity-50","cursor-not-allowed");
 
       document.querySelectorAll(".preference-card").forEach(card=>{
-        card.classList.remove("selected");
-        card.onclick = ()=>{
+        card.onclick=()=>{
           document.querySelectorAll(".preference-card").forEach(c=>c.classList.remove("selected"));
           card.classList.add("selected");
-          const mode = card.getAttribute("data-mode");
-
-          prefContinueBtn.disabled = false;
-          prefContinueBtn.classList.remove("opacity-50","cursor-not-allowed");
-          prefContinueBtn.onclick = ()=>{
-            applyPlatformMode(mode);
-            prefOverlay.classList.add("hidden");
-            prefOverlay.classList.remove("flex");
+          const mode=card.getAttribute("data-mode");
+          btn.disabled=false; btn.classList.remove("opacity-50","cursor-not-allowed");
+          btn.onclick=()=>{
+            document.body.className="";
+            document.body.classList.add(`mode-${mode}`);
+            localStorage.setItem("preferredPlatform",mode);
+            modal.classList.add("hidden");
+            log(`Platform set: ${mode.toUpperCase()}`,"info");
           };
         };
       });
     }
 
-    // --- START/STOP ---
-    function startBot(){
-      ensureDailyReset();
-
-      S.apiToken = tokenInput.value.trim();
-      if(!S.apiToken){
-        log("API token required.", "error");
+    function handleUnlock(){
+      if(state.safeMode){
+        log("Unlock blocked: Turn Safe Mode OFF first.","error");
+        showModal("Safe Mode ON", "Turn Safe Mode OFF first. Manual editing is only allowed when Safe Mode is OFF.", false, null, null);
         return;
       }
-      S.bot_enabled = true;
-
-      // Reset day start balance will be set on first balance callback
-      S.start_balance = 0;
-
-      updateUI("Starting…");
-      connect();
+      showModal("Unlock Settings", "Type UNLOCK to enable manual editing.", true, ()=>{
+        state.settingsLocked=false;
+        applyLockState();
+        log("Settings unlocked. Manual values now editable.","warn");
+      }, ()=>{});
     }
 
-    function stopBot(){
-      S.bot_enabled = false;
-      updateUI("Stopped", true);
-      try{ if(S.ws) S.ws.close(); }catch(e){}
-      log("Bot stopped.", "warn");
+    function handleSafeModeToggle(){
+      if(safeModeToggle.checked){
+        state.safeMode=true;
+        state.settingsLocked=true;
+        safeModeIndicator.textContent="Safe Mode: ON";
+        safeModeIndicator.classList.remove("bg-red-500"); safeModeIndicator.classList.add("bg-green-500");
+        log("Safe Mode ENABLED. Settings forced locked.","success");
+      } else {
+        showModal("WARNING: Safe Mode OFF", "Safe Mode OFF uses ONLY your manual values. Continue?", false, ()=>{
+          state.safeMode=false;
+          safeModeIndicator.textContent="Safe Mode: OFF";
+          safeModeIndicator.classList.remove("bg-green-500"); safeModeIndicator.classList.add("bg-red-500");
+          log("Safe Mode DISABLED. You may unlock to edit manual values.","warn");
+          applyLockState();
+          updateUI();
+        }, ()=>{
+          safeModeToggle.checked=true;
+        });
+      }
+      applyLockState();
+      updateUI();
     }
 
-    function toggleBot(){
-      if(S.bot_enabled) stopBot();
-      else startBot();
-    }
+    toggleBtn.addEventListener("click", toggleBot);
+    unlockBtn.addEventListener("click", handleUnlock);
+    safeModeToggle.addEventListener("change", handleSafeModeToggle);
+    document.getElementById("change-preference-btn").addEventListener("click", showPreferenceModal);
 
-    // --- INIT ---
     document.addEventListener("DOMContentLoaded", ()=>{
-      // preference
-      selectedPlatform = localStorage.getItem("preferredPlatform");
-      if(selectedPlatform) applyPlatformMode(selectedPlatform);
-      else showPreferenceModal();
+      const pref=localStorage.getItem("preferredPlatform");
+      if(pref){ document.body.classList.add(`mode-${pref}`); } else { showPreferenceModal(); }
 
-      changePrefBtn.addEventListener("click", showPreferenceModal);
-      toggleBtn.addEventListener("click", toggleBot);
-      unlockBtn.addEventListener("click", handleUnlock);
-      safeModeToggle.addEventListener("change", handleSafeMode);
+      stakeInput.value=state.stakeAmount.toFixed(2);
+      maxTradesInput.value=state.maxTradesPerSignal;
+      balanceMinInput.value=state.balanceMin.toFixed(2);
+      balanceMaxInput.value=state.balanceMax.toFixed(0);
+      cooldownInput.value=(state.cooldownDuration/60).toFixed(0);
+      maxLossStreakInput.value=state.maxLossStreak;
+      dailyCapInput.value=state.dailyLossCapPercent;
 
-      // initial UI
-      updateUI("Awaiting Start");
+      tpQuickInput.value=state.tpQuickUSD.toFixed(2);
+      tpCleanInput.value=state.tpCleanUSD.toFixed(2);
+      slInput.value=state.stopLossUSD.toFixed(2);
+
+      autoScaleToggle.checked=false;
+
+      applyLockState();
+      updateUI();
+      log("Initialization complete.","info");
     });
   </script>
 </body>
-</html>
+</html>;
+       
