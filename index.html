@@ -406,15 +406,16 @@
         
         // --- BALANCE TIER CONFIGURATION ---
         const TIER_CONFIGS = {
+            // UPDATED: Min balance check changed from $2.00 to $0.90
             BLOCKED: {
-                min: 0.00, max: 1.99, name: "BLOCKED (Min $2)",
+                min: 0.00, max: 0.89, name: "BLOCKED (Min $0.90)",
                 maxTradesPerSignal: 0, cooldownDuration: 0, 
                 maxLossStreak: 999, dailyLossCapPercent: 100.0,
                 breakEvenLockUSD: 999, partialLockUSD: 999, trailingStartPercent: 999, 
                 trailingExitDrawdown: 1.0, isBlocked: true
             },
             MICRO: {
-                min: 2.00, max: 4.99, name: "MICRO MODE ($2-$4.99)",
+                min: 0.90, max: 4.99, name: "MICRO MODE ($0.90-$4.99)", // UPDATED: Min value changed to 0.90
                 maxTradesPerSignal: 1, cooldownDuration: 300, // 5 min
                 maxLossStreak: 1, dailyLossCapPercent: 3.0,
                 breakEvenLockUSD: 0.10, partialLockUSD: 0.20, trailingStartPercent: 30.0, // 30% of stake
@@ -720,6 +721,7 @@
                 // 2. Balance Tier Check (Must not be BLOCKED)
                 else if (state.currentTier.isBlocked || state.currentBalance < TIER_CONFIGS.MICRO.min) {
                     checksPassed = false;
+                    // UPDATED: Show new minimum balance in log
                     failureReason = `Balance Tier ${state.currentTier.name} (Balance $${state.currentBalance.toFixed(2)})`;
                 }
                 // 3. Loss Caps/SL Logic Active Check (Implicitly true if Tier is detected and not BLOCKED)
@@ -761,7 +763,7 @@
         }
 
 
-        // --- BALANCE TIER LOGIC (Unchanged) ---
+        // --- BALANCE TIER LOGIC (Changed for 0.90 minimum) ---
         
         function detectBalanceTier() {
             let newTier = TIER_CONFIGS.BLOCKED;
@@ -770,7 +772,9 @@
                 newTier = TIER_CONFIGS.STANDARD;
             } else if (state.currentBalance >= TIER_CONFIGS.LOW.min && state.currentBalance <= TIER_CONFIGS.LOW.max) {
                 newTier = TIER_CONFIGS.LOW;
-            } else if (state.currentBalance >= TIER_CONFIGS.MICRO.min && state.currentBalance <= TIER_CONFIGS.MICRO.max) {
+            } 
+            // UPDATED: Changed TIER_CONFIGS.MICRO.min from 2.00 to 0.90
+            else if (state.currentBalance >= TIER_CONFIGS.MICRO.min && state.currentBalance <= TIER_CONFIGS.MICRO.max) {
                 newTier = TIER_CONFIGS.MICRO;
             } else {
                 newTier = TIER_CONFIGS.BLOCKED;
@@ -779,7 +783,8 @@
             if (newTier.name !== state.currentTier.name) {
                 log(`Balance tier changed from ${state.currentTier.name} to ${newTier.name}`, 'action');
                 if (newTier.isBlocked) {
-                    log(`Trading BLOCKED: Balance $${state.currentBalance.toFixed(2)} is below minimum $2.00.`, 'error');
+                    // UPDATED: Show new minimum balance in log message
+                    log(`Trading BLOCKED: Balance $${state.currentBalance.toFixed(2)} is below minimum $${TIER_CONFIGS.MICRO.min.toFixed(2)}.`, 'error');
                 } else {
                     log(`Risk auto-scaled to match ${newTier.name} safety rules.`, 'warn');
                 }
@@ -844,6 +849,10 @@
             statusDisplay.cap.textContent = state.dailyLossCapTriggered ? 'CAPPED' : 'OK';
             statusDisplay.cap.className = state.dailyLossCapTriggered ? 'status-value text-status-error' : 'status-value text-status-active';
             
+            // Block Reason Display (UPDATED to reflect $0.90 minimum)
+            if (state.currentTier.isBlocked) {
+                state.blockReason = TIER_CONFIGS.BLOCKED.name;
+            }
             statusDisplay.block.textContent = state.blockReason;
             statusDisplay.block.className = state.blockReason === 'Awaiting Trade' || state.blockReason === 'Ready' ? 
                                             'status-value text-status-active' : 'status-value text-status-warn';
@@ -1028,9 +1037,10 @@
             
             // --- SAFETY VALIDATION CHECKS ---
             
-            // 1. Balance Block Check (Min $2)
+            // 1. Balance Block Check (Min $0.90)
             if (tier.isBlocked) {
-                state.blockReason = tier.name;
+                // UPDATED: Block reason now reflects the new $0.90 minimum
+                state.blockReason = TIER_CONFIGS.BLOCKED.name;
                 if (state.isBotRunning) stopBot(); 
                 return;
             }
@@ -1290,4 +1300,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
