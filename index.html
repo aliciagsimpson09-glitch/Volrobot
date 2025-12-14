@@ -239,7 +239,7 @@
                         Safe Mode is currently DISABLED.
                     </div>
 
-                    <!-- Auto-resume row (added, minimal) -->
+                    <!-- Auto-resume row -->
                     <div class="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
                         <div class="flex flex-col sm:flex-row sm:items-center">
                             <span class="text-sm font-medium text-slate-300 mr-4">Auto-resume after cooldown:</span>
@@ -258,7 +258,7 @@
                 </div>
             </div>
 
-            <!-- Chart Card (NEW - merged in) -->
+            <!-- Chart Card -->
             <div class="card">
                 <div class="flex items-center justify-between mb-3">
                     <h2 class="text-xl font-semibold text-sky-400">Live Chart</h2>
@@ -294,7 +294,7 @@
                                 type="button" title="Show Token">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M3.988 5.82a1.01 1.01 0 0 0-.083.125m3.668-.125c.112-.34.238-.667.38-.985a24.144 24.144 0 0 1 8.878 0c.142.318.268.645.38.985M3.988 5.82a1.01 1.01 0 0 1-.083.125m3.668-.125c.112-.34.238-.667.38-.985a24.144 24.144 0 0 1 8.878 0c.142.318.268.645.38.985m-.12 11.082l-3.321-3.321a3.5 3.5 0 0 0-4.95-.99L3.988 5.82M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                      d="M3.988 5.82a1.01 1.01 0 0 0-.083.125m3.668-.125c.112-.34.238-.667.38-.985a24.144 24.144 0 0 1 8.878 0c.142.318.268.645.38.985m3.668-.125c.112-.34.238-.667.38-.985a24.144 24.144 0 0 1 8.878 0c.142.318.268.645.38.985m-.12 11.082l-3.321-3.321a3.5 3.5 0 0 0-4.95-.99L3.988 5.82M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                             </svg>
                         </button>
                     </div>
@@ -327,7 +327,7 @@
                 </div>
             </div>
 
-            <!-- Gemini Insight Card (kept exactly as you had it) -->
+            <!-- Gemini Insight Card -->
             <div class="card">
                 <h2 class="text-xl font-semibold mb-4 text-emerald-400">Gemini Market Insights ✨</h2>
 
@@ -360,7 +360,7 @@
    CONFIG
 =========================== */
 const API_URL = 'wss://ws.binaryws.com/websockets/v3?app_id=1089';
-const SYMBOL  = 'R_100'; // Volatility 100 Index
+const SYMBOL  = 'R_100';
 
 /* ===========================
    MODE DEFAULTS
@@ -370,11 +370,10 @@ const modeDefaults = {
     stake: 1.00,
     duration: 5,
     durationUnit: 't',
-    tp: 0.34,          // ✅ your quick tap-out default
+    tp: 0.34,
     sl: 10.00,
     maxTrades: 1,
     cooldown: 30,
-    // momentum detection tuning
     tickBufferSize: 6,
     momentumThreshold: 0.015
   },
@@ -411,12 +410,10 @@ const appState = {
   is_sellable: 0,
   isSelling: false,
 
-  // mode & lock
   mode: 'SCALP',
   isSettingsLocked: true,
   isSafeMode: false,
 
-  // trading params (from mode/defaults/UI)
   stakeAmount: 1.00,
   duration: 5,
   durationUnit: 't',
@@ -425,32 +422,36 @@ const appState = {
   maxTradesPerSignal: 1,
   cooldownDuration: 30,
 
-  // NEW: momentum detection
   tickBuffer: [],
   tickBufferSize: 6,
   momentumThreshold: 0.015,
   lastTick: null,
 
-  // NEW: cooldown control (auto-resume)
   cooldownUntil: 0,
   autoResume: true,
 
-  // NEW: H4 trend filter (EMA20/EMA50)
+  // proposal/buy flow state
+  pendingProposalId: null,
+  pendingProposalAt: 0,
+
+  // remember last direction (CALL / PUT)
+  lastSignal: null,
+
   trend: {
-    enabled: true,
-    status: "LOADING",       // LOADING | BULL | BEAR | NEUTRAL | ERROR
-    tfSeconds: 14400,        // 4H
+    enabled: false,          // ✅ will be enabled ONLY in MOMENTUM mode
+    status: "OFF",           // OFF | LOADING | BULL | BEAR | NEUTRAL | ERROR
+    tfSeconds: 14400,
     emaFast: 20,
     emaSlow: 50,
     lastUpdated: 0,
-    refreshMs: 60_000,
+    refreshMs: 60000,
     ema20: null,
     ema50: null
   }
 };
 
 /* ===========================
-   DOM ELEMENTS
+   DOM
 =========================== */
 const dom = {
   modeSelect: document.getElementById('mode-select'),
@@ -482,25 +483,21 @@ const dom = {
   maxTradesPerSignalInput: document.getElementById('maxTradesPerSignal'),
   cooldownDurationInput: document.getElementById('cooldownDuration'),
 
-  // Trend + Chart
   h4TrendDisplay: document.getElementById('h4-trend-display'),
   chartStatus: document.getElementById('chart-status'),
 
-  // Gemini
   analyzeMarketBtn: document.getElementById('analyze-market-btn'),
   assessRiskBtn: document.getElementById('assess-risk-btn'),
   geminiOutput: document.getElementById('gemini-output'),
   geminiLoadingIndicator: document.getElementById('gemini-loading-indicator'),
   geminiSources: document.getElementById('gemini-sources'),
 
-  // API UI extras
   loginStatusBadge: document.getElementById('login-status-badge'),
   toggleVisibilityBtn: document.getElementById('toggle-visibility-btn'),
   tokenErrorMessage: document.getElementById('token-error-message'),
   apiUrlText: document.getElementById('api-url-text'),
   copyApiUrlBtn: document.getElementById('copy-api-url-btn'),
 
-  // auto-resume
   autoResumeToggle: document.getElementById('autoresume-toggle'),
   autoResumeIndicator: document.getElementById('autoresume-indicator'),
 };
@@ -530,9 +527,7 @@ const updateLoginBadge = (statusText) => {
 };
 
 const setupConnectionObserver = () => {
-  const observer = new MutationObserver(() => {
-    updateLoginBadge(dom.connectionStatus.textContent);
-  });
+  const observer = new MutationObserver(() => updateLoginBadge(dom.connectionStatus.textContent));
   observer.observe(dom.connectionStatus, { childList: true, subtree: true, characterData: true });
 };
 
@@ -581,6 +576,8 @@ const updateTrendUI = () => {
   dom.h4TrendDisplay.textContent = t;
 
   let cls = 'bg-slate-600 text-slate-300';
+  if (t === 'OFF') cls = 'bg-slate-700 text-slate-200';
+  if (t === 'LOADING') cls = 'bg-slate-600 text-slate-200';
   if (t === 'BULL') cls = 'bg-emerald-600 text-white';
   if (t === 'BEAR') cls = 'bg-red-600 text-white';
   if (t === 'NEUTRAL') cls = 'bg-yellow-600 text-white';
@@ -649,12 +646,26 @@ document.querySelectorAll('input, select').forEach(input => {
 /* ===========================
    MODE LOGIC
 =========================== */
+function applyTrendMode() {
+  // ✅ Trend filter only for MOMENTUM
+  appState.trend.enabled = (appState.mode === 'MOMENTUM');
+  if (!appState.trend.enabled) {
+    appState.trend.status = "OFF";
+    updateTrendUI();
+    return;
+  }
+  // MOMENTUM: start loading + refresh
+  appState.trend.status = "LOADING";
+  appState.trend.lastUpdated = 0;
+  updateTrendUI();
+  if (appState.ws && appState.isAuthenticated) requestH4Candles();
+}
+
 const loadDefaults = (mode) => {
   const d = modeDefaults[mode];
   if (!d) return;
 
   appState.mode = mode;
-
   appState.stakeAmount = d.stake;
   appState.duration = d.duration;
   appState.durationUnit = d.durationUnit;
@@ -662,10 +673,10 @@ const loadDefaults = (mode) => {
   appState.slUSD = d.sl;
   appState.maxTradesPerSignal = d.maxTrades;
   appState.cooldownDuration = d.cooldown;
-
   appState.tickBufferSize = d.tickBufferSize;
   appState.momentumThreshold = d.momentumThreshold;
 
+  applyTrendMode();
   updateUI();
 };
 
@@ -699,12 +710,13 @@ const copyApiUrl = () => {
 };
 
 /* ===========================
-   CHART (Lightweight Charts)
+   CHART
 =========================== */
 let chart = null;
 let series = null;
 let ro = null;
 const MAX_POINTS = 500;
+const chartData = [];
 
 function initChart() {
   const container = document.getElementById('chart-container');
@@ -716,30 +728,19 @@ function initChart() {
     return;
   }
 
-  // clean if re-init
   if (chart) { try { chart.remove(); } catch (_) {} }
 
   chart = LightweightCharts.createChart(container, {
     width: container.clientWidth,
     height: container.clientHeight,
-    layout: {
-      background: { color: '#0b1220' },
-      textColor: '#e2e8f0',
-    },
-    grid: {
-      vertLines: { color: '#243244' },
-      horzLines: { color: '#243244' },
-    },
+    layout: { background: { color: '#0b1220' }, textColor: '#e2e8f0' },
+    grid: { vertLines: { color: '#243244' }, horzLines: { color: '#243244' } },
     rightPriceScale: { borderColor: '#334155' },
     timeScale: { borderColor: '#334155', timeVisible: true, secondsVisible: true },
     crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
   });
 
-  series = chart.addLineSeries({
-    lineWidth: 2,
-    priceLineVisible: false,
-    lastValueVisible: true,
-  });
+  series = chart.addLineSeries({ lineWidth: 2, priceLineVisible: false, lastValueVisible: true });
 
   dom.chartStatus.textContent = "READY";
   dom.chartStatus.className = "pill bg-emerald-700 text-white";
@@ -752,14 +753,12 @@ function initChart() {
   ro.observe(container);
 }
 
-const chartData = [];
 function pushChartPoint(price) {
-  if (!series) return;
-  const t = Math.floor(Date.now() / 1000);
+  if (!series || !chart) return;
+  const t = Math.floor(Date.now() / 1000); // epoch seconds
   chartData.push({ time: t, value: Number(price) });
   while (chartData.length > MAX_POINTS) chartData.shift();
   series.setData(chartData);
-  chart.timeScale().fitContent();
 }
 
 /* ===========================
@@ -786,6 +785,7 @@ function trendClassify(emaFast, emaSlow) {
 
 function requestH4Candles() {
   if (!appState.ws || !appState.isAuthenticated) return;
+  if (!appState.trend.enabled) return;
   appState.ws.send(JSON.stringify({
     candles: SYMBOL,
     granularity: appState.trend.tfSeconds,
@@ -802,9 +802,60 @@ function maybeRefreshTrend() {
   requestH4Candles();
 }
 
-function trendAllowsCall() {
-  if (!appState.trend.enabled) return true;
-  return appState.trend.status === "BULL"; // CALL only
+// ✅ trend gate only in MOMENTUM mode
+function trendAllowsTrade(contractType) {
+  if (!appState.trend.enabled) return true; // SCALP ignores trend completely
+  if (appState.trend.status === "LOADING") return false;
+  if (appState.trend.status === "ERROR") return false;
+  if (appState.trend.status === "NEUTRAL") return false;
+
+  if (contractType === "CALL") return appState.trend.status === "BULL";
+  if (contractType === "PUT")  return appState.trend.status === "BEAR";
+  return false;
+}
+
+/* ===========================
+   CLEAN BREAKOUT + SIGNAL DETECTION
+=========================== */
+// returns ratio of monotonic moves in desired direction
+function directionalStrength(contractType) {
+  const buf = appState.tickBuffer;
+  if (buf.length < 3) return 0;
+
+  let good = 0;
+  let total = 0;
+
+  for (let i = 1; i < buf.length; i++) {
+    const diff = buf[i] - buf[i - 1];
+    if (diff === 0) continue;
+    total++;
+
+    if (contractType === "CALL" && diff > 0) good++;
+    if (contractType === "PUT"  && diff < 0) good++;
+  }
+  if (total === 0) return 0;
+  return good / total;
+}
+
+function detectSignalContractType() {
+  if (appState.tickBuffer.length < appState.tickBufferSize) return null;
+
+  const first = appState.tickBuffer[0];
+  const last  = appState.tickBuffer[appState.tickBuffer.length - 1];
+  const delta = last - first;
+
+  if (Math.abs(delta) < appState.momentumThreshold) return null;
+
+  const contractType = (delta > 0) ? "CALL" : "PUT";
+
+  // ✅ clean breakout filter: requires mostly one-direction ticks
+  const strength = directionalStrength(contractType);
+  // stricter in MOMENTUM mode, slightly looser in SCALP
+  const minStrength = (appState.mode === "MOMENTUM") ? 0.80 : 0.70;
+
+  if (strength < minStrength) return null;
+
+  return contractType;
 }
 
 /* ===========================
@@ -830,6 +881,9 @@ const startBot = () => {
   appState.isSelling = false;
   appState.cooldownUntil = 0;
   appState.tickBuffer = [];
+  appState.pendingProposalId = null;
+  appState.pendingProposalAt = 0;
+  appState.lastSignal = null;
   updateProfitDisplay(0);
 
   appState.isBotRunning = true;
@@ -850,6 +904,9 @@ const stopBot = () => {
   appState.isSelling = false;
   appState.tickBuffer = [];
   appState.cooldownUntil = 0;
+  appState.pendingProposalId = null;
+  appState.pendingProposalAt = 0;
+  appState.lastSignal = null;
 
   updateConnectionStatus('DISCONNECTED', 'bg-red-800 text-white');
   updateTradeStatus('Stopped.', 'bg-slate-600 text-slate-300');
@@ -876,7 +933,13 @@ const connectToDeriv = () => {
   };
 
   appState.ws.onmessage = (msg) => {
-    const response = JSON.parse(msg.data);
+    let response;
+    try {
+      response = JSON.parse(msg.data);
+    } catch (e) {
+      console.error("Bad JSON:", msg.data);
+      return;
+    }
     handleResponse(response);
   };
 
@@ -897,12 +960,19 @@ const connectToDeriv = () => {
   };
 };
 
+function resetEntryPipeline(reason = "reset") {
+  appState.isEntryInProgress = false;
+  appState.pendingProposalId = null;
+  appState.pendingProposalAt = 0;
+  appState.lastSignal = null;
+  if (reason) dom.blockReasonDisplay.textContent = reason;
+}
+
 const handleResponse = (response) => {
   if (response.error) {
     console.error('API Error:', response.error.message);
 
-    // reset entry flags on any error
-    appState.isEntryInProgress = false;
+    resetEntryPipeline('API Error');
 
     if (response.error.code === 'AuthorizationRequired') {
       dom.blockReasonDisplay.textContent = 'Auth Failed';
@@ -919,17 +989,17 @@ const handleResponse = (response) => {
     case 'authorize':
       appState.isAuthenticated = true;
 
-      // show balance immediately
       appState.currentBalance = Number(response.authorize.balance || 0);
       dom.currentBalanceDisplay.textContent =
         `${response.authorize.currency} ${appState.currentBalance.toFixed(2)}`;
 
-      // subscribe feeds (✅ FIX: ticks must be subscribe=1)
       if (appState.isBotRunning) {
         appState.ws.send(JSON.stringify({ ticks: SYMBOL, subscribe: 1 }));
         appState.ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
-        appState.ws.send(JSON.stringify({ proposal_open_contract: 1, subscribe: 1 })); // monitor any open contract stream
-        requestH4Candles();
+
+        // ✅ trend mode depends on SCALP/MOMENTUM
+        applyTrendMode();
+        if (appState.trend.enabled) requestH4Candles();
 
         updateTradeStatus('Monitoring Ticks...', 'bg-yellow-600 text-white');
         dom.blockReasonDisplay.textContent = 'None';
@@ -947,55 +1017,71 @@ const handleResponse = (response) => {
 
     case 'tick': {
       if (!appState.isBotRunning) return;
+
       const price = Number(response.tick.quote);
       if (!Number.isFinite(price)) return;
 
-      // chart update
       pushChartPoint(price);
 
-      // store tick + momentum buffer
       appState.lastTick = price;
       appState.tickBuffer.push(price);
       while (appState.tickBuffer.length > appState.tickBufferSize) appState.tickBuffer.shift();
 
-      // refresh trend sometimes (cheap, safe)
       maybeRefreshTrend();
-
-      // main entry decision
       checkAndEnterTrade();
       break;
     }
 
     case 'candles': {
+      if (!appState.trend.enabled) break;
+
       if (!response.candles || !Array.isArray(response.candles)) {
         appState.trend.status = "ERROR";
         updateTrendUI();
         break;
       }
+
       const closes = response.candles.map(c => parseFloat(c.close)).filter(n => Number.isFinite(n));
       const ema20 = calcEMA(closes, appState.trend.emaFast);
       const ema50 = calcEMA(closes, appState.trend.emaSlow);
 
       appState.trend.ema20 = ema20;
       appState.trend.ema50 = ema50;
-
       appState.trend.status = trendClassify(ema20, ema50);
       updateTrendUI();
       break;
     }
 
+    case 'proposal': {
+      if (!appState.isEntryInProgress) break;
+
+      if (!response.proposal || !response.proposal.id) {
+        resetEntryPipeline('Proposal Missing');
+        updateTradeStatus('ERROR', 'bg-red-600 text-white');
+        break;
+      }
+
+      appState.pendingProposalId = response.proposal.id;
+      appState.pendingProposalAt = Date.now();
+
+      appState.ws.send(JSON.stringify({
+        buy: appState.pendingProposalId,
+        price: appState.stakeAmount
+      }));
+      break;
+    }
+
     case 'buy':
-      // successful buy
       appState.isEntryInProgress = false;
+      appState.pendingProposalId = null;
+
       appState.currentContractId = response.buy.contract_id;
       appState.currentContractBuyPrice = response.buy.buy_price;
       appState.currentContractEntryTime = Date.now();
       appState.tradeCounter++;
 
       updateTradeStatus('Contract Active', 'bg-indigo-600 text-white');
-      dom.tradeActiveStatus.textContent = "Active";
 
-      // subscribe to this contract specifically
       appState.ws.send(JSON.stringify({
         proposal_open_contract: 1,
         contract_id: appState.currentContractId,
@@ -1003,88 +1089,63 @@ const handleResponse = (response) => {
       }));
       break;
 
-    case 'sell':
-      // sell ack — we still rely on proposal_open_contract is_sold to finalize.
-      break;
-
     case 'proposal_open_contract': {
       const c = response.proposal_open_contract;
-      if (!c) return;
+      if (!c) break;
 
-      // keep sellable updated
       updateSellableStatus(c.is_sellable);
 
-      // if sold/expired
       if (c.is_sold === 1) {
         const profit = Number(c.sell_price) - Number(c.buy_price);
         appState.sessionProfit += profit;
         updateProfitDisplay(appState.sessionProfit);
 
-        // reset contract flags
         appState.currentContractId = null;
         appState.isSelling = false;
         appState.isEntryInProgress = false;
         appState.tickBuffer = [];
         appState.tradeCounter = 0;
+        appState.lastSignal = null;
 
-        // cooldown starts now
         appState.cooldownUntil = Date.now() + (appState.cooldownDuration * 1000);
         dom.blockReasonDisplay.textContent = 'Cooldown';
         updateTradeStatus('Trade Closed. Cooldown...', 'bg-orange-500 text-white');
 
-        // auto-resume message
-        setTimeout(() => {
-          if (!appState.isBotRunning) return;
-          if (!appState.autoResume) return;
-
-          // if cooldown actually finished
-          if (Date.now() >= appState.cooldownUntil) {
-            dom.blockReasonDisplay.textContent = 'None';
-            updateTradeStatus('Monitoring Ticks...', 'bg-yellow-600 text-white');
-          }
-        }, appState.cooldownDuration * 1000);
-
-        return;
+        if (appState.autoResume) {
+          setTimeout(() => {
+            if (!appState.isBotRunning) return;
+            if (Date.now() >= appState.cooldownUntil) {
+              dom.blockReasonDisplay.textContent = 'None';
+              updateTradeStatus('Monitoring Ticks...', 'bg-yellow-600 text-white');
+            }
+          }, appState.cooldownDuration * 1000);
+        }
+        break;
       }
 
-      // contract still open — check TP/SL
       checkProfitAndLoss(c);
       break;
     }
+
+    case 'sell':
+      break;
   }
 
   updateUI();
 };
 
 /* ===========================
-   GOOD MOVE DETECTION (Momentum)
-=========================== */
-function hasGoodMove() {
-  // must have full buffer
-  if (appState.tickBuffer.length < appState.tickBufferSize) return false;
-
-  const first = appState.tickBuffer[0];
-  const last  = appState.tickBuffer[appState.tickBuffer.length - 1];
-  const delta = last - first;
-
-  return Math.abs(delta) >= appState.momentumThreshold;
-}
-
-/* ===========================
    ENTRY GUARDS + ENTER TRADE
 =========================== */
 function checkAndEnterTrade() {
-  // guards
   if (!appState.isBotRunning) return;
   if (!appState.isAuthenticated) return;
 
-  // cooldown guard
   if (Date.now() < appState.cooldownUntil) {
     dom.blockReasonDisplay.textContent = 'Cooldown';
     return;
-  } else if (dom.blockReasonDisplay.textContent === 'Cooldown') {
-    // cooldown just ended
-    if (appState.autoResume) dom.blockReasonDisplay.textContent = 'None';
+  } else if (dom.blockReasonDisplay.textContent === 'Cooldown' && appState.autoResume) {
+    dom.blockReasonDisplay.textContent = 'None';
   }
 
   if (appState.isEntryInProgress) {
@@ -1097,66 +1158,74 @@ function checkAndEnterTrade() {
     return;
   }
 
-  // max trades per signal guard
   if (appState.tradeCounter >= appState.maxTradesPerSignal) {
     dom.blockReasonDisplay.textContent = 'Max Trades/Signal Hit';
     return;
   }
 
-  // H4 trend filter gate (CALL only)
-  if (appState.trend.enabled) {
+  // ✅ Decide CALL or PUT using momentum + clean breakout
+  const contractType = detectSignalContractType();
+  if (!contractType) {
+    dom.blockReasonDisplay.textContent = 'Waiting Signal';
+    return;
+  }
+
+  // ✅ Trend filter only in MOMENTUM
+  if (appState.mode === "MOMENTUM") {
+    if (!appState.trend.enabled) {
+      dom.blockReasonDisplay.textContent = 'Trend Off';
+      return;
+    }
     if (appState.trend.status === "LOADING") {
       dom.blockReasonDisplay.textContent = 'H4 Trend Loading';
       return;
     }
-    if (!trendAllowsCall()) {
+    if (!trendAllowsTrade(contractType)) {
       dom.blockReasonDisplay.textContent = `H4 Trend Blocked (${appState.trend.status})`;
       return;
     }
   }
 
-  // GOOD MOVE gate (momentum buffer)
-  if (!hasGoodMove()) {
-    dom.blockReasonDisplay.textContent = 'Waiting Good Move';
-    return;
-  }
-
   dom.blockReasonDisplay.textContent = 'None';
-  enterTrade();
+  enterTrade(contractType);
 }
 
-function enterTrade() {
+function enterTrade(contractType) {
   if (!appState.ws || !appState.isAuthenticated) return;
 
-  // lock entry and clear buffer (prevents re-trigger spam)
   appState.isEntryInProgress = true;
-  appState.tickBuffer = [];
-  updateTradeStatus('Entering Trade...', 'bg-orange-500 text-white');
+  appState.pendingProposalId = null;
+  appState.pendingProposalAt = Date.now();
+  appState.lastSignal = contractType;
 
-  // ✅ CALL only (as your bot already was)
-  const req = {
-    buy: appState.stakeAmount,
-    price: appState.stakeAmount,
-    parameters: {
-      amount: appState.stakeAmount,
-      basis: 'stake',
-      contract_type: 'CALL',
-      currency: 'USD',
-      duration: appState.duration,
-      duration_unit: appState.durationUnit,
-      symbol: SYMBOL
-    }
+  // prevent re-trigger spam
+  appState.tickBuffer = [];
+
+  updateTradeStatus(`Creating Proposal (${contractType})...`, 'bg-orange-500 text-white');
+
+  // ✅ Proposal first (Deriv requirement)
+  const proposalReq = {
+    proposal: 1,
+    amount: appState.stakeAmount,
+    basis: 'stake',
+    contract_type: contractType, // ✅ CALL or PUT
+    currency: 'USD',
+    duration: appState.duration,
+    duration_unit: appState.durationUnit,
+    symbol: SYMBOL
   };
 
-  appState.ws.send(JSON.stringify(req));
+  appState.ws.send(JSON.stringify(proposalReq));
 
-  // safety timeout: if buy never returns, unlock entry
   setTimeout(() => {
-    if (appState.isEntryInProgress && !appState.currentContractId) {
-      appState.isEntryInProgress = false;
+    if (!appState.isBotRunning) return;
+    if (appState.currentContractId) return;
+
+    if (appState.isEntryInProgress) {
+      resetEntryPipeline('Entry Timeout');
       updateTradeStatus('Monitoring Ticks...', 'bg-yellow-600 text-white');
     }
-  }, 8000);
+  }, 10000);
 }
 
 /* ===========================
@@ -1165,13 +1234,11 @@ function enterTrade() {
 function checkProfitAndLoss(contract) {
   const currentProfit = Number(contract.profit);
 
-  // ✅ Quick TP (default 0.34 in SCALP)
   if (currentProfit >= appState.tpUSD) {
     sellContract();
     return;
   }
 
-  // SL only sells early if Safe Mode ON (your design)
   if (appState.isSafeMode) {
     const lossThreshold = -Math.abs(appState.slUSD);
     if (currentProfit <= lossThreshold) {
@@ -1187,7 +1254,6 @@ function sellContract() {
   if (appState.isSelling) return;
   if (!appState.currentContractId) return;
 
-  // only sell if sellable
   if (appState.is_sellable !== 1) {
     dom.blockReasonDisplay.textContent = 'Not Sellable';
     return;
@@ -1203,24 +1269,24 @@ function sellContract() {
 }
 
 /* ===========================
-   GEMINI (left as-is, key empty)
+   GEMINI (placeholder)
 =========================== */
 const GEMINI_API_KEY = "";
 const GEMINI_MODEL = 'gemini-2.5-flash-preview-09-2025';
 
-const callGeminiAPI = async (userQuery, systemPrompt, useGrounding = false) => {
+const callGeminiAPI = async (userQuery, systemPrompt) => {
   dom.geminiLoadingIndicator.classList.remove('hidden');
   dom.geminiOutput.textContent = 'Generating insight... Please wait.';
   dom.geminiSources.innerHTML = '';
 
-  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-  const payload = {
-    contents: [{ parts: [{ text: userQuery }] }],
-    systemInstruction: { parts: [{ text: systemPrompt }] },
-  };
-  if (useGrounding) payload.tools = [{ "google_search": {} }];
-
   try {
+    if (!GEMINI_API_KEY) throw new Error("Gemini API key is empty.");
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+    const payload = {
+      contents: [{ parts: [{ text: userQuery }] }],
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+    };
+
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1247,7 +1313,8 @@ const displayGeminiResult = ({ text, sources }) => {
   dom.geminiOutput.textContent = text;
   dom.geminiSources.innerHTML = '';
   if (sources && sources.length) {
-    dom.geminiSources.innerHTML = `<p class="font-semibold text-slate-300">Sources:</p>` +
+    dom.geminiSources.innerHTML =
+      `<p class="font-semibold text-slate-300">Sources:</p>` +
       sources.map((s, i) => `<a href="${s.uri}" target="_blank" class="text-sky-400 hover:text-sky-300 underline block">Source ${i+1}: ${s.title}</a>`).join('');
   }
 };
@@ -1255,7 +1322,7 @@ const displayGeminiResult = ({ text, sources }) => {
 const analyzeMarket = async () => {
   const systemPrompt = "Act as a specialized financial market analyst for volatility indices. Provide a concise, professional sentiment analysis.";
   const userQuery = `What is the current trading sentiment and factors for Deriv symbol ${SYMBOL}?`;
-  const result = await callGeminiAPI(userQuery, systemPrompt, false);
+  const result = await callGeminiAPI(userQuery, systemPrompt);
   displayGeminiResult(result);
 };
 
@@ -1264,7 +1331,7 @@ const assessRisk = async () => {
   const { stakeAmount, tpUSD, slUSD, mode } = appState;
   const systemPrompt = "Act as an experienced trading risk manager. Provide a concise risk/reward assessment.";
   const userQuery = `Analyze risk: Mode=${mode}, Stake=$${stakeAmount.toFixed(2)}, TP=$${tpUSD.toFixed(2)}, SL=$${slUSD.toFixed(2)}.`;
-  const result = await callGeminiAPI(userQuery, systemPrompt, false);
+  const result = await callGeminiAPI(userQuery, systemPrompt);
   displayGeminiResult(result);
 };
 
