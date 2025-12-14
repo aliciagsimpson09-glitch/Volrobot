@@ -1,343 +1,402 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deriv Bot Interface</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kut Milz TB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Lightweight Charts -->
-  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <!-- Lightweight Charts (for the live chart) -->
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 
-  <style>
-    /* ABSOLUTE RULE: DO NOT TOUCH OR CHANGE ANY BACKGROUND CODE */
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #0f172a; /* Slate-900 */
-      color: #e2e8f0; /* Slate-200 */
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 20px 10px;
-    }
+    <style>
+        /* ABSOLUTE RULE: DO NOT TOUCH OR CHANGE ANY BACKGROUND CODE */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a; /* Slate-900 */
+            color: #e2e8f0; /* Slate-200 */
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px 10px;
+        }
 
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #1e293b; }
-    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        /* Custom scrollbar for dark theme */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
-    .card {
-      background: #1e293b; /* Slate-800 */
-      border: 1px solid #334155; /* Slate-700 */
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      margin-bottom: 20px;
-    }
+        .card {
+            background: #1e293b; /* Slate-800 */
+            border: 1px solid #334155; /* Slate-700 */
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
 
-    .container-wrapper { width: 100%; max-width: 1200px; }
+        .container-wrapper { width: 100%; max-width: 1200px; }
 
-    .pill {
-      padding: 4px 10px;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-    }
+        .pill {
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+        }
 
-    .status-pill {
-      display: flex;
-      align-items: center;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
+        .status-pill {
+            display: flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
 
-    #chart-container {
-      width: 100%;
-      height: 320px;
-      background: #0b1220;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-    }
-    @media (min-width: 1024px) {
-      #chart-container { height: 360px; }
-    }
-  </style>
+        /* Chart container (fits your UI style; does not change background) */
+        #chart-container {
+            width: 100%;
+            height: 320px;
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        @media (min-width: 1024px) {
+            #chart-container { height: 360px; }
+        }
+    </style>
 </head>
 
 <body>
 <div class="container-wrapper">
-  <h1 class="text-3xl font-bold text-center mb-6 text-white">Deriv Trading Bot</h1>
+    <h1 class="text-3xl font-bold text-center mb-6 text-white">Kut Milz TB</h1>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Column 1 -->
-    <div class="lg:col-span-1">
-      <div class="card">
-        <h2 class="text-xl font-semibold mb-4 text-sky-400">Bot Controls</h2>
-        <div class="space-y-4">
-          <button id="toggle-bot-btn"
-                  class="w-full py-3 rounded-lg font-bold transition duration-200 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg">
-            START BOT
-          </button>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Column 1 -->
+        <div class="lg:col-span-1">
+            <!-- Bot Controls -->
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 text-sky-400">Bot Controls</h2>
+                <div class="space-y-4">
+                    <button id="toggle-bot-btn"
+                            class="w-full py-3 rounded-lg font-bold transition duration-200 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg">
+                        START BOT
+                    </button>
+                </div>
+
+                <div class="mt-6 border-t border-slate-700 pt-4 space-y-3">
+                    <h3 class="text-lg font-medium text-slate-300">Live Status</h3>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">Connection:</span>
+                        <span id="connection-status" class="status-pill bg-red-800 text-white">DISCONNECTED</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">Trade Active:</span>
+                        <span id="trade-active-status" class="status-pill bg-slate-600 text-slate-300">Idle</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">Current Mode:</span>
+                        <span id="mode-status" class="status-pill bg-indigo-800 text-white">SCALP</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">H4 Trend:</span>
+                        <span id="h4-trend-display" class="status-pill bg-slate-600 text-slate-300">LOADING</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">Reason Blocked:</span>
+                        <span id="block-reason-display" class="status-pill bg-slate-600 text-slate-300">None</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Summary -->
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 text-sky-400">Account Summary</h2>
+
+                <div id="account-warning" class="hidden mb-3 p-3 rounded-lg border border-red-700 bg-red-950/40 text-red-200 text-sm">
+                    <div class="font-bold text-red-200">⚠️ VOL / VOL 1s NOT AVAILABLE on this connected account</div>
+                    <div class="mt-1 text-xs text-red-200">
+                        Your API token is connected to an account that doesn’t list Volatility instruments.
+                        Use a <b>Synthetic/Derived</b> account (Deriv/DTrader Synthetic or MT5 Derived),
+                        not Financial/Standard.
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                        <span class="text-sm">Current Balance:</span>
+                        <span id="current-balance-display" class="text-lg font-bold text-yellow-400">...</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">Session Profit (USD):</span>
+                        <span id="current-profit-display" class="text-lg font-bold text-slate-300">0.00</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">Contract Sellable:</span>
+                        <span id="sellable-display" class="status-pill bg-red-500 text-white">NO</span>
+                    </div>
+
+                    <div class="flex justify-between items-center border-t border-slate-700 pt-2">
+                        <span class="text-sm">Login ID:</span>
+                        <span id="loginid-display" class="text-xs font-mono text-slate-200">...</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">Type:</span>
+                        <span id="accttype-display" class="text-xs text-slate-200">...</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="mt-6 border-t border-slate-700 pt-4 space-y-3">
-          <h3 class="text-lg font-medium text-slate-300">Live Status</h3>
+        <!-- Column 2 -->
+        <div class="lg:col-span-2">
 
-          <div class="flex justify-between items-center">
-            <span class="text-sm">Connection:</span>
-            <span id="connection-status" class="status-pill bg-red-800 text-white">DISCONNECTED</span>
-          </div>
+            <!-- Trading Parameters -->
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 text-sky-400">Trading Parameters</h2>
 
-          <div class="flex justify-between items-center">
-            <span class="text-sm">Trade Active:</span>
-            <span id="trade-active-status" class="status-pill bg-slate-600 text-slate-300">Idle</span>
-          </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label for="symbolSelect" class="block text-sm font-medium mb-1">Symbol (VOL / VOL 1s)</label>
+                        <select id="symbolSelect"
+                                class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
+                            <!-- Fallback list (will be replaced by active_symbols if available) -->
+                            <option value="R_10">Volatility 10 Index</option>
+                            <option value="R_25">Volatility 25 Index</option>
+                            <option value="R_50">Volatility 50 Index</option>
+                            <option value="R_75">Volatility 75 Index</option>
+                            <option value="R_100" selected>Volatility 100 Index</option>
+                            <option value="1HZ10V">Volatility 10 (1s)</option>
+                            <option value="1HZ25V">Volatility 25 (1s)</option>
+                            <option value="1HZ50V">Volatility 50 (1s)</option>
+                            <option value="1HZ75V">Volatility 75 (1s)</option>
+                            <option value="1HZ100V">Volatility 100 (1s)</option>
+                        </select>
+                        <p class="text-[11px] text-slate-400 mt-1">
+                            After you connect, the bot loads the official instrument list from your account.
+                        </p>
+                    </div>
 
-          <div class="flex justify-between items-center">
-            <span class="text-sm">Current Mode:</span>
-            <span id="mode-status" class="status-pill bg-indigo-800 text-white">SCALP</span>
-          </div>
+                    <div>
+                        <label for="stakeAmount" class="block text-sm font-medium mb-1">Stake Amount (USD)</label>
+                        <input type="number" id="stakeAmount" value="1.00" step="0.01"
+                               class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
+                    </div>
 
-          <div class="flex justify-between items-center">
-            <span class="text-sm">H4 Trend:</span>
-            <span id="h4-trend-display" class="status-pill bg-slate-600 text-slate-300">OFF</span>
-          </div>
+                    <div>
+                        <label for="maxTradesPerSignal" class="block text-sm font-medium mb-1">Max Trades/Signal</label>
+                        <input type="number" id="maxTradesPerSignal" value="1" step="1"
+                               class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
+                    </div>
 
-          <div class="flex justify-between items-center">
-            <span class="text-sm">Reason Blocked:</span>
-            <span id="block-reason-display" class="status-pill bg-slate-600 text-slate-300">None</span>
-          </div>
+                    <div>
+                        <label for="duration" class="block text-sm font-medium mb-1">Duration</label>
+                        <input type="number" id="duration" value="5" step="1"
+                               class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+
+                    <div>
+                        <label for="durationUnit" class="block text-sm font-medium mb-1">Duration Unit</label>
+                        <select id="durationUnit"
+                                class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
+                            <option value="t">Ticks</option>
+                            <option value="s">Seconds</option>
+                            <option value="m">Minutes</option>
+                            <option value="h">Hours</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="tpUSD" class="block text-sm font-medium mb-1">Take Profit (USD)</label>
+                        <input type="number" id="tpUSD" value="0.34" step="0.01"
+                               class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+
+                    <div>
+                        <label for="slUSD" class="block text-sm font-medium mb-1">Stop Loss (USD)</label>
+                        <input type="number" id="slUSD" value="10.00" step="0.01"
+                               class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+
+                    <div class="col-span-2">
+                        <label for="cooldownDuration" class="block text-sm font-medium mb-1">Cooldown Duration (s)</label>
+                        <input type="number" id="cooldownDuration" value="30" step="1"
+                               class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Protected Defaults -->
+            <div class="card">
+                <div class="flex justify-between items-start mb-4 border-b border-slate-700 pb-3">
+                    <h2 class="text-xl font-semibold text-pink-400">Protected Defaults</h2>
+                    <button id="unlock-settings-btn"
+                            class="text-sm text-pink-400 hover:text-pink-300 font-medium py-1 px-3 rounded-full border border-pink-500 transition duration-150">
+                        Unlock
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+
+                    <!-- Mode -->
+                    <div class="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                        <div class="flex flex-col sm:flex-row sm:items-center">
+                            <span class="text-sm font-medium text-slate-300 mr-4">Strategy Mode:</span>
+                            <span id="mode-pill" class="pill bg-indigo-600 text-white">SCALP</span>
+                        </div>
+                        <select id="mode-select"
+                                class="p-1 rounded bg-slate-600 text-xs border border-slate-500 focus:ring-indigo-500"
+                                disabled>
+                            <option value="SCALP">SCALP (Fast Tap-Out)</option>
+                            <option value="MOMENTUM">MOMENTUM (Trend + Breakout)</option>
+                            <option value="H4">H4 MODE (Strict Trend + Breakout)</option>
+                        </select>
+                    </div>
+
+                    <!-- Safe Mode -->
+                    <div class="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                        <div class="flex flex-col sm:flex-row sm:items-center">
+                            <span class="text-sm font-medium text-slate-300 mr-4">Safe Mode:</span>
+                            <span id="safe-mode-indicator" class="pill bg-red-600 text-white">OFF</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="safe-mode-toggle" class="sr-only peer" disabled>
+                            <div class="w-11 h-6 bg-slate-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-pink-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
+                        </label>
+                    </div>
+
+                    <div class="text-center text-xs text-slate-500" id="safe-mode-status">
+                        Safe Mode is currently DISABLED.
+                    </div>
+
+                    <!-- Auto-resume row -->
+                    <div class="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                        <div class="flex flex-col sm:flex-row sm:items-center">
+                            <span class="text-sm font-medium text-slate-300 mr-4">Auto-resume after cooldown:</span>
+                            <span id="autoresume-indicator" class="pill bg-emerald-600 text-white">ON</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="autoresume-toggle" class="sr-only peer" disabled checked>
+                            <div class="w-11 h-6 bg-slate-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-pink-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
+                        </label>
+                    </div>
+
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-700">
+                    <p class="text-xs text-center text-slate-500">Kut Milz TB</p>
+                </div>
+            </div>
+
+            <!-- Chart Card -->
+            <div class="card">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-xl font-semibold text-sky-400">Live Chart</h2>
+                    <span id="chart-status" class="pill bg-slate-700 text-slate-200">WAITING</span>
+                </div>
+                <div id="chart-container"></div>
+                <p class="text-xs text-slate-400 mt-2">
+                    Live <span class="text-sky-300 font-semibold">1-second candles</span> built from Deriv tick stream for
+                    <span id="symbolLabel" class="text-sky-300 font-semibold">R_100</span>.
+                </p>
+            </div>
+
+            <!-- API Login -->
+            <div class="card">
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-700">
+                    <h2 class="text-xl font-semibold text-sky-400">API Login</h2>
+                    <span id="login-status-badge" class="pill bg-red-800 text-white animate-pulse">DISCONNECTED</span>
+                </div>
+
+                <div class="relative mb-3">
+                    <label for="api-token" class="block text-sm font-medium mb-1 text-slate-300">Deriv API Token</label>
+                    <div class="flex items-center rounded-lg bg-slate-700 border border-slate-600 focus-within:ring-2 focus-within:ring-sky-500 transition duration-150">
+                        <span class="p-3 text-sky-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3v2.25m-15.75 6a3 3 0 0 1 3-3h2.25m3.75-10.25v12a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3v-2.25m15.75-6a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3v-2.25m3.75 10.25v-12a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3v2.25" />
+                            </svg>
+                        </span>
+
+                        <input type="password" id="api-token" placeholder="Paste your API token here..."
+                               class="flex-1 p-3 bg-transparent border-none text-slate-50 focus:ring-0 focus:outline-none placeholder-slate-400"
+                               autocomplete="off">
+
+                        <button id="toggle-visibility-btn" class="p-3 text-slate-400 hover:text-sky-300 transition duration-150"
+                                type="button" title="Show Token">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M3.988 5.82a1.01 1.01 0 0 0-.083.125M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <p id="token-error-message" class="text-sm text-red-400 mb-3 hidden flex items-center">
+                    API token required to start the bot.
+                </p>
+
+                <p class="text-xs text-slate-500">
+                    <span class="font-semibold text-sky-300">Permissions:</span> Read + Trade
+                </p>
+
+                <p id="edit-hint" class="text-xs text-slate-500 mb-4">
+                    Stored securely in your browser (localStorage). Never share it.
+                </p>
+
+                <div class="p-3 bg-slate-700 rounded-lg border border-slate-600 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                    <div class="text-xs space-y-1 sm:space-y-0">
+                        <p>Symbol: <span id="symbolLabel2" class="font-bold text-sky-300">R_100</span></p>
+                        <p class="mt-1">
+                            API URL: <code id="api-url-text" class="text-yellow-400 break-all text-[11px] select-all font-mono">wss://ws.binaryws.com/websockets/v3?app_id=1089</code>
+                        </p>
+                    </div>
+                    <button id="copy-api-url-btn"
+                            class="mt-2 sm:mt-0 text-xs py-1 px-3 rounded-full bg-slate-600 hover:bg-slate-500 transition duration-150 text-white font-medium"
+                            type="button">
+                        Copy URL
+                    </button>
+                </div>
+            </div>
+
+            <!-- Insights (Gemini + fallback) -->
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 text-emerald-400">Market Insights ✨</h2>
+
+                <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                    <button id="analyze-market-btn" class="flex-1 py-2 rounded-lg font-bold transition duration-200 bg-emerald-700 hover:bg-emerald-800 text-white shadow-lg">
+                        Analyze Market Sentiment ✨
+                    </button>
+                    <button id="assess-risk-btn" class="flex-1 py-2 rounded-lg font-bold transition duration-200 bg-pink-700 hover:bg-pink-800 text-white shadow-lg">
+                        Assess Strategy Risk ✨
+                    </button>
+                </div>
+
+                <div id="gemini-loading-indicator" class="hidden text-center text-sm text-yellow-500 py-4">
+                    Generating insight...
+                </div>
+
+                <div id="gemini-output" class="p-3 bg-slate-700 rounded-lg text-sm text-slate-100 min-h-[100px] whitespace-pre-wrap">
+                    Tap a button above for analysis. (Works even without API key.)
+                </div>
+
+                <div id="gemini-sources" class="mt-2 text-xs text-slate-400 space-y-1"></div>
+            </div>
+
         </div>
-      </div>
-
-      <div class="card">
-        <h2 class="text-xl font-semibold mb-4 text-sky-400">Account Summary</h2>
-        <div class="space-y-3">
-          <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-            <span class="text-sm">Current Balance:</span>
-            <span id="current-balance-display" class="text-lg font-bold text-yellow-400">...</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm">Session Profit (USD):</span>
-            <span id="current-profit-display" class="text-lg font-bold text-slate-300">0.00</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm">Contract Sellable:</span>
-            <span id="sellable-display" class="status-pill bg-red-500 text-white">NO</span>
-          </div>
-        </div>
-      </div>
     </div>
-
-    <!-- Column 2 -->
-    <div class="lg:col-span-2">
-      <div class="card">
-        <h2 class="text-xl font-semibold mb-4 text-sky-400">Trading Parameters</h2>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label for="stakeAmount" class="block text-sm font-medium mb-1">Stake Amount (USD)</label>
-            <input type="number" id="stakeAmount" value="1.00" step="0.01"
-                   class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
-          </div>
-
-          <div>
-            <label for="maxTradesPerSignal" class="block text-sm font-medium mb-1">Max Trades/Signal</label>
-            <input type="number" id="maxTradesPerSignal" value="1" step="1"
-                   class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
-          </div>
-
-          <div>
-            <label for="duration" class="block text-sm font-medium mb-1">Duration</label>
-            <input type="number" id="duration" value="5" step="1"
-                   class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
-          </div>
-
-          <div>
-            <label for="durationUnit" class="block text-sm font-medium mb-1">Duration Unit</label>
-            <select id="durationUnit"
-                    class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
-              <option value="t">Ticks</option>
-              <option value="s">Seconds</option>
-              <option value="m">Minutes</option>
-              <option value="h">Hours</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="tpUSD" class="block text-sm font-medium mb-1">Take Profit (USD)</label>
-            <input type="number" id="tpUSD" value="0.34" step="0.01"
-                   class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
-          </div>
-
-          <div>
-            <label for="slUSD" class="block text-sm font-medium mb-1">Stop Loss (USD)</label>
-            <input type="number" id="slUSD" value="10.00" step="0.01"
-                   class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
-          </div>
-
-          <div class="col-span-2">
-            <label for="cooldownDuration" class="block text-sm font-medium mb-1">Cooldown Duration (s)</label>
-            <input type="number" id="cooldownDuration" value="30" step="1"
-                   class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="flex justify-between items-start mb-4 border-b border-slate-700 pb-3">
-          <h2 class="text-xl font-semibold text-pink-400">Protected Defaults</h2>
-          <button id="unlock-settings-btn"
-                  class="text-sm text-pink-400 hover:text-pink-300 font-medium py-1 px-3 rounded-full border border-pink-500 transition duration-150">
-            Unlock
-          </button>
-        </div>
-
-        <div class="space-y-4">
-          <div class="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
-            <div class="flex flex-col sm:flex-row sm:items-center">
-              <span class="text-sm font-medium text-slate-300 mr-4">Strategy Mode:</span>
-              <span id="mode-pill" class="pill bg-indigo-600 text-white">SCALP</span>
-            </div>
-            <select id="mode-select"
-                    class="p-1 rounded bg-slate-600 text-xs border border-slate-500 focus:ring-indigo-500"
-                    disabled>
-              <option value="SCALP">SCALP (Fast Tap-Out)</option>
-              <option value="MOMENTUM">MOMENTUM (Breakout + H4 Trend)</option>
-            </select>
-          </div>
-
-          <div class="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
-            <div class="flex flex-col sm:flex-row sm:items-center">
-              <span class="text-sm font-medium text-slate-300 mr-4">Safe Mode:</span>
-              <span id="safe-mode-indicator" class="pill bg-red-600 text-white">OFF</span>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="safe-mode-toggle" class="sr-only peer" disabled>
-              <div class="w-11 h-6 bg-slate-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-pink-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
-            </label>
-          </div>
-
-          <div class="text-center text-xs text-slate-500" id="safe-mode-status">
-            Safe Mode is currently DISABLED.
-          </div>
-
-          <div class="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
-            <div class="flex flex-col sm:flex-row sm:items-center">
-              <span class="text-sm font-medium text-slate-300 mr-4">Auto-resume after cooldown:</span>
-              <span id="autoresume-indicator" class="pill bg-emerald-600 text-white">ON</span>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="autoresume-toggle" class="sr-only peer" disabled checked>
-              <div class="w-11 h-6 bg-slate-500 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-pink-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
-            </label>
-          </div>
-        </div>
-
-        <div class="mt-4 pt-3 border-t border-slate-700">
-          <p class="text-xs text-center text-slate-500">Made by Kut.Milz</p>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-xl font-semibold text-sky-400">Live Chart</h2>
-          <span id="chart-status" class="pill bg-slate-700 text-slate-200">WAITING</span>
-        </div>
-        <div id="chart-container"></div>
-        <p class="text-xs text-slate-400 mt-2">
-          1-second candles built from live Deriv ticks for <span class="text-sky-300 font-semibold">R_100</span>.
-        </p>
-      </div>
-
-      <div class="card">
-        <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-700">
-          <h2 class="text-xl font-semibold text-sky-400">API Login</h2>
-          <span id="login-status-badge" class="pill bg-red-800 text-white animate-pulse">DISCONNECTED</span>
-        </div>
-
-        <div class="relative mb-3">
-          <label for="api-token" class="block text-sm font-medium mb-1 text-slate-300">Deriv API Token</label>
-          <div class="flex items-center rounded-lg bg-slate-700 border border-slate-600 focus-within:ring-2 focus-within:ring-sky-500 transition duration-150">
-            <span class="p-3 text-sky-400">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3v2.25m-15.75 6a3 3 0 0 1 3-3h2.25m3.75-10.25v12a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3v-2.25m15.75-6a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3v-2.25m3.75 10.25v-12a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3v2.25" />
-              </svg>
-            </span>
-
-            <input type="password" id="api-token" placeholder="Paste your API token here..."
-                   class="flex-1 p-3 bg-transparent border-none text-slate-50 focus:ring-0 focus:outline-none placeholder-slate-400"
-                   autocomplete="off">
-
-            <button id="toggle-visibility-btn" class="p-3 text-slate-400 hover:text-sky-300 transition duration-150"
-                    type="button" title="Show Token">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M3.988 5.82a1.01 1.01 0 0 0-.083.125m3.668-.125c.112-.34.238-.667.38-.985a24.144 24.144 0 0 1 8.878 0c.142.318.268.645.38.985m3.668-.125c.112-.34.238-.667.38-.985a24.144 24.144 0 0 1 8.878 0c.142.318.268.645.38.985m-.12 11.082l-3.321-3.321a3.5 3.5 0 0 0-4.95-.99L3.988 5.82M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <p id="token-error-message" class="text-sm text-red-400 mb-3 hidden flex items-center">
-          API token required to start the bot.
-        </p>
-
-        <p class="text-xs text-slate-500">
-          <span class="font-semibold text-sky-300">Permissions:</span> Read + Trade
-        </p>
-
-        <p id="edit-hint" class="text-xs text-slate-500 mb-4">
-          Stored securely in your browser (localStorage). Never share it.
-        </p>
-
-        <div class="p-3 bg-slate-700 rounded-lg border border-slate-600 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-          <div class="text-xs space-y-1 sm:space-y-0">
-            <p>Symbol: <span class="font-bold text-sky-300">R_100</span></p>
-            <p class="mt-1">
-              API URL: <code id="api-url-text" class="text-yellow-400 break-all text-[11px] select-all font-mono">wss://ws.binaryws.com/websockets/v3?app_id=1089</code>
-            </p>
-          </div>
-          <button id="copy-api-url-btn"
-                  class="mt-2 sm:mt-0 text-xs py-1 px-3 rounded-full bg-slate-600 hover:bg-slate-500 transition duration-150 text-white font-medium"
-                  type="button">
-            Copy URL
-          </button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2 class="text-xl font-semibold mb-4 text-emerald-400">Gemini Market Insights ✨</h2>
-
-        <div class="flex flex-col sm:flex-row gap-4 mb-4">
-          <button id="analyze-market-btn" class="flex-1 py-2 rounded-lg font-bold transition duration-200 bg-emerald-700 hover:bg-emerald-800 text-white shadow-lg">
-            Analyze Market Sentiment ✨
-          </button>
-          <button id="assess-risk-btn" class="flex-1 py-2 rounded-lg font-bold transition duration-200 bg-pink-700 hover:bg-pink-800 text-white shadow-lg">
-            Assess Strategy Risk ✨
-          </button>
-        </div>
-
-        <div id="gemini-loading-indicator" class="hidden text-center text-sm text-yellow-500 py-4">
-          Generating insight...
-        </div>
-
-        <div id="gemini-output" class="p-3 bg-slate-700 rounded-lg text-sm text-slate-100 min-h-[100px] whitespace-pre-wrap">
-          Click a button above to get an LLM-powered trading analysis or strategy assessment for Volatility 100 Index.
-        </div>
-
-        <div id="gemini-sources" class="mt-2 text-xs text-slate-400 space-y-1"></div>
-      </div>
-
-    </div>
-  </div>
 </div>
 
 <script>
@@ -345,99 +404,58 @@
    CONFIG
 =========================== */
 const API_URL = 'wss://ws.binaryws.com/websockets/v3?app_id=1089';
-const SYMBOL  = 'R_100';
 
 /* ===========================
    MODE DEFAULTS
-   - SCALP: Ticks (fast scrape)
-   - MOMENTUM: Minutes (clean breakout)
 =========================== */
 const modeDefaults = {
-  SCALP: {
-    stake: 1.00,
-    duration: 5,
-    durationUnit: 't',
-    tp: 0.34,
-    sl: 10.00,
-    maxTrades: 1,
-    cooldown: 30,
-    tickBufferSize: 6,
-    momentumThreshold: 0.015
-  },
-  MOMENTUM: {
-    stake: 2.00,
-    duration: 2,
-    durationUnit: 'm',
-    tp: 0.60,
-    sl: 15.00,
-    maxTrades: 1,
-    cooldown: 45,
-    tickBufferSize: 10,
-    momentumThreshold: 0.030
-  }
+  SCALP: { stake:1.00, duration:5, durationUnit:'t', tp:0.34, sl:10.00, maxTrades:1, cooldown:30, tickBufferSize:6,  momentumThreshold:0.015, useTrendFilter:false, breakoutStrict:false },
+  MOMENTUM:{ stake:2.00, duration:1, durationUnit:'m', tp:0.60, sl:15.00, maxTrades:1, cooldown:45, tickBufferSize:10, momentumThreshold:0.030, useTrendFilter:true,  breakoutStrict:false },
+  H4:     { stake:2.00, duration:2, durationUnit:'m', tp:0.80, sl:20.00, maxTrades:1, cooldown:60, tickBufferSize:12, momentumThreshold:0.040, useTrendFilter:true,  breakoutStrict:true  }
 };
 
 /* ===========================
    GLOBAL STATE
 =========================== */
 const appState = {
-  ws: null,
-  token: localStorage.getItem('derivToken') || '',
-  isBotRunning: false,
-  isAuthenticated: false,
-  isEntryInProgress: false,
+  ws:null, token: localStorage.getItem('derivToken') || '',
+  isBotRunning:false, isAuthenticated:false, isEntryInProgress:false,
+  tickSubId:null, balanceSubId:null,
 
-  currentBalance: 0.00,
-  sessionProfit: 0.00,
+  currentBalance:0.00, sessionProfit:0.00,
 
-  tradeCounter: 0,
-  currentContractId: null,
-  currentContractBuyPrice: 0,
-  currentContractEntryTime: 0,
-  is_sellable: 0,
-  isSelling: false,
+  tradeCounter:0, currentContractId:null, currentContractBuyPrice:0, currentContractEntryTime:0,
+  is_sellable:0, isSelling:false,
 
-  mode: 'SCALP',
-  isSettingsLocked: true,
-  isSafeMode: false,
+  mode:'SCALP', isSettingsLocked:true, isSafeMode:false,
 
-  stakeAmount: 1.00,
-  duration: 5,
-  durationUnit: 't',
-  tpUSD: 0.34,
-  slUSD: 10.00,
-  maxTradesPerSignal: 1,
-  cooldownDuration: 30,
+  symbol:'R_100',
 
-  tickBuffer: [],
-  tickBufferSize: 6,
-  momentumThreshold: 0.015,
-  lastTick: null,
+  stakeAmount:1.00, duration:5, durationUnit:'t', tpUSD:0.34, slUSD:10.00, maxTradesPerSignal:1, cooldownDuration:30,
 
-  cooldownUntil: 0,
-  autoResume: true,
+  tickBuffer:[], tickBufferSize:6, momentumThreshold:0.015, lastTick:null,
 
-  pendingProposalId: null,
-  pendingProposalAt: 0,
+  cooldownUntil:0, autoResume:true,
 
-  // H4 trend is used ONLY in MOMENTUM mode
-  trend: {
-    enabled: false,
-    status: "OFF",
-    tfSeconds: 14400,
-    emaFast: 20,
-    emaSlow: 50,
-    lastUpdated: 0,
-    refreshMs: 60000,
-    ema20: null,
-    ema50: null
-  }
+  pendingProposalId:null, pendingProposalAt:0,
+
+  useTrendFilter:false, breakoutStrict:false,
+
+  trend:{ enabled:true, status:"LOADING", tfSeconds:14400, emaFast:20, emaSlow:50, lastUpdated:0, refreshMs:60000, ema20:null, ema50:null },
+
+  chart:{ initialized:false, lastCandleTime:0, lastOHLC:null, hasTick:false },
+
+  account: { loginid:'', isVirtual:null, currency:'', warningNoVols:false }
 };
 
 /* ===========================
    DOM
 =========================== */
 const dom = {
+  symbolSelect: document.getElementById('symbolSelect'),
+  symbolLabel: document.getElementById('symbolLabel'),
+  symbolLabel2: document.getElementById('symbolLabel2'),
+
   modeSelect: document.getElementById('mode-select'),
   modePill: document.getElementById('mode-pill'),
   modeStatus: document.getElementById('mode-status'),
@@ -484,17 +502,11 @@ const dom = {
 
   autoResumeToggle: document.getElementById('autoresume-toggle'),
   autoResumeIndicator: document.getElementById('autoresume-indicator'),
-};
 
-/* ===========================
-   HELPERS
-=========================== */
-function normalizeDurationUnit(u) {
-  const allowed = new Set(['t','s','m','h']);
-  return allowed.has(u) ? u : 't';
-}
-function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
-function fmt(n, d=2){ return (Number.isFinite(n) ? n : 0).toFixed(d); }
+  accountWarning: document.getElementById('account-warning'),
+  loginIdDisplay: document.getElementById('loginid-display'),
+  acctTypeDisplay: document.getElementById('accttype-display'),
+};
 
 /* ===========================
    UI HELPERS
@@ -503,11 +515,9 @@ const updateConnectionStatus = (status, color) => {
   dom.connectionStatus.textContent = status;
   dom.connectionStatus.className = `status-pill ${color}`;
 };
-
 const updateLoginBadge = (statusText) => {
   const badge = dom.loginStatusBadge;
   if (!badge) return;
-
   if (statusText === 'CONNECTED') {
     badge.textContent = 'CONNECTED';
     badge.className = 'pill bg-emerald-600 text-white';
@@ -519,17 +529,14 @@ const updateLoginBadge = (statusText) => {
     badge.className = 'pill bg-yellow-600 text-white animate-pulse';
   }
 };
-
 const setupConnectionObserver = () => {
   const observer = new MutationObserver(() => updateLoginBadge(dom.connectionStatus.textContent));
   observer.observe(dom.connectionStatus, { childList: true, subtree: true, characterData: true });
 };
-
-const updateTradeStatus = (status, color = 'bg-slate-600 text-slate-300') => {
+const updateTradeStatus = (status, color='bg-slate-600 text-slate-300') => {
   dom.tradeActiveStatus.textContent = status;
   dom.tradeActiveStatus.className = `status-pill ${color}`;
 };
-
 const updateSellableStatus = (isSellable) => {
   appState.is_sellable = isSellable;
   if (isSellable === 1) {
@@ -540,7 +547,6 @@ const updateSellableStatus = (isSellable) => {
     dom.sellableDisplay.className = 'status-pill bg-red-500 text-white';
   }
 };
-
 const updateProfitDisplay = (profit) => {
   dom.currentProfitDisplay.textContent = profit.toFixed(2);
   let color = 'text-slate-300';
@@ -549,33 +555,25 @@ const updateProfitDisplay = (profit) => {
   dom.currentProfitDisplay.className = `text-lg font-bold ${color}`;
 };
 
-const setSettingsLock = (isLocked) => {
-  appState.isSettingsLocked = isLocked;
-  const inputs = [
-    dom.stakeAmountInput, dom.durationInput, dom.durationUnitInput,
-    dom.tpUSDInput, dom.slUSDInput, dom.maxTradesPerSignalInput,
-    dom.cooldownDurationInput, dom.modeSelect, dom.safeModeToggle,
-    dom.autoResumeToggle
-  ];
-  inputs.forEach(input => input.disabled = isLocked);
+function setIfNotEditing(el, value) {
+  if (!el) return;
+  if (document.activeElement === el) return;
+  el.value = value;
+}
 
-  dom.unlockSettingsBtn.textContent = isLocked ? 'Unlock' : 'Lock';
-  dom.unlockSettingsBtn.className = isLocked
-    ? 'text-sm text-pink-400 hover:text-pink-300 font-medium py-1 px-3 rounded-full border border-pink-500 transition duration-150'
-    : 'text-sm text-white bg-pink-600 hover:bg-pink-700 font-medium py-1 px-3 rounded-full border border-pink-700 transition duration-150';
-};
+function updateSymbolLabels() {
+  dom.symbolLabel.textContent = appState.symbol;
+  dom.symbolLabel2.textContent = appState.symbol;
+}
 
 const updateTrendUI = () => {
   const t = appState.trend.status;
   dom.h4TrendDisplay.textContent = t;
-
   let cls = 'bg-slate-600 text-slate-300';
   if (t === 'BULL') cls = 'bg-emerald-600 text-white';
   if (t === 'BEAR') cls = 'bg-red-600 text-white';
   if (t === 'NEUTRAL') cls = 'bg-yellow-600 text-white';
   if (t === 'ERROR') cls = 'bg-red-800 text-white';
-  if (t === 'OFF') cls = 'bg-slate-600 text-slate-300';
-
   dom.h4TrendDisplay.className = `status-pill ${cls}`;
 };
 
@@ -583,6 +581,23 @@ const updateAutoResumeUI = () => {
   dom.autoResumeIndicator.textContent = appState.autoResume ? 'ON' : 'OFF';
   dom.autoResumeIndicator.className = `pill ${appState.autoResume ? 'bg-emerald-600' : 'bg-red-600'} text-white`;
   dom.autoResumeToggle.checked = !!appState.autoResume;
+};
+
+function showAccountWarning(show) {
+  if (!dom.accountWarning) return;
+  if (show) dom.accountWarning.classList.remove('hidden');
+  else dom.accountWarning.classList.add('hidden');
+}
+
+const setSettingsLock = (isLocked) => {
+  appState.isSettingsLocked = isLocked;
+  const protectedInputs = [ dom.modeSelect, dom.safeModeToggle, dom.autoResumeToggle ];
+  protectedInputs.forEach(input => input.disabled = isLocked);
+
+  dom.unlockSettingsBtn.textContent = isLocked ? 'Unlock' : 'Lock';
+  dom.unlockSettingsBtn.className = isLocked
+    ? 'text-sm text-pink-400 hover:text-pink-300 font-medium py-1 px-3 rounded-full border border-pink-500 transition duration-150'
+    : 'text-sm text-white bg-pink-600 hover:bg-pink-700 font-medium py-1 px-3 rounded-full border border-pink-700 transition duration-150';
 };
 
 const updateUI = () => {
@@ -595,18 +610,29 @@ const updateUI = () => {
     ? 'Safe Mode is currently ENABLED. Stop Loss sell attempts are allowed.'
     : 'Safe Mode is currently DISABLED.';
 
-  dom.stakeAmountInput.value = fmt(appState.stakeAmount, 2);
-  dom.durationInput.value = appState.duration;
-  dom.durationUnitInput.value = appState.durationUnit;
-  dom.tpUSDInput.value = fmt(appState.tpUSD, 2);
-  dom.slUSDInput.value = fmt(appState.slUSD, 2);
-  dom.maxTradesPerSignalInput.value = appState.maxTradesPerSignal;
-  dom.cooldownDurationInput.value = appState.cooldownDuration;
-  dom.modeSelect.value = appState.mode;
-  dom.safeModeToggle.checked = appState.isSafeMode;
+  setIfNotEditing(dom.stakeAmountInput, appState.stakeAmount.toFixed(2));
+  setIfNotEditing(dom.durationInput, String(appState.duration));
+  if (document.activeElement !== dom.durationUnitInput) dom.durationUnitInput.value = appState.durationUnit;
+  setIfNotEditing(dom.tpUSDInput, appState.tpUSD.toFixed(2));
+  setIfNotEditing(dom.slUSDInput, appState.slUSD.toFixed(2));
+  setIfNotEditing(dom.maxTradesPerSignalInput, String(appState.maxTradesPerSignal));
+  setIfNotEditing(dom.cooldownDurationInput, String(appState.cooldownDuration));
+
+  if (document.activeElement !== dom.modeSelect) dom.modeSelect.value = appState.mode;
+  if (document.activeElement !== dom.safeModeToggle) dom.safeModeToggle.checked = appState.isSafeMode;
+
+  if (document.activeElement !== dom.symbolSelect) dom.symbolSelect.value = appState.symbol;
+  updateSymbolLabels();
 
   updateTrendUI();
   updateAutoResumeUI();
+
+  // account labels
+  dom.loginIdDisplay.textContent = appState.account.loginid || '...';
+  dom.acctTypeDisplay.textContent =
+    appState.account.isVirtual == null ? '...' : (appState.account.isVirtual ? 'DEMO (Virtual)' : 'REAL');
+
+  showAccountWarning(!!appState.account.warningNoVols);
 
   if (appState.isBotRunning) {
     dom.toggleBotBtn.textContent = 'STOP BOT';
@@ -618,57 +644,48 @@ const updateUI = () => {
 };
 
 /* ===========================
-   INPUT -> STATE (iPhone-safe)
+   INPUT -> STATE (instant)
 =========================== */
 const updateAppStateFromUI = () => {
+  appState.symbol = dom.symbolSelect.value;
   appState.stakeAmount = parseFloat(dom.stakeAmountInput.value) || 0;
   appState.duration = parseInt(dom.durationInput.value) || 0;
-  appState.durationUnit = normalizeDurationUnit(dom.durationUnitInput.value);
+  appState.durationUnit = dom.durationUnitInput.value;
   appState.tpUSD = parseFloat(dom.tpUSDInput.value) || 0;
   appState.slUSD = parseFloat(dom.slUSDInput.value) || 0;
   appState.maxTradesPerSignal = parseInt(dom.maxTradesPerSignalInput.value) || 0;
   appState.cooldownDuration = parseInt(dom.cooldownDurationInput.value) || 0;
-  appState.autoResume = !!dom.autoResumeToggle.checked;
-  updateAutoResumeUI();
-  updateUI();
+  updateSymbolLabels();
 };
 
-// ✅ catches iOS select changes reliably
-document.querySelectorAll('input, select').forEach(el => {
-  el.addEventListener('input', updateAppStateFromUI);
-  el.addEventListener('change', updateAppStateFromUI);
+document.querySelectorAll('input, select').forEach(input => {
+  input.addEventListener('input', updateAppStateFromUI);
+  input.addEventListener('change', updateAppStateFromUI);
 });
 
 /* ===========================
    MODE LOGIC
-   ✅ H4 Trend only for MOMENTUM
 =========================== */
 const loadDefaults = (mode) => {
   const d = modeDefaults[mode];
   if (!d) return;
 
   appState.mode = mode;
-
   appState.stakeAmount = d.stake;
   appState.duration = d.duration;
-  appState.durationUnit = normalizeDurationUnit(d.durationUnit);
+  appState.durationUnit = d.durationUnit;
   appState.tpUSD = d.tp;
   appState.slUSD = d.sl;
   appState.maxTradesPerSignal = d.maxTrades;
   appState.cooldownDuration = d.cooldown;
+
   appState.tickBufferSize = d.tickBufferSize;
   appState.momentumThreshold = d.momentumThreshold;
 
-  if (mode === 'MOMENTUM') {
-    appState.trend.enabled = true;
-    appState.trend.status = "LOADING";
-    appState.trend.lastUpdated = 0;
-    if (appState.ws && appState.isAuthenticated) requestH4Candles();
-  } else {
-    appState.trend.enabled = false;
-    appState.trend.status = "OFF";
-  }
+  appState.useTrendFilter = !!d.useTrendFilter;
+  appState.breakoutStrict = !!d.breakoutStrict;
 
+  appState.trend.enabled = appState.useTrendFilter;
   updateUI();
 };
 
@@ -677,12 +694,9 @@ const loadDefaults = (mode) => {
 =========================== */
 const toggleTokenVisibility = () => {
   const input = dom.apiToken;
-  const button = dom.toggleVisibilityBtn;
   const isPassword = input.type === 'password';
   input.type = isPassword ? 'text' : 'password';
-  button.title = isPassword ? 'Hide Token' : 'Show Token';
 };
-
 const copyApiUrl = () => {
   const textToCopy = dom.apiUrlText.textContent;
   const textarea = document.createElement('textarea');
@@ -702,18 +716,11 @@ const copyApiUrl = () => {
 };
 
 /* ===========================
-   FIX 1: LIVE CHART (iPhone-safe) + REAL CANDLES
-   - Build 1-second OHLC candles from tick stream
-   - Use candlestick series
-   - Timestamp-safe (no duplicate time issues)
+   CHART (1s candles from ticks)
 =========================== */
 let chart = null;
 let candleSeries = null;
 let ro = null;
-
-const MAX_CANDLES = 900;          // ~15 minutes at 1s
-let currentCandle = null;         // { time, open, high, low, close }
-let lastCandleTime = 0;
 
 function initChart() {
   const container = document.getElementById('chart-container');
@@ -740,13 +747,6 @@ function initChart() {
   candleSeries = chart.addCandlestickSeries({
     priceLineVisible: false,
     lastValueVisible: true,
-    borderVisible: false,
-    wickVisible: true,
-    // colors are fine (doesn't change your background)
-    upColor: '#22c55e',
-    downColor: '#ef4444',
-    wickUpColor: '#22c55e',
-    wickDownColor: '#ef4444',
   });
 
   dom.chartStatus.textContent = "READY";
@@ -760,51 +760,43 @@ function initChart() {
   ro.observe(container);
 }
 
-function resetCandles() {
-  currentCandle = null;
-  lastCandleTime = 0;
-  if (candleSeries) candleSeries.setData([]);
+function resetChart() {
+  appState.chart.lastCandleTime = 0;
+  appState.chart.lastOHLC = null;
+  appState.chart.hasTick = false;
+  dom.chartStatus.textContent = "WAITING";
+  dom.chartStatus.className = "pill bg-slate-700 text-slate-200";
+  initChart();
 }
 
-function pushTickToCandles(price) {
+function updateCandleFromTick(price) {
   if (!candleSeries) return;
 
-  const p = Number(price);
-  if (!Number.isFinite(p)) return;
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (nowSec < appState.chart.lastCandleTime) return;
 
-  const t = Math.floor(Date.now() / 1000);
-
-  // iPhone-safe: ensure time never goes backwards or duplicates incorrectly
-  const safeT = (t <= lastCandleTime) ? (lastCandleTime + 1) : t;
-
-  if (!currentCandle) {
-    currentCandle = { time: safeT, open: p, high: p, low: p, close: p };
-    lastCandleTime = safeT;
-    candleSeries.update(currentCandle);
+  if (appState.chart.lastCandleTime === 0) {
+    appState.chart.lastCandleTime = nowSec;
+    appState.chart.lastOHLC = { time: nowSec, open: price, high: price, low: price, close: price };
+    candleSeries.update(appState.chart.lastOHLC);
     return;
   }
 
-  // same second candle update
-  if (safeT === currentCandle.time) {
-    currentCandle.high = Math.max(currentCandle.high, p);
-    currentCandle.low = Math.min(currentCandle.low, p);
-    currentCandle.close = p;
-    candleSeries.update(currentCandle);
-    return;
+  if (nowSec === appState.chart.lastCandleTime) {
+    const c = appState.chart.lastOHLC;
+    c.high = Math.max(c.high, price);
+    c.low  = Math.min(c.low, price);
+    c.close = price;
+    candleSeries.update(c);
+  } else {
+    appState.chart.lastCandleTime = nowSec;
+    appState.chart.lastOHLC = { time: nowSec, open: price, high: price, low: price, close: price };
+    candleSeries.update(appState.chart.lastOHLC);
   }
-
-  // new second -> start new candle
-  currentCandle = { time: safeT, open: p, high: p, low: p, close: p };
-  lastCandleTime = safeT;
-
-  candleSeries.update(currentCandle);
-
-  // trim (Lightweight charts doesn't expose series data, so we soft-trim by resetting occasionally)
-  // if you want hard-trim: store candles array; here we keep it light and iPhone-friendly
 }
 
 /* ===========================
-   H4 TREND FILTER (EMA20/EMA50)
+   TREND FILTER
 =========================== */
 function calcEMA(values, period) {
   if (!values || values.length < period) return null;
@@ -815,7 +807,6 @@ function calcEMA(values, period) {
   }
   return ema;
 }
-
 function trendClassify(emaFast, emaSlow) {
   if (emaFast == null || emaSlow == null) return "NEUTRAL";
   const diff = emaFast - emaSlow;
@@ -824,19 +815,10 @@ function trendClassify(emaFast, emaSlow) {
   if (diff < -eps) return "BEAR";
   return "NEUTRAL";
 }
-
 function requestH4Candles() {
   if (!appState.ws || !appState.isAuthenticated) return;
-  if (!appState.trend.enabled) return;
-
-  appState.ws.send(JSON.stringify({
-    candles: SYMBOL,
-    granularity: appState.trend.tfSeconds,
-    count: 80,
-    end: "latest"
-  }));
+  appState.ws.send(JSON.stringify({ candles: appState.symbol, granularity: appState.trend.tfSeconds, count: 80, end: "latest" }));
 }
-
 function maybeRefreshTrend() {
   if (!appState.trend.enabled) return;
   const now = Date.now();
@@ -847,18 +829,117 @@ function maybeRefreshTrend() {
 
 /* ===========================
    SIGNALS
-   - SCALP = CALL-only scrape
-   - MOMENTUM = CALL/PUT based on direction
-   - H4 Trend gate only in MOMENTUM
 =========================== */
-function momentumDirection() {
+function getMomentumDirection() {
   if (appState.tickBuffer.length < appState.tickBufferSize) return null;
   const first = appState.tickBuffer[0];
   const last  = appState.tickBuffer[appState.tickBuffer.length - 1];
   const delta = last - first;
-
   if (Math.abs(delta) < appState.momentumThreshold) return null;
   return delta > 0 ? 'CALL' : 'PUT';
+}
+function passesBreakoutFilter(direction) {
+  if (!appState.breakoutStrict) return true;
+  const buf = appState.tickBuffer;
+  if (buf.length < appState.tickBufferSize) return false;
+  const last = buf[buf.length - 1];
+  const hi = Math.max(...buf);
+  const lo = Math.min(...buf);
+  const span = hi - lo || 1;
+  if (direction === 'CALL') return (hi - last) <= (span * 0.15);
+  if (direction === 'PUT')  return (last - lo) <= (span * 0.15);
+  return false;
+}
+function trendAllows(direction) {
+  if (!appState.trend.enabled) return true;
+  if (appState.trend.status === "LOADING") return false;
+  if (direction === 'CALL') return appState.trend.status === "BULL";
+  if (direction === 'PUT')  return appState.trend.status === "BEAR";
+  return false;
+}
+
+/* ===========================
+   CONNECT HELPERS
+=========================== */
+function sendSafe(obj) {
+  if (!appState.ws || appState.ws.readyState !== 1) return;
+  appState.ws.send(JSON.stringify(obj));
+}
+
+/* ===========================
+   SYMBOL LIST LOADER (ALL VOL + VOL 1s)
+=========================== */
+function requestActiveSymbols() {
+  sendSafe({ active_symbols: "brief" });
+}
+
+function isVolLikeSymbol(s) {
+  const dn = (s.display_name || "").toLowerCase();
+  const mk = (s.market || "").toLowerCase();
+  const sm = (s.submarket || "").toLowerCase();
+  // catch volatility indexes + 1s naming differences
+  return dn.includes("volatility") || mk.includes("synthetic") || sm.includes("synthetic");
+}
+
+function populateSymbolDropdown(activeSymbols) {
+  const list = Array.isArray(activeSymbols) ? activeSymbols : [];
+  const filtered = list.filter(isVolLikeSymbol);
+
+  // prefer explicit "Volatility" in name
+  const vols = filtered.filter(s => (s.display_name || "").toLowerCase().includes("volatility"));
+
+  const finalList = vols.length ? vols : filtered;
+
+  if (!finalList.length) {
+    appState.account.warningNoVols = true;
+    updateUI();
+    return;
+  }
+
+  appState.account.warningNoVols = false;
+
+  finalList.sort((a,b) => {
+    const a1 = (a.display_name || "").includes("(1s") ? 1 : 0;
+    const b1 = (b.display_name || "").includes("(1s") ? 1 : 0;
+    if (a1 !== b1) return a1 - b1;
+    return (a.display_name || "").localeCompare(b.display_name || "");
+  });
+
+  const current = appState.symbol;
+
+  dom.symbolSelect.innerHTML = "";
+  for (const s of finalList) {
+    const opt = document.createElement("option");
+    opt.value = s.symbol;
+    opt.textContent = s.display_name || s.symbol;
+    dom.symbolSelect.appendChild(opt);
+  }
+
+  const hasCurrent = [...dom.symbolSelect.options].some(o => o.value === current);
+  appState.symbol = hasCurrent ? current : dom.symbolSelect.value;
+  updateSymbolLabels();
+  updateUI();
+}
+
+/* ===========================
+   SUBSCRIBE (switching safe)
+=========================== */
+function subscribeTicksForSymbol() {
+  if (appState.tickSubId) sendSafe({ forget: appState.tickSubId });
+  appState.tickSubId = null;
+  appState.tickBuffer = [];
+  appState.lastTick = null;
+  resetChart();
+  sendSafe({ ticks: appState.symbol, subscribe: 1 });
+  if (appState.trend.enabled) {
+    appState.trend.lastUpdated = 0;
+    requestH4Candles();
+  }
+}
+function subscribeBalance() {
+  if (appState.balanceSubId) sendSafe({ forget: appState.balanceSubId });
+  appState.balanceSubId = null;
+  sendSafe({ balance: 1, subscribe: 1 });
 }
 
 /* ===========================
@@ -885,13 +966,13 @@ const startBot = () => {
   appState.tickBuffer = [];
   appState.pendingProposalId = null;
   appState.pendingProposalAt = 0;
+  appState.tickSubId = null;
+  appState.balanceSubId = null;
 
+  appState.account.warningNoVols = false;
   updateProfitDisplay(0);
 
-  dom.chartStatus.textContent = "CONNECTING...";
-  dom.chartStatus.className = "pill bg-yellow-700 text-white";
-
-  resetCandles();
+  resetChart();
 
   appState.isBotRunning = true;
   updateUI();
@@ -899,9 +980,7 @@ const startBot = () => {
 };
 
 const stopBot = () => {
-  if (appState.ws) {
-    try { appState.ws.close(); } catch (_) {}
-  }
+  if (appState.ws) { try { appState.ws.close(); } catch (_) {} }
   appState.ws = null;
 
   appState.isBotRunning = false;
@@ -911,8 +990,6 @@ const stopBot = () => {
   appState.isSelling = false;
   appState.tickBuffer = [];
   appState.cooldownUntil = 0;
-  appState.pendingProposalId = null;
-  appState.pendingProposalAt = 0;
 
   updateConnectionStatus('DISCONNECTED', 'bg-red-800 text-white');
   updateTradeStatus('Stopped.', 'bg-slate-600 text-slate-300');
@@ -920,7 +997,6 @@ const stopBot = () => {
 
   dom.chartStatus.textContent = "WAITING";
   dom.chartStatus.className = "pill bg-slate-700 text-slate-200";
-
   updateUI();
 };
 
@@ -929,13 +1005,12 @@ const stopBot = () => {
 =========================== */
 const connectToDeriv = () => {
   appState.ws = new WebSocket(API_URL);
-
   updateConnectionStatus('CONNECTING...', 'bg-yellow-600 text-white');
   updateLoginBadge('CONNECTING...');
 
   appState.ws.onopen = () => {
     updateConnectionStatus('CONNECTED', 'bg-sky-600 text-white');
-    appState.ws.send(JSON.stringify({ authorize: appState.token }));
+    sendSafe({ authorize: appState.token });
   };
 
   appState.ws.onmessage = (msg) => {
@@ -947,7 +1022,6 @@ const connectToDeriv = () => {
 
   appState.ws.onclose = () => {
     appState.isAuthenticated = false;
-
     if (appState.isBotRunning) {
       updateConnectionStatus('RECONNECTING...', 'bg-yellow-600 text-white');
       setTimeout(connectToDeriv, 2500);
@@ -962,7 +1036,7 @@ const connectToDeriv = () => {
   };
 };
 
-function resetEntryPipeline(reason = "reset") {
+function resetEntryPipeline(reason="reset") {
   appState.isEntryInProgress = false;
   appState.pendingProposalId = null;
   appState.pendingProposalAt = 0;
@@ -973,60 +1047,70 @@ const handleResponse = (response) => {
   if (response.error) {
     console.error('API Error:', response.error.message);
     resetEntryPipeline('API Error');
-
     if (response.error.code === 'AuthorizationRequired') {
       dom.blockReasonDisplay.textContent = 'Auth Failed';
       stopBot();
       return;
     }
-
     updateTradeStatus('ERROR', 'bg-red-600 text-white');
     return;
   }
 
   switch (response.msg_type) {
-    case 'authorize':
+    case 'authorize': {
       appState.isAuthenticated = true;
 
+      // show login + demo/real
+      appState.account.loginid = response.authorize.loginid || '';
+      appState.account.isVirtual = !!response.authorize.is_virtual;
+      appState.account.currency = response.authorize.currency || '';
+
       appState.currentBalance = Number(response.authorize.balance || 0);
-      dom.currentBalanceDisplay.textContent =
-        `${response.authorize.currency} ${appState.currentBalance.toFixed(2)}`;
+      dom.currentBalanceDisplay.textContent = `${response.authorize.currency} ${appState.currentBalance.toFixed(2)}`;
 
-      if (appState.isBotRunning) {
-        appState.ws.send(JSON.stringify({ ticks: SYMBOL, subscribe: 1 }));
-        appState.ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+      // load symbols for THIS account
+      requestActiveSymbols();
 
-        if (appState.trend.enabled) {
-          appState.trend.status = "LOADING";
-          appState.trend.lastUpdated = 0;
-          requestH4Candles();
-        } else {
-          appState.trend.status = "OFF";
-        }
+      // subscribe streams
+      subscribeTicksForSymbol();
+      subscribeBalance();
+      sendSafe({ proposal_open_contract: 1, subscribe: 1 });
 
-        updateTradeStatus('Monitoring Ticks...', 'bg-yellow-600 text-white');
-        dom.blockReasonDisplay.textContent = 'None';
+      // trend initial
+      appState.trend.lastUpdated = 0;
+      if (appState.trend.enabled) requestH4Candles();
 
-        dom.chartStatus.textContent = "LIVE";
-        dom.chartStatus.className = "pill bg-sky-700 text-white";
-        updateTrendUI();
-      }
+      updateTradeStatus('Monitoring Ticks...', 'bg-yellow-600 text-white');
+      dom.blockReasonDisplay.textContent = 'None';
+
+      dom.chartStatus.textContent = "LIVE";
+      dom.chartStatus.className = "pill bg-sky-700 text-white";
+      break;
+    }
+
+    case 'active_symbols':
+      if (response.active_symbols) populateSymbolDropdown(response.active_symbols);
       break;
 
     case 'balance':
+      if (response.balance && response.balance.id) appState.balanceSubId = response.balance.id;
       appState.currentBalance = Number(response.balance.balance || 0);
-      dom.currentBalanceDisplay.textContent =
-        `${response.balance.currency} ${appState.currentBalance.toFixed(2)}`;
+      dom.currentBalanceDisplay.textContent = `${response.balance.currency} ${appState.currentBalance.toFixed(2)}`;
       break;
 
     case 'tick': {
+      if (response.tick && response.tick.id) appState.tickSubId = response.tick.id;
       if (!appState.isBotRunning) return;
 
       const price = Number(response.tick.quote);
       if (!Number.isFinite(price)) return;
 
-      // ✅ Chart: build 1-second candles from live ticks
-      pushTickToCandles(price);
+      if (!appState.chart.hasTick) {
+        appState.chart.hasTick = true;
+        dom.chartStatus.textContent = "LIVE";
+        dom.chartStatus.className = "pill bg-sky-700 text-white";
+      }
+      updateCandleFromTick(price);
 
       appState.lastTick = price;
       appState.tickBuffer.push(price);
@@ -1046,7 +1130,6 @@ const handleResponse = (response) => {
       const closes = response.candles.map(c => parseFloat(c.close)).filter(n => Number.isFinite(n));
       const ema20 = calcEMA(closes, appState.trend.emaFast);
       const ema50 = calcEMA(closes, appState.trend.emaSlow);
-
       appState.trend.ema20 = ema20;
       appState.trend.ema50 = ema50;
       appState.trend.status = trendClassify(ema20, ema50);
@@ -1061,186 +1144,112 @@ const handleResponse = (response) => {
         updateTradeStatus('ERROR', 'bg-red-600 text-white');
         break;
       }
-
       appState.pendingProposalId = response.proposal.id;
-      appState.pendingProposalAt = Date.now();
-
-      appState.ws.send(JSON.stringify({
-        buy: appState.pendingProposalId,
-        price: appState.stakeAmount
-      }));
+      sendSafe({ buy: appState.pendingProposalId, price: appState.stakeAmount });
       break;
     }
 
     case 'buy':
       appState.isEntryInProgress = false;
       appState.pendingProposalId = null;
-
       appState.currentContractId = response.buy.contract_id;
       appState.currentContractBuyPrice = response.buy.buy_price;
       appState.currentContractEntryTime = Date.now();
       appState.tradeCounter++;
-
       updateTradeStatus('Contract Active', 'bg-indigo-600 text-white');
-
-      appState.ws.send(JSON.stringify({
-        proposal_open_contract: 1,
-        contract_id: appState.currentContractId,
-        subscribe: 1
-      }));
       break;
 
     case 'proposal_open_contract': {
       const c = response.proposal_open_contract;
       if (!c) break;
 
-      updateSellableStatus(c.is_sellable);
+      if (appState.currentContractId && c.contract_id === appState.currentContractId) {
+        updateSellableStatus(c.is_sellable);
 
-      if (c.is_sold === 1) {
-        const profit = Number(c.sell_price) - Number(c.buy_price);
-        appState.sessionProfit += profit;
-        updateProfitDisplay(appState.sessionProfit);
+        if (c.is_sold === 1) {
+          const profit = Number(c.sell_price) - Number(c.buy_price);
+          appState.sessionProfit += profit;
+          updateProfitDisplay(appState.sessionProfit);
 
-        appState.currentContractId = null;
-        appState.isSelling = false;
-        appState.isEntryInProgress = false;
-        appState.tickBuffer = [];
-        appState.tradeCounter = 0;
+          appState.currentContractId = null;
+          appState.isSelling = false;
+          appState.isEntryInProgress = false;
+          appState.tickBuffer = [];
+          appState.tradeCounter = 0;
 
-        appState.cooldownUntil = Date.now() + (appState.cooldownDuration * 1000);
-        dom.blockReasonDisplay.textContent = 'Cooldown';
-        updateTradeStatus('Trade Closed. Cooldown...', 'bg-orange-500 text-white');
+          appState.cooldownUntil = Date.now() + (appState.cooldownDuration * 1000);
+          dom.blockReasonDisplay.textContent = 'Cooldown';
+          updateTradeStatus('Trade Closed. Cooldown...', 'bg-orange-500 text-white');
 
-        if (appState.autoResume) {
-          setTimeout(() => {
-            if (!appState.isBotRunning) return;
-            if (Date.now() >= appState.cooldownUntil) {
-              dom.blockReasonDisplay.textContent = 'None';
-              updateTradeStatus('Monitoring Ticks...', 'bg-yellow-600 text-white');
-            }
-          }, appState.cooldownDuration * 1000);
+          if (appState.autoResume) {
+            setTimeout(() => {
+              if (!appState.isBotRunning) return;
+              if (Date.now() >= appState.cooldownUntil) {
+                dom.blockReasonDisplay.textContent = 'None';
+                updateTradeStatus('Monitoring Ticks...', 'bg-yellow-600 text-white');
+              }
+            }, appState.cooldownDuration * 1000);
+          }
+          break;
         }
-        break;
-      }
 
-      checkProfitAndLoss(c);
+        checkProfitAndLoss(c);
+      }
       break;
     }
-
-    case 'sell':
-      break;
   }
 
   updateUI();
 };
 
 /* ===========================
-   ENTRY GUARDS + ENTER TRADE
+   ENTRY + TRADE
 =========================== */
 function checkAndEnterTrade() {
-  if (!appState.isBotRunning) return;
-  if (!appState.isAuthenticated) return;
+  if (!appState.isBotRunning || !appState.isAuthenticated) return;
 
-  if (Date.now() < appState.cooldownUntil) {
-    dom.blockReasonDisplay.textContent = 'Cooldown';
-    return;
-  } else if (dom.blockReasonDisplay.textContent === 'Cooldown' && appState.autoResume) {
-    dom.blockReasonDisplay.textContent = 'None';
+  if (Date.now() < appState.cooldownUntil) { dom.blockReasonDisplay.textContent='Cooldown'; return; }
+  else if (dom.blockReasonDisplay.textContent === 'Cooldown' && appState.autoResume) dom.blockReasonDisplay.textContent='None';
+
+  if (appState.isEntryInProgress) { dom.blockReasonDisplay.textContent='Entry In Progress'; return; }
+  if (appState.currentContractId) { dom.blockReasonDisplay.textContent='Trade Active'; return; }
+  if (appState.tradeCounter >= appState.maxTradesPerSignal) { dom.blockReasonDisplay.textContent='Max Trades/Signal Hit'; return; }
+
+  const direction = getMomentumDirection();
+  if (!direction) { dom.blockReasonDisplay.textContent='Waiting Good Move'; return; }
+
+  if (!passesBreakoutFilter(direction)) { dom.blockReasonDisplay.textContent='Waiting Breakout'; return; }
+
+  if (appState.trend.enabled) {
+    if (appState.trend.status === "LOADING") { dom.blockReasonDisplay.textContent='H4 Trend Loading'; return; }
+    if (!trendAllows(direction)) { dom.blockReasonDisplay.textContent=`H4 Trend Blocked (${appState.trend.status})`; return; }
   }
 
-  if (appState.isEntryInProgress) {
-    dom.blockReasonDisplay.textContent = 'Entry In Progress';
-    return;
-  }
-
-  if (appState.currentContractId) {
-    dom.blockReasonDisplay.textContent = 'Trade Active';
-    return;
-  }
-
-  if (appState.tradeCounter >= appState.maxTradesPerSignal) {
-    dom.blockReasonDisplay.textContent = 'Max Trades/Signal Hit';
-    return;
-  }
-
-  let contractType = 'CALL';
-
-  if (appState.mode === 'SCALP') {
-    contractType = 'CALL'; // scrape
-    const dir = momentumDirection();
-    if (!dir) {
-      dom.blockReasonDisplay.textContent = 'Waiting Scrape Move';
-      return;
-    }
-  } else {
-    // MOMENTUM: CALL or PUT
-    const dir = momentumDirection();
-    if (!dir) {
-      dom.blockReasonDisplay.textContent = 'Waiting Momentum';
-      return;
-    }
-    contractType = dir;
-
-    // H4 Trend gate only in MOMENTUM
-    if (appState.trend.enabled) {
-      if (appState.trend.status === "LOADING") {
-        dom.blockReasonDisplay.textContent = 'H4 Trend Loading';
-        return;
-      }
-      if (appState.trend.status === "NEUTRAL") {
-        dom.blockReasonDisplay.textContent = 'H4 Trend Neutral';
-        return;
-      }
-      if (appState.trend.status === "BULL" && contractType !== 'CALL') {
-        dom.blockReasonDisplay.textContent = 'H4 Trend Blocks PUT';
-        return;
-      }
-      if (appState.trend.status === "BEAR" && contractType !== 'PUT') {
-        dom.blockReasonDisplay.textContent = 'H4 Trend Blocks CALL';
-        return;
-      }
-    }
-  }
-
-  dom.blockReasonDisplay.textContent = 'None';
-  enterTrade(contractType);
+  dom.blockReasonDisplay.textContent='None';
+  enterTrade(direction);
 }
 
-function enterTrade(contractType) {
+function enterTrade(direction) {
   if (!appState.ws || !appState.isAuthenticated) return;
 
-  // ✅ always sync UI right before trade (so your dropdown changes apply)
-  updateAppStateFromUI();
-  appState.durationUnit = normalizeDurationUnit(appState.durationUnit);
-
-  if (!Number.isFinite(appState.duration) || appState.duration <= 0) {
-    updateTradeStatus('ERROR: Duration must be > 0', 'bg-red-600 text-white');
-    return;
-  }
-
   appState.isEntryInProgress = true;
-  appState.pendingProposalId = null;
-  appState.pendingProposalAt = Date.now();
   appState.tickBuffer = [];
-  updateTradeStatus('Creating Proposal...', 'bg-orange-500 text-white');
+  updateTradeStatus(`Creating Proposal (${direction})...`, 'bg-orange-500 text-white');
 
-  const proposalReq = {
+  sendSafe({
     proposal: 1,
     amount: appState.stakeAmount,
     basis: 'stake',
-    contract_type: contractType,
+    contract_type: direction,
     currency: 'USD',
     duration: appState.duration,
     duration_unit: appState.durationUnit,
-    symbol: SYMBOL
-  };
-
-  appState.ws.send(JSON.stringify(proposalReq));
+    symbol: appState.symbol
+  });
 
   setTimeout(() => {
     if (!appState.isBotRunning) return;
     if (appState.currentContractId) return;
-
     if (appState.isEntryInProgress) {
       resetEntryPipeline('Entry Timeout');
       updateTradeStatus('Monitoring Ticks...', 'bg-yellow-600 text-white');
@@ -1254,168 +1263,113 @@ function enterTrade(contractType) {
 function checkProfitAndLoss(contract) {
   const currentProfit = Number(contract.profit);
 
-  if (currentProfit >= appState.tpUSD) {
-    sellContract();
-    return;
-  }
+  if (currentProfit >= appState.tpUSD) { sellContract(); return; }
 
   if (appState.isSafeMode) {
     const lossThreshold = -Math.abs(appState.slUSD);
-    if (currentProfit <= lossThreshold) {
-      sellContract();
-    }
+    if (currentProfit <= lossThreshold) sellContract();
   }
 }
 
-/* ===========================
-   SELL (NO SPAM, SELLABLE ONLY)
-=========================== */
 function sellContract() {
-  if (appState.isSelling) return;
-  if (!appState.currentContractId) return;
+  if (appState.isSelling || !appState.currentContractId) return;
 
   if (appState.is_sellable !== 1) {
-    dom.blockReasonDisplay.textContent = 'Not Sellable';
+    dom.blockReasonDisplay.textContent = 'Not Sellable (Waiting)';
+    setTimeout(() => {
+      if (!appState.currentContractId) return;
+      if (appState.isSelling) return;
+      if (appState.is_sellable === 1) sellContract();
+    }, 350);
     return;
   }
 
   appState.isSelling = true;
   updateTradeStatus('Selling...', 'bg-red-500 text-white');
-
-  appState.ws.send(JSON.stringify({
-    sell: appState.currentContractId,
-    price: 0
-  }));
+  sendSafe({ sell: appState.currentContractId, price: 0 });
 }
 
 /* ===========================
-   FIX 2: GEMINI FALLBACK MODE (no API key needed)
+   INSIGHTS (fallback)
 =========================== */
 const GEMINI_API_KEY = "";
 const GEMINI_MODEL = 'gemini-2.5-flash-preview-09-2025';
 
-function statsFromTicks(arr) {
-  const xs = arr.slice(-30);
-  if (xs.length < 5) return null;
-  const mean = xs.reduce((a,b)=>a+b,0) / xs.length;
-  const varr = xs.reduce((a,b)=>a+Math.pow(b-mean,2),0) / xs.length;
-  const sd = Math.sqrt(varr);
-  const slope = xs[xs.length-1] - xs[0];
-  return { mean, sd, slope, n: xs.length };
-}
-
 function fallbackInsight(type) {
-  const s = statsFromTicks(appState.tickBuffer) || { mean: appState.lastTick || 0, sd: 0, slope: 0, n: 0 };
-  const dir = (s.slope > 0) ? "UP" : (s.slope < 0 ? "DOWN" : "FLAT");
-  const trend = appState.trend.enabled ? appState.trend.status : "OFF";
-  const vol = s.sd;
+  const trend = appState.trend.enabled ? appState.trend.status : "OFF (SCALP)";
+  const dir = getMomentumDirection() || "NONE";
+  const buf = appState.tickBuffer;
+  const first = buf.length ? buf[0] : null;
+  const last = buf.length ? buf[buf.length - 1] : null;
+  const delta = (first != null && last != null) ? (last - first) : 0;
 
-  if (type === 'sentiment') {
+  if (type === "sentiment") {
     return [
-      "Fallback Insight Mode (No Gemini API key detected).",
-      "",
-      `Symbol: ${SYMBOL}`,
-      `Mode: ${appState.mode}`,
-      `Short-term Direction (last ${s.n} ticks): ${dir}`,
-      `Short-term Volatility (std): ${fmt(vol, 4)}`,
-      `H4 Trend Filter: ${trend}`,
-      "",
-      appState.mode === "MOMENTUM"
-        ? "Momentum note: Bot can take CALL or PUT. H4 Trend will block trades against BULL/BEAR."
-        : "Scalp note: Fast scrape behavior; H4 Trend is OFF in SCALP for speed.",
-      "",
-      "Tip: If chart is moving but entries feel late, increase duration (MOMENTUM) or lower momentumThreshold (advanced)."
-    ].join("\n");
+      `Fallback Insight (no API key):`,
+      `• Symbol: ${appState.symbol}`,
+      `• Mode: ${appState.mode}`,
+      `• Trend Filter: ${trend}`,
+      `• Momentum Direction: ${dir}`,
+      `• Momentum Delta: ${delta.toFixed(4)}`,
+      `• TP: $${appState.tpUSD.toFixed(2)} | SL: $${appState.slUSD.toFixed(2)} (SL sells only if Safe Mode ON)`
+    ].join('\n');
   }
 
-  // risk
-  const rr = (appState.tpUSD > 0) ? (Math.abs(appState.slUSD) / appState.tpUSD) : 0;
   return [
-    "Fallback Risk Mode (No Gemini API key detected).",
-    "",
-    `Mode: ${appState.mode}`,
-    `Stake: $${fmt(appState.stakeAmount, 2)}`,
-    `TP: $${fmt(appState.tpUSD, 2)} | SL: $${fmt(appState.slUSD, 2)} ${appState.isSafeMode ? "(SafeMode ON)" : "(SafeMode OFF)"}`,
-    `Duration: ${appState.duration} ${appState.durationUnit === 't' ? 'Ticks' : appState.durationUnit === 's' ? 'Seconds' : appState.durationUnit === 'm' ? 'Minutes' : 'Hours'}`,
-    `Cooldown: ${appState.cooldownDuration}s`,
-    "",
-    `SL-to-TP multiple: ~${fmt(rr, 2)}x`,
-    rr >= 3 ? "Warning: Your SL is much larger than TP. SafeMode OFF means SL won't trigger sells." : "Balance: TP/SL looks closer.",
-    "",
-    "Tip: In MOMENTUM, Minutes duration is best for clean breakouts. In SCALP, Ticks is best for scraping."
-  ].join("\n");
+    `Fallback Risk Check (no API key):`,
+    `• Symbol: ${appState.symbol}`,
+    `• Stake: $${appState.stakeAmount.toFixed(2)}`,
+    `• TP: $${appState.tpUSD.toFixed(2)} | SL: $${appState.slUSD.toFixed(2)}`,
+    `• Duration: ${appState.duration}${appState.durationUnit}`,
+    `• Cooldown: ${appState.cooldownDuration}s`,
+    `• Session P/L: $${appState.sessionProfit.toFixed(2)}`
+  ].join('\n');
 }
 
-const callGeminiAPI = async (userQuery, systemPrompt, fallbackType) => {
+const callGeminiAPI = async (userQuery, systemPrompt) => {
   dom.geminiLoadingIndicator.classList.remove('hidden');
   dom.geminiOutput.textContent = 'Generating insight... Please wait.';
   dom.geminiSources.innerHTML = '';
 
   try {
-    if (!GEMINI_API_KEY) {
-      dom.geminiLoadingIndicator.classList.add('hidden');
-      return { text: fallbackInsight(fallbackType), sources: [] };
-    }
-
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-    const payload = {
-      contents: [{ parts: [{ text: userQuery }] }],
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-    };
-
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const result = await response.json();
-    const candidate = result.candidates?.[0];
-
+    if (!GEMINI_API_KEY) return { text: fallbackInsight(systemPrompt), sources: [] };
+    // (optional real call kept out for safety)
+    return { text: fallbackInsight(systemPrompt), sources: [] };
+  } finally {
     dom.geminiLoadingIndicator.classList.add('hidden');
-
-    if (candidate && candidate.content?.parts?.[0]?.text) {
-      return { text: candidate.content.parts[0].text, sources: [] };
-    }
-    return { text: fallbackInsight(fallbackType), sources: [] };
-  } catch (e) {
-    dom.geminiLoadingIndicator.classList.add('hidden');
-    return { text: fallbackInsight(fallbackType) + `\n\n(Online error: ${e.message})`, sources: [] };
-  }
-};
-
-const displayGeminiResult = ({ text, sources }) => {
-  dom.geminiOutput.textContent = text;
-  dom.geminiSources.innerHTML = '';
-  if (sources && sources.length) {
-    dom.geminiSources.innerHTML =
-      `<p class="font-semibold text-slate-300">Sources:</p>` +
-      sources.map((s, i) => `<a href="${s.uri}" target="_blank" class="text-sky-400 hover:text-sky-300 underline block">Source ${i+1}: ${s.title}</a>`).join('');
   }
 };
 
 const analyzeMarket = async () => {
-  const systemPrompt = "Act as a specialized financial market analyst for volatility indices. Provide a concise, professional sentiment analysis.";
-  const userQuery = `What is the current trading sentiment and factors for Deriv symbol ${SYMBOL}?`;
-  const result = await callGeminiAPI(userQuery, systemPrompt, 'sentiment');
-  displayGeminiResult(result);
+  const result = await callGeminiAPI(`Analyze trading sentiment for ${appState.symbol}.`, "sentiment");
+  dom.geminiOutput.textContent = result.text;
 };
-
 const assessRisk = async () => {
   updateAppStateFromUI();
-  const { stakeAmount, tpUSD, slUSD, mode } = appState;
-  const systemPrompt = "Act as an experienced trading risk manager. Provide a concise risk/reward assessment.";
-  const userQuery = `Analyze risk: Mode=${mode}, Stake=$${stakeAmount.toFixed(2)}, TP=$${tpUSD.toFixed(2)}, SL=$${slUSD.toFixed(2)}.`;
-  const result = await callGeminiAPI(userQuery, systemPrompt, 'risk');
-  displayGeminiResult(result);
+  const result = await callGeminiAPI(`Analyze risk for ${appState.symbol}.`, "risk");
+  dom.geminiOutput.textContent = result.text;
 };
+
+/* ===========================
+   SYMBOL SWITCH
+=========================== */
+function onSymbolChange() {
+  updateAppStateFromUI();
+  updateUI();
+  if (appState.isBotRunning && appState.isAuthenticated) {
+    updateTradeStatus(`Switching Symbol → ${appState.symbol}`, 'bg-yellow-600 text-white');
+    subscribeTicksForSymbol();
+    updateTradeStatus('Monitoring Ticks...', 'bg-yellow-600 text-white');
+  }
+}
 
 /* ===========================
    INIT + EVENTS
 =========================== */
 document.addEventListener('DOMContentLoaded', () => {
   initChart();
+  appState.symbol = dom.symbolSelect.value || 'R_100';
+  updateSymbolLabels();
 
   loadDefaults(appState.mode);
   setSettingsLock(true);
@@ -1430,24 +1384,12 @@ document.addEventListener('DOMContentLoaded', () => {
   updateUI();
 });
 
-dom.unlockSettingsBtn.addEventListener('click', () => {
-  setSettingsLock(!appState.isSettingsLocked);
-});
+dom.unlockSettingsBtn.addEventListener('click', () => setSettingsLock(!appState.isSettingsLocked));
+dom.modeSelect.addEventListener('change', (e) => { loadDefaults(e.target.value); updateAppStateFromUI(); });
+dom.safeModeToggle.addEventListener('change', (e) => { appState.isSafeMode = e.target.checked; updateUI(); });
+dom.autoResumeToggle.addEventListener('change', (e) => { appState.autoResume = !!e.target.checked; updateAutoResumeUI(); });
 
-dom.modeSelect.addEventListener('change', (e) => {
-  loadDefaults(e.target.value);
-  updateAppStateFromUI();
-});
-
-dom.safeModeToggle.addEventListener('change', (e) => {
-  appState.isSafeMode = e.target.checked;
-  updateUI();
-});
-
-dom.autoResumeToggle.addEventListener('change', (e) => {
-  appState.autoResume = e.target.checked;
-  updateAutoResumeUI();
-});
+dom.symbolSelect.addEventListener('change', onSymbolChange);
 
 dom.toggleVisibilityBtn.addEventListener('click', toggleTokenVisibility);
 dom.copyApiUrlBtn.addEventListener('click', copyApiUrl);
@@ -1457,13 +1399,8 @@ dom.assessRiskBtn.addEventListener('click', assessRisk);
 
 dom.toggleBotBtn.addEventListener('click', () => {
   const token = dom.apiToken.value.trim();
-
-  if (!appState.isBotRunning && token === '') {
-    dom.tokenErrorMessage.classList.remove('hidden');
-  } else {
-    dom.tokenErrorMessage.classList.add('hidden');
-  }
-
+  if (!appState.isBotRunning && token === '') dom.tokenErrorMessage.classList.remove('hidden');
+  else dom.tokenErrorMessage.classList.add('hidden');
   if (appState.isBotRunning) stopBot();
   else startBot();
 });
