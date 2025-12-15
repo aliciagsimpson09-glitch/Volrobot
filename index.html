@@ -22,50 +22,168 @@
       padding: 20px 10px;
     }
 
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #1e293b; }
-    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    /* =========================
+       LOVE / PREMIUM THEME (LOOK ONLY)
+       - No JS edits
+       - No ID changes
+       - No element removal
+    ========================= */
+    :root{
+      --bg-card: rgba(30, 41, 59, 0.78);
+      --bg-card-2: rgba(15, 23, 42, 0.55);
+      --border-soft: rgba(148, 163, 184, 0.18);
+      --border-strong: rgba(148, 163, 184, 0.26);
+      --text: #e2e8f0;
+      --muted: rgba(226, 232, 240, 0.70);
 
-    .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      margin-bottom: 20px;
+      --rose: rgba(244, 114, 182, 0.95);
+      --violet: rgba(167, 139, 250, 0.95);
+      --teal: rgba(45, 212, 191, 0.95);
+
+      --shadow: 0 18px 60px rgba(0,0,0,0.35);
+      --shadow-soft: 0 10px 30px rgba(0,0,0,0.28);
+      --glow-rose: 0 0 0 1px rgba(244,114,182,0.18), 0 0 28px rgba(244,114,182,0.12);
+      --glow-violet: 0 0 0 1px rgba(167,139,250,0.18), 0 0 28px rgba(167,139,250,0.12);
+      --glow-teal: 0 0 0 1px rgba(45,212,191,0.16), 0 0 28px rgba(45,212,191,0.10);
+
+      --radius: 16px;
     }
+
+    /* Smooth, premium default */
+    * { -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(30, 41, 59, 0.65); }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.55); }
 
     .container-wrapper { width: 100%; max-width: 1200px; }
 
+    /* LOVE cards (glass + premium) */
+    .card {
+      background: linear-gradient(180deg, var(--bg-card), var(--bg-card-2));
+      border: 1px solid var(--border-soft);
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+      transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(700px 220px at 10% 0%, rgba(244,114,182,0.08), transparent 55%),
+        radial-gradient(700px 220px at 90% 10%, rgba(167,139,250,0.08), transparent 55%),
+        radial-gradient(500px 200px at 50% 110%, rgba(45,212,191,0.05), transparent 60%);
+      pointer-events:none;
+      opacity: 1;
+    }
+    .card:hover{
+      transform: translateY(-2px);
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow);
+    }
+
+    /* Title glow (keeps text exactly Kut Milz TB) */
+    h1{
+      letter-spacing: 0.3px;
+      text-shadow: 0 0 22px rgba(244,114,182,0.18), 0 0 22px rgba(167,139,250,0.14);
+    }
+
+    /* Pills + statuses (must keep "pill" / "status-pill" names for JS) */
     .pill {
-      padding: 4px 10px;
+      padding: 6px 12px;
       border-radius: 9999px;
       font-size: 0.75rem;
-      font-weight: 600;
+      font-weight: 700;
       display: inline-flex;
       align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(148,163,184,0.18);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.18);
     }
 
     .status-pill {
       display: flex;
       align-items: center;
-      padding: 4px 10px;
-      border-radius: 6px;
+      padding: 6px 12px;
+      border-radius: 10px;
       font-size: 0.875rem;
-      font-weight: 500;
+      font-weight: 700;
+      border: 1px solid rgba(148,163,184,0.18);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.22);
+      letter-spacing: 0.2px;
     }
 
+    /* Make ALL buttons feel app-like (without changing behavior) */
+    button{
+      transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+      will-change: transform;
+    }
+    button:hover{ filter: brightness(1.06); }
+    button:active{ transform: translateY(1px) scale(0.99); }
+    button:focus-visible{
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(244,114,182,0.22), 0 0 0 6px rgba(167,139,250,0.14);
+    }
+
+    /* Premium inputs/selects everywhere (no structure change) */
+    input, select{
+      border-radius: 12px !important;
+    }
+    input:focus, select:focus{
+      outline: none !important;
+      box-shadow: 0 0 0 3px rgba(244,114,182,0.16), 0 0 0 6px rgba(167,139,250,0.10) !important;
+    }
+
+    /* Upgrade the log panels without changing IDs */
+    #tx-log, #system-log{
+      border-radius: 14px !important;
+      border: 1px solid rgba(148,163,184,0.18) !important;
+      background: linear-gradient(180deg, rgba(2,6,23,0.40), rgba(2,6,23,0.20)) !important;
+      box-shadow: inset 0 0 0 1px rgba(148,163,184,0.06);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    /* Make the alert look premium */
+    #cluster-alert{
+      box-shadow: var(--glow-violet);
+    }
+
+    /* Chart container polish */
     #chart-container {
       width: 100%;
       height: 320px;
-      background: #0b1220;
-      border: 1px solid #334155;
-      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(11,18,32,0.95), rgba(2,6,23,0.55));
+      border: 1px solid rgba(148,163,184,0.20);
+      border-radius: var(--radius);
       overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(148,163,184,0.06), 0 18px 50px rgba(0,0,0,0.28);
     }
     @media (min-width: 1024px) {
       #chart-container { height: 360px; }
+    }
+
+    /* Subtle LOVE glow hints on key sections by heading color */
+    .text-sky-400 { text-shadow: 0 0 18px rgba(45,212,191,0.10); }
+    .text-pink-400, .text-red-300 { text-shadow: 0 0 18px rgba(244,114,182,0.10); }
+    .text-emerald-400, .text-emerald-300 { text-shadow: 0 0 18px rgba(16,185,129,0.10); }
+
+    /* Improve small helper text readability */
+    .text-slate-400, .text-slate-500{
+      color: rgba(226,232,240,0.62) !important;
+    }
+
+    /* Make toggle track feel softer (visual only) */
+    .peer:checked + div{
+      box-shadow: var(--glow-rose);
     }
   </style>
 </head>
@@ -82,19 +200,18 @@
       <!-- Bot Controls -->
       <div class="card">
         <h2 class="text-xl font-semibold mb-4 text-sky-400">Bot Controls</h2>
-        <div class="space-y-4">
-          <button id="toggle-bot-btn"
-            class="w-full py-3 rounded-lg font-bold transition duration-200 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg">
-            START BOT
-          </button>
-        </div>
 
-        <div class="mt-6 border-t border-slate-700 pt-4 space-y-3">
+        <div class="mt-2 border-t border-slate-700 pt-4 space-y-3">
           <h3 class="text-lg font-medium text-slate-300">Live Status</h3>
 
           <div class="flex justify-between items-center">
             <span class="text-sm">Connection:</span>
             <span id="connection-status" class="status-pill bg-red-800 text-white">DISCONNECTED</span>
+          </div>
+
+          <div class="flex justify-between items-center">
+            <span class="text-sm">Account Type:</span>
+            <span id="account-type-status" class="status-pill bg-slate-600 text-slate-300">UNKNOWN</span>
           </div>
 
           <div class="flex justify-between items-center">
@@ -116,6 +233,10 @@
             <span class="text-sm">Reason Blocked:</span>
             <span id="block-reason-display" class="status-pill bg-slate-600 text-slate-300">None</span>
           </div>
+
+          <div id="account-warning" class="hidden mt-3 p-3 rounded-lg border border-red-500/40 bg-red-500/10 text-sm text-red-200">
+            ⚠️ Symbol not available on this account. Use a Deriv <b>Derived/Synthetic (STD)</b> account for Volatility indices and Vol 1s.
+          </div>
         </div>
       </div>
 
@@ -127,14 +248,36 @@
             <span class="text-sm">Current Balance:</span>
             <span id="current-balance-display" class="text-lg font-bold text-yellow-400">...</span>
           </div>
+
           <div class="flex justify-between items-center">
             <span class="text-sm">Session Profit (USD):</span>
             <span id="current-profit-display" class="text-lg font-bold text-slate-300">0.00</span>
           </div>
+
+          <!-- ✅ ADDED: Session Loss -->
+          <div class="flex justify-between items-center">
+            <span class="text-sm">Session Loss (USD):</span>
+            <span id="current-loss-display" class="text-lg font-bold text-red-300">0.00</span>
+          </div>
+
           <div class="flex justify-between items-center">
             <span class="text-sm">Contract Sellable:</span>
             <span id="sellable-display" class="status-pill bg-red-500 text-white">NO</span>
           </div>
+        </div>
+      </div>
+
+      <!-- ✅ ADDED: Transaction Log -->
+      <div class="card">
+        <h2 class="text-xl font-semibold mb-4 text-emerald-300">Transaction Log</h2>
+        <div class="p-3 bg-slate-900/40 border border-slate-700 rounded-lg text-xs whitespace-pre-wrap min-h-[120px] max-h-[220px] overflow-auto"
+             id="tx-log"></div>
+        <div class="mt-3 flex gap-2">
+          <button id="clear-txlog-btn" class="text-xs py-2 px-3 rounded bg-slate-600 hover:bg-slate-500 text-white">Clear Log</button>
+          <button id="export-txlog-btn" class="text-xs py-2 px-3 rounded bg-slate-600 hover:bg-slate-500 text-white">Copy Log</button>
+        </div>
+        <div class="mt-2 text-[11px] text-slate-400">
+          Format: <span class="text-slate-300">CLOSED | SYMBOL | CALL/PUT | +/-value</span>
         </div>
       </div>
 
@@ -167,7 +310,27 @@
         </div>
       </div>
 
-      <!-- Trade Settings (Symbol + Manual Buttons + Auto Toggle) -->
+      <!-- Confidence Meter -->
+      <div class="card">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xl font-semibold text-emerald-400">Confidence Meter</h2>
+          <span id="signal-pill" class="pill bg-slate-700 text-slate-200">WAIT</span>
+        </div>
+
+        <div class="w-full bg-slate-700 rounded-full h-4 overflow-hidden">
+          <div id="confidence-bar" class="h-4 bg-emerald-500" style="width:0%"></div>
+        </div>
+        <div class="flex justify-between mt-2 text-xs text-slate-300">
+          <div id="confidence-text">0%</div>
+          <div id="confidence-notes" class="text-slate-400">Waiting ticks…</div>
+        </div>
+
+        <div class="mt-3 text-xs text-slate-400">
+          If <b>Auto Trading</b> is OFF, you can use this bar + signal to decide manual entries. Not financial advice.
+        </div>
+      </div>
+
+      <!-- Trade Settings -->
       <div class="card">
         <h2 class="text-xl font-semibold mb-4 text-sky-400">Trade Settings</h2>
 
@@ -177,14 +340,11 @@
             <label class="block text-sm font-medium mb-1">Select Market</label>
             <select id="symbolSelect"
               class="w-full p-2 rounded bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500">
-              <!-- Main Vols -->
               <option value="R_10">Volatility 10 Index (R_10)</option>
               <option value="R_25">Volatility 25 Index (R_25)</option>
               <option value="R_50">Volatility 50 Index (R_50)</option>
               <option value="R_75">Volatility 75 Index (R_75)</option>
               <option value="R_100" selected>Volatility 100 Index (R_100)</option>
-
-              <!-- 1s Vols (Deriv commonly uses these codes; if yours differs, use Custom Symbol below) -->
               <option value="1HZ10V">Volatility 10 (1s) (1HZ10V)</option>
               <option value="1HZ25V">Volatility 25 (1s) (1HZ25V)</option>
               <option value="1HZ50V">Volatility 50 (1s) (1HZ50V)</option>
@@ -370,7 +530,7 @@
         </div>
         <div id="chart-container"></div>
         <p class="text-xs text-slate-400 mt-2">
-          Live <span class="text-sky-300 font-semibold">1-second candles</span> built from Deriv tick stream.
+          Live <span class="text-sky-300 font-semibold">1-second candles</span> built from Deriv tick stream (auto-fallback supported).
         </p>
       </div>
 
@@ -396,22 +556,34 @@
 
             <button id="toggle-visibility-btn" class="p-3 text-slate-400 hover:text-sky-300 transition duration-150"
               type="button" title="Show Token">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M3.988 5.82a1.01 1.01 0 0 0-.083.125m3.668-.125c.112-.34.238-.667.38-.985a24.144 24.144 0 0 1 8.878 0c.142.318.268.645.38.985m3.668-.125c.112-.34.238-.667.38-.985a24.144 24.144 0 0 1 8.878 0c.142.318.268.645.38.985m-.12 11.082l-3.321-3.321a3.5 3 0 0 0-4.95-.99L3.988 5.82M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
+              👁️
             </button>
           </div>
         </div>
 
-        <p id="token-error-message" class="text-sm text-red-400 mb-3 hidden">API token required to start the bot.</p>
+        <div class="relative mb-3">
+          <label for="start-password" class="block text-sm font-medium mb-1 text-slate-300">Start Password</label>
+          <input type="password" id="start-password" placeholder="Type password to start bot…"
+            class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 text-slate-50 focus:ring-sky-500 focus:border-sky-500"
+            autocomplete="off" />
+          <p id="pw-error-message" class="mt-2 text-sm text-red-300 hidden">
+            Access Denied: Incorrect password to start bot.
+          </p>
+        </div>
 
-        <p class="text-xs text-slate-500">
+        <button id="toggle-bot-btn"
+          class="w-full py-3 rounded-lg font-bold transition duration-200 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg">
+          START BOT
+        </button>
+
+        <p id="token-error-message" class="text-sm text-red-400 mt-3 hidden">API token required to start the bot.</p>
+
+        <p class="text-xs text-slate-500 mt-3">
           <span class="font-semibold text-sky-300">Permissions:</span> Read + Trade
         </p>
 
         <p id="edit-hint" class="text-xs text-slate-500 mb-4">
-          Stored securely in your browser (localStorage). Never share it.
+          Token stored in browser (localStorage). Never share it.
         </p>
 
         <div class="p-3 bg-slate-700 rounded-lg border border-slate-600 flex flex-col sm:flex-row justify-between items-start sm:items-center">
@@ -458,17 +630,29 @@
 
 <script>
 /* =========================================================
-   SAFE DOM + LOGGING (prevents crashes)
+   SAFE DOM + LOGGING
 ========================================================= */
 function $(id){ return document.getElementById(id); }
 const LOG = $("system-log");
+const TXLOG = $("tx-log");
 function logLine(msg){
   const t = new Date().toLocaleTimeString();
   const line = `[${t}] ${msg}`;
   console.log(line);
   if (LOG){
-    LOG.textContent = (LOG.textContent ? (LOG.textContent + "\\n") : "") + line;
+    LOG.textContent = (LOG.textContent ? (LOG.textContent + "\n") : "") + line;
     LOG.scrollTop = LOG.scrollHeight;
+  }
+}
+
+// ✅ Transaction log lines: CLOSED | SYMBOL | CALL/PUT | +/-value
+function txLogLine(msg){
+  const t = new Date().toLocaleTimeString();
+  const line = `[${t}] ${msg}`;
+  console.log("TX:", line);
+  if (TXLOG){
+    TXLOG.textContent = (TXLOG.textContent ? (TXLOG.textContent + "\n") : "") + line;
+    TXLOG.scrollTop = TXLOG.scrollHeight;
   }
 }
 
@@ -476,10 +660,10 @@ function logLine(msg){
    CONFIG
 ========================================================= */
 const API_URL = 'wss://ws.binaryws.com/websockets/v3?app_id=1089';
+const REQUIRED_PASSWORD = "$1977";
 
 /* =========================================================
-   MODE DEFAULTS
-   - Momentum best = Minutes
+   MODE DEFAULTS (Momentum best = Minutes)
 ========================================================= */
 const modeDefaults = {
   SCALP:   { stake:1.00, duration:5, durationUnit:'t', tp:0.34, sl:10.00, maxTrades:1, cooldown:30, tickBuf:6,  thr:0.015, trend:false, strict:false },
@@ -500,12 +684,19 @@ const appState = {
   symbol: "R_100",
 
   currentBalance:0,
-  sessionProfit:0,
+
+  // ✅ Session tracking
+  sessionProfit:0,     // net P/L
+  sessionLoss:0,       // absolute loss total
 
   tradeCounter:0,
   currentContractId:null,
   is_sellable:0,
   isSelling:false,
+
+  // ✅ Track last trade meta so TX log shows CALL/PUT + symbol
+  currentDirection:null,       // "CALL" / "PUT"
+  currentSymbolAtEntry:null,   // e.g., "R_100"
 
   mode:'SCALP',
   isSettingsLocked:true,
@@ -539,7 +730,7 @@ const appState = {
   trend:{
     enabled:false,
     status:"OFF",
-    tfSeconds:14400,
+    tfSeconds:14400,   // H4 = 4 hours
     emaFast:20,
     emaSlow:50,
     lastUpdated:0,
@@ -551,27 +742,36 @@ const appState = {
     lastCandleTime:0,
     lastOHLC:null,
     hasTick:false
-  }
+  },
+
+  // account
+  isDemo: null
 };
 
 /* =========================================================
-   DOM (all guarded)
+   DOM
 ========================================================= */
 const dom = {
+  // status
+  connectionStatus: $("connection-status"),
+  accountTypeStatus: $("account-type-status"),
+  tradeActiveStatus: $("trade-active-status"),
+  h4TrendDisplay: $("h4-trend-display"),
+  blockReasonDisplay: $("block-reason-display"),
+  accountWarning: $("account-warning"),
+
+  // balance
+  balanceDisplay: $("current-balance-display"),
+  profitDisplay: $("current-profit-display"),
+  lossDisplay: $("current-loss-display"),
+  sellableDisplay: $("sellable-display"),
+
+  // controls
   toggleBotBtn: $("toggle-bot-btn"),
   unlockBtn: $("unlock-settings-btn"),
   modeSelect: $("mode-select"),
   modePill: $("mode-pill"),
   modeStatus: $("mode-status"),
-
-  connectionStatus: $("connection-status"),
-  tradeActiveStatus: $("trade-active-status"),
-  h4TrendDisplay: $("h4-trend-display"),
-  blockReasonDisplay: $("block-reason-display"),
-
-  balanceDisplay: $("current-balance-display"),
-  profitDisplay: $("current-profit-display"),
-  sellableDisplay: $("sellable-display"),
 
   stakeInput: $("stakeAmount"),
   durationInput: $("duration"),
@@ -588,6 +788,7 @@ const dom = {
   autoResumeToggle: $("autoresume-toggle"),
   autoResumeIndicator: $("autoresume-indicator"),
 
+  // api + pw
   apiToken: $("api-token"),
   tokenError: $("token-error-message"),
   loginBadge: $("login-status-badge"),
@@ -595,15 +796,19 @@ const dom = {
   copyApiUrlBtn: $("copy-api-url-btn"),
   apiUrlText: $("api-url-text"),
   editHint: $("edit-hint"),
+  pwInput: $("start-password"),
+  pwError: $("pw-error-message"),
 
+  // chart
   chartStatus: $("chart-status"),
 
+  // insights
   analyzeBtn: $("analyze-market-btn"),
   riskBtn: $("assess-risk-btn"),
   geminiOut: $("gemini-output"),
   geminiLoading: $("gemini-loading-indicator"),
 
-  // trade settings block
+  // trade settings
   symbolSelect: $("symbolSelect"),
   currentSymbolLabel: $("currentSymbolLabel"),
   customSymbol: $("customSymbol"),
@@ -624,7 +829,17 @@ const dom = {
 
   // log controls
   clearLogBtn: $("clear-log-btn"),
-  exportLogBtn: $("export-log-btn")
+  exportLogBtn: $("export-log-btn"),
+
+  // tx log controls
+  clearTxLogBtn: $("clear-txlog-btn"),
+  exportTxLogBtn: $("export-txlog-btn"),
+
+  // confidence
+  confidenceBar: $("confidence-bar"),
+  confidenceText: $("confidence-text"),
+  confidenceNotes: $("confidence-notes"),
+  signalPill: $("signal-pill")
 };
 
 /* =========================================================
@@ -633,8 +848,27 @@ const dom = {
 function setPill(el, text, cls){
   if (!el) return;
   el.textContent = text;
-  el.className = el.className.includes("status-pill") ? `status-pill ${cls}` : `pill ${cls}`;
+  if (el.className.includes("status-pill")) el.className = `status-pill ${cls}`;
+  else el.className = `pill ${cls}`;
 }
+
+function updateConnection(status, cls){
+  setPill(dom.connectionStatus, status, cls);
+  updateLoginBadge();
+}
+
+function updateLoginBadge(){
+  if (!dom.loginBadge || !dom.connectionStatus) return;
+  const t = dom.connectionStatus.textContent || "";
+  if (t === "CONNECTED") setPill(dom.loginBadge, "CONNECTED", "bg-emerald-600 text-white");
+  else if (t.includes("ERROR") || t.includes("DISCONNECTED")) setPill(dom.loginBadge, "DISCONNECTED", "bg-red-800 text-white");
+  else setPill(dom.loginBadge, "CONNECTING...", "bg-yellow-600 text-white animate-pulse");
+}
+
+function updateTradeStatus(text, cls="bg-slate-600 text-slate-300"){
+  setPill(dom.tradeActiveStatus, text, cls);
+}
+
 function updateProfit(p){
   if (!dom.profitDisplay) return;
   dom.profitDisplay.textContent = p.toFixed(2);
@@ -643,27 +877,50 @@ function updateProfit(p){
   if (p < 0) color = "text-red-400";
   dom.profitDisplay.className = `text-lg font-bold ${color}`;
 }
+
+function updateLoss(l){
+  if (!dom.lossDisplay) return;
+  dom.lossDisplay.textContent = l.toFixed(2);
+  dom.lossDisplay.className = "text-lg font-bold text-red-300";
+}
+
+function setSellable(isSellable){
+  appState.is_sellable = isSellable;
+  if (isSellable === 1) setPill(dom.sellableDisplay, "YES", "bg-emerald-600 text-white");
+  else setPill(dom.sellableDisplay, "NO", "bg-red-500 text-white");
+}
+
 function setIfNotEditing(el, value){
   if (!el) return;
   if (document.activeElement === el) return;
   el.value = value;
 }
-function updateLoginBadge(){
-  if (!dom.loginBadge || !dom.connectionStatus) return;
-  const t = dom.connectionStatus.textContent || "";
-  if (t === "CONNECTED") setPill(dom.loginBadge, "CONNECTED", "bg-emerald-600 text-white");
-  else if (t.includes("ERROR") || t.includes("DISCONNECTED")) setPill(dom.loginBadge, "DISCONNECTED", "bg-red-800 text-white");
-  else setPill(dom.loginBadge, "CONNECTING...", "bg-yellow-600 text-white animate-pulse");
+
+function updateTrendUI(){
+  if (!dom.h4TrendDisplay) return;
+  const t = appState.trend.enabled ? appState.trend.status : "OFF";
+  let cls = "bg-slate-600 text-slate-300";
+  if (t === "BULL") cls = "bg-emerald-600 text-white";
+  if (t === "BEAR") cls = "bg-red-600 text-white";
+  if (t === "NEUTRAL") cls = "bg-yellow-600 text-white";
+  if (t === "ERROR") cls = "bg-red-800 text-white";
+  if (t === "LOADING") cls = "bg-indigo-700 text-white";
+  setPill(dom.h4TrendDisplay, t, cls);
 }
+
 function updateUI(){
   if (dom.modePill) dom.modePill.textContent = appState.mode;
   if (dom.modeStatus) dom.modeStatus.textContent = appState.mode;
 
-  if (dom.safeIndicator) dom.safeIndicator.textContent = appState.isSafeMode ? "ON" : "OFF";
-  if (dom.safeIndicator) dom.safeIndicator.className = `pill ${appState.isSafeMode ? "bg-emerald-600" : "bg-red-600"} text-white`;
-  if (dom.safeStatus) dom.safeStatus.textContent = appState.isSafeMode
-    ? "Safe Mode is ENABLED. Stop-loss selling is allowed."
-    : "Safe Mode is DISABLED.";
+  if (dom.safeIndicator){
+    dom.safeIndicator.textContent = appState.isSafeMode ? "ON" : "OFF";
+    dom.safeIndicator.className = `pill ${appState.isSafeMode ? "bg-emerald-600" : "bg-red-600"} text-white`;
+  }
+  if (dom.safeStatus){
+    dom.safeStatus.textContent = appState.isSafeMode
+      ? "Safe Mode is ENABLED. Stop-loss selling is allowed."
+      : "Safe Mode is DISABLED.";
+  }
 
   setIfNotEditing(dom.stakeInput, appState.stakeAmount.toFixed(2));
   setIfNotEditing(dom.durationInput, String(appState.duration));
@@ -682,18 +939,20 @@ function updateUI(){
   }
   if (dom.autoResumeToggle) dom.autoResumeToggle.checked = !!appState.autoResume;
 
-  // trend
-  if (dom.h4TrendDisplay){
-    const t = appState.trend.enabled ? appState.trend.status : "OFF";
-    let cls = "bg-slate-600 text-slate-300";
-    if (t === "BULL") cls = "bg-emerald-600 text-white";
-    if (t === "BEAR") cls = "bg-red-600 text-white";
-    if (t === "NEUTRAL") cls = "bg-yellow-600 text-white";
-    if (t === "ERROR") cls = "bg-red-800 text-white";
-    setPill(dom.h4TrendDisplay, t, cls);
+  updateTrendUI();
+
+  if (dom.currentSymbolLabel) dom.currentSymbolLabel.textContent = appState.symbol;
+
+  if (dom.placeStakeLabel) dom.placeStakeLabel.textContent = `$${appState.stakeAmount.toFixed(2)}`;
+  if (dom.bulk3Label) dom.bulk3Label.textContent = `$${(appState.stakeAmount*3).toFixed(2)}`;
+  if (dom.bulk5Label) dom.bulk5Label.textContent = `$${(appState.stakeAmount*5).toFixed(2)}`;
+
+  if (dom.accountTypeStatus){
+    if (appState.isDemo === true) setPill(dom.accountTypeStatus, "DEMO", "bg-yellow-600 text-white");
+    else if (appState.isDemo === false) setPill(dom.accountTypeStatus, "REAL", "bg-emerald-700 text-white");
+    else setPill(dom.accountTypeStatus, "UNKNOWN", "bg-slate-600 text-slate-300");
   }
 
-  // buttons
   if (dom.toggleBotBtn){
     if (appState.isBotRunning){
       dom.toggleBotBtn.textContent = "STOP BOT";
@@ -704,15 +963,9 @@ function updateUI(){
     }
   }
 
-  // symbol label
-  if (dom.currentSymbolLabel) dom.currentSymbolLabel.textContent = appState.symbol;
-
-  // stake labels
-  if (dom.placeStakeLabel) dom.placeStakeLabel.textContent = `$${appState.stakeAmount.toFixed(2)}`;
-  if (dom.bulk3Label) dom.bulk3Label.textContent = `$${(appState.stakeAmount*3).toFixed(2)}`;
-  if (dom.bulk5Label) dom.bulk5Label.textContent = `$${(appState.stakeAmount*5).toFixed(2)}`;
-
   updateLoginBadge();
+  updateConfidenceUI();
+  updateLoss(appState.sessionLoss);
 }
 
 /* =========================================================
@@ -720,6 +973,7 @@ function updateUI(){
 ========================================================= */
 function setSettingsLock(isLocked){
   appState.isSettingsLocked = isLocked;
+
   const list = [
     dom.stakeInput, dom.durationInput, dom.durationUnitInput,
     dom.tpInput, dom.slInput, dom.maxTradesInput, dom.cooldownInput,
@@ -748,8 +1002,11 @@ function updateStateFromUI(){
     if (dom.slInput) appState.slUSD = parseFloat(dom.slInput.value) || 0;
     if (dom.maxTradesInput) appState.maxTradesPerSignal = parseInt(dom.maxTradesInput.value) || 0;
     if (dom.cooldownInput) appState.cooldownDuration = parseInt(dom.cooldownInput.value) || 0;
+
     if (dom.autoResumeToggle) appState.autoResume = !!dom.autoResumeToggle.checked;
     if (dom.autoTradingToggle) appState.autoTradingEnabled = !!dom.autoTradingToggle.checked;
+
+    if (dom.safeToggle) appState.isSafeMode = !!dom.safeToggle.checked;
 
     updateUI();
   } catch(e){
@@ -782,13 +1039,17 @@ function loadDefaults(mode){
   appState.trend.enabled = appState.useTrendFilter;
   appState.trend.status = appState.trend.enabled ? "LOADING" : "OFF";
 
+  // ✅ if we are already connected, refresh H4 trend immediately when switching to MOMENTUM/H4
+  appState.trend.lastUpdated = 0;
+  if (appState.trend.enabled && appState.isAuthenticated) requestH4Candles();
+
   updateUI();
 }
 
 /* =========================================================
-   Chart (1s candles from ticks, iPhone-safe)
+   Chart (Candles with compatibility + fallback)
 ========================================================= */
-let chart=null, candleSeries=null, ro=null;
+let chart=null, series=null, seriesKind="line", ro=null;
 
 function initChart(){
   const container = document.getElementById("chart-container");
@@ -800,7 +1061,7 @@ function initChart(){
     return;
   }
 
-  try{ if (chart) chart.remove(); }catch(_){}
+  try{ if (chart && chart.remove) chart.remove(); }catch(_){}
 
   chart = LightweightCharts.createChart(container, {
     width: container.clientWidth,
@@ -811,10 +1072,27 @@ function initChart(){
     timeScale: { borderColor:"#334155", timeVisible:true, secondsVisible:true }
   });
 
-  candleSeries = chart.addCandlestickSeries({
-    priceLineVisible:false,
-    lastValueVisible:true
-  });
+  try{
+    if (chart.addCandlestickSeries){
+      series = chart.addCandlestickSeries({ priceLineVisible:false, lastValueVisible:true });
+      seriesKind = "candles";
+      logLine("Chart ready (candles v3/v4).");
+    } else if (chart.addSeries && LightweightCharts.CandlestickSeries){
+      series = chart.addSeries(LightweightCharts.CandlestickSeries, { priceLineVisible:false, lastValueVisible:true });
+      seriesKind = "candles";
+      logLine("Chart ready (candles v5).");
+    } else {
+      throw new Error("Candles not supported");
+    }
+  } catch(e){
+    if (chart.addLineSeries){
+      series = chart.addLineSeries({ priceLineVisible:false, lastValueVisible:true });
+    } else if (chart.addSeries && LightweightCharts.LineSeries){
+      series = chart.addSeries(LightweightCharts.LineSeries, { priceLineVisible:false, lastValueVisible:true });
+    }
+    seriesKind = "line";
+    logLine("Chart fallback → line series (candles unavailable).");
+  }
 
   if (dom.chartStatus) setPill(dom.chartStatus, "READY", "bg-emerald-700 text-white");
 
@@ -827,15 +1105,21 @@ function initChart(){
   ro.observe(container);
 }
 
-function updateCandleFromTick(price){
-  if (!candleSeries) return;
+function updateSeriesFromTick(price){
+  if (!series) return;
   const nowSec = Math.floor(Date.now()/1000);
+
+  if (seriesKind === "line"){
+    try{ series.update({ time: nowSec, value: price }); }catch(_){}
+    return;
+  }
+
   if (nowSec < appState.chart.lastCandleTime) return;
 
   if (appState.chart.lastCandleTime === 0){
     appState.chart.lastCandleTime = nowSec;
     appState.chart.lastOHLC = { time: nowSec, open: price, high: price, low: price, close: price };
-    candleSeries.update(appState.chart.lastOHLC);
+    try{ series.update(appState.chart.lastOHLC); }catch(_){}
     return;
   }
 
@@ -844,11 +1128,11 @@ function updateCandleFromTick(price){
     c.high = Math.max(c.high, price);
     c.low  = Math.min(c.low, price);
     c.close = price;
-    candleSeries.update(c);
+    try{ series.update(c); }catch(_){}
   } else {
     appState.chart.lastCandleTime = nowSec;
     appState.chart.lastOHLC = { time: nowSec, open: price, high: price, low: price, close: price };
-    candleSeries.update(appState.chart.lastOHLC);
+    try{ series.update(appState.chart.lastOHLC); }catch(_){}
   }
 }
 
@@ -870,10 +1154,31 @@ function trendClassify(emaFast, emaSlow){
   if (diff < -eps) return "BEAR";
   return "NEUTRAL";
 }
+
+/* ✅ FIXED: Proper Deriv candles request uses ticks_history + style:"candles"
+   Response comes back as msg_type:"history" with history.candles[] */
 function requestH4Candles(){
   if (!appState.ws || !appState.isAuthenticated || !appState.trend.enabled) return;
-  appState.ws.send(JSON.stringify({ candles: appState.symbol, granularity: appState.trend.tfSeconds, count: 80, end:"latest" }));
+
+  const req = {
+    ticks_history: appState.symbol,
+    adjust_start_time: 1,
+    count: 80,
+    end: "latest",
+    style: "candles",
+    granularity: appState.trend.tfSeconds
+  };
+
+  try{
+    appState.ws.send(JSON.stringify(req));
+    logLine(`H4 candles requested (history) for ${appState.symbol}`);
+  }catch(e){
+    appState.trend.status = "ERROR";
+    logLine("H4 request send failed: " + e.message);
+    updateUI();
+  }
 }
+
 function maybeRefreshTrend(){
   if (!appState.trend.enabled) return;
   const now = Date.now();
@@ -881,6 +1186,7 @@ function maybeRefreshTrend(){
   appState.trend.lastUpdated = now;
   requestH4Candles();
 }
+
 function trendAllows(direction){
   if (!appState.trend.enabled) return true;
   if (appState.trend.status === "LOADING") return false;
@@ -914,12 +1220,11 @@ function passesBreakoutFilter(direction){
 }
 
 /* =========================================================
-   Clustering detection (simple)
-   - Detect repeated/flat last digit patterns over last 5 ticks
+   Clustering detection
 ========================================================= */
 function updateClustering(price){
   const s = String(price);
-  const lastChar = s.replace(/\\D/g,'').slice(-1) || "0";
+  const lastChar = s.replace(/\D/g,'').slice(-1) || "0";
   const d = parseInt(lastChar,10);
 
   appState.lastDigits.push(d);
@@ -927,37 +1232,78 @@ function updateClustering(price){
 
   if (appState.lastDigits.length < 5) return;
 
-  // count repeats/flatness: how many times digit stayed same in last transitions
   let sameCount = 0;
   for (let i=1;i<appState.lastDigits.length;i++){
     if (appState.lastDigits[i] === appState.lastDigits[i-1]) sameCount++;
   }
 
-  // show alert if 3+ "stays" inside last 5
   if (sameCount >= 3){
-    if (dom.clusterAlert) dom.clusterAlert.classList.remove("hidden");
+    dom.clusterAlert?.classList.remove("hidden");
     if (dom.clusterText) dom.clusterText.textContent = `Clustering Detected: ${sameCount} repeats in last 5 ticks → possible reversal/indecision.`;
   } else {
-    if (dom.clusterAlert) dom.clusterAlert.classList.add("hidden");
+    dom.clusterAlert?.classList.add("hidden");
   }
+}
+
+/* =========================================================
+   Confidence Meter + Signal
+========================================================= */
+function computeConfidence(){
+  const buf = appState.tickBuffer;
+  if (buf.length < appState.tickBufferSize) return { score: 0, signal: "WAIT", notes: "Waiting ticks…" };
+
+  const first = buf[0];
+  const last = buf[buf.length-1];
+  const delta = last - first;
+  const dir = getMomentumDirection();
+
+  const strength = Math.min(1, Math.abs(delta) / Math.max(appState.momentumThreshold, 1e-9));
+  let score = Math.round(strength * 60);
+
+  const breakoutOk = passesBreakoutFilter(dir || "CALL");
+  if (breakoutOk) score += 15;
+
+  if (appState.trend.enabled){
+    if (appState.trend.status === "LOADING") score -= 10;
+    else if (dir && trendAllows(dir)) score += 20;
+    else score -= 20;
+  }
+
+  if (dom.clusterAlert && !dom.clusterAlert.classList.contains("hidden")) score -= 15;
+
+  score = Math.max(0, Math.min(100, score));
+
+  let signal = "WAIT";
+  if (dir && score >= 70) signal = (dir === "CALL") ? "BUY" : "SELL";
+  else if (dir && score >= 45) signal = "WATCH";
+
+  const notes = `Δ=${delta.toFixed(4)} | Mode=${appState.mode} | Trend=${appState.trend.enabled ? appState.trend.status : "OFF"} | Breakout=${breakoutOk ? "OK" : "WAIT"}`;
+  return { score, signal, notes };
+}
+
+function updateConfidenceUI(){
+  if (!dom.confidenceBar || !dom.confidenceText || !dom.signalPill || !dom.confidenceNotes) return;
+
+  const { score, signal, notes } = computeConfidence();
+  dom.confidenceBar.style.width = score + "%";
+  dom.confidenceText.textContent = score + "%";
+  dom.confidenceNotes.textContent = notes;
+
+  let barCls = "bg-red-500";
+  if (score >= 70) barCls = "bg-emerald-500";
+  else if (score >= 45) barCls = "bg-yellow-500";
+  dom.confidenceBar.className = `h-4 ${barCls}`;
+
+  let pillCls = "bg-slate-700 text-slate-200";
+  if (signal === "BUY") pillCls = "bg-emerald-700 text-white";
+  if (signal === "SELL") pillCls = "bg-red-700 text-white";
+  if (signal === "WATCH") pillCls = "bg-yellow-600 text-white";
+  setPill(dom.signalPill, signal, pillCls);
 }
 
 /* =========================================================
    Deriv WS + Trading
 ========================================================= */
-function updateConnection(status, cls){
-  setPill(dom.connectionStatus, status, cls);
-  updateLoginBadge();
-}
-function updateTradeStatus(text, cls="bg-slate-600 text-slate-300"){
-  setPill(dom.tradeActiveStatus, text, cls);
-}
-function setSellable(isSellable){
-  appState.is_sellable = isSellable;
-  if (isSellable === 1) setPill(dom.sellableDisplay, "YES", "bg-emerald-600 text-white");
-  else setPill(dom.sellableDisplay, "NO", "bg-red-500 text-white");
-}
-
 function connectToDeriv(){
   try{
     appState.ws = new WebSocket(API_URL);
@@ -987,7 +1333,7 @@ function connectToDeriv(){
     }
   };
 
-  appState.ws.onerror = (err) => {
+  appState.ws.onerror = () => {
     logLine("WS error (see console).");
     updateConnection("ERROR", "bg-red-600 text-white");
   };
@@ -1015,6 +1361,11 @@ function stopBot(){
   appState.cooldownUntil = 0;
   appState.pendingProposalId = null;
 
+  appState.currentDirection = null;
+  appState.currentSymbolAtEntry = null;
+
+  dom.accountWarning?.classList.add("hidden");
+
   updateConnection("DISCONNECTED", "bg-red-800 text-white");
   updateTradeStatus("Stopped.", "bg-slate-600 text-slate-300");
   if (dom.blockReasonDisplay) dom.blockReasonDisplay.textContent = "None";
@@ -1027,20 +1378,29 @@ function stopBot(){
 function startBot(){
   if (appState.isBotRunning) return;
 
+  const pw = (dom.pwInput?.value || "").trim();
+  if (pw !== REQUIRED_PASSWORD){
+    dom.pwError?.classList.remove("hidden");
+    updateTradeStatus("ACCESS DENIED", "bg-red-600 text-white");
+    logLine("Access denied: incorrect password.");
+    return;
+  }
+  dom.pwError?.classList.add("hidden");
+
   const token = (dom.apiToken?.value || "").trim();
   if (!token){
-    if (dom.tokenError) dom.tokenError.classList.remove("hidden");
+    dom.tokenError?.classList.remove("hidden");
     updateTradeStatus("ERROR: Enter API Token", "bg-red-600 text-white");
     logLine("Start blocked: missing API token.");
     return;
   }
-  if (dom.tokenError) dom.tokenError.classList.add("hidden");
+  dom.tokenError?.classList.add("hidden");
 
   localStorage.setItem("derivToken", token);
   appState.token = token;
 
-  // reset session
   appState.sessionProfit = 0;
+  appState.sessionLoss = 0;
   appState.tradeCounter = 0;
   appState.currentContractId = null;
   appState.isEntryInProgress = false;
@@ -1053,7 +1413,13 @@ function startBot(){
   appState.chart.hasTick = false;
   appState.lastDigits = [];
 
+  appState.currentDirection = null;
+  appState.currentSymbolAtEntry = null;
+
+  dom.accountWarning?.classList.add("hidden");
+
   updateProfit(appState.sessionProfit);
+  updateLoss(appState.sessionLoss);
 
   appState.isBotRunning = true;
   logLine("Bot started.");
@@ -1061,13 +1427,30 @@ function startBot(){
   connectToDeriv();
 }
 
+function subscribeTicks(symbol){
+  if (!appState.ws || !appState.isAuthenticated) return;
+  try{
+    appState.ws.send(JSON.stringify({ forget_all: "ticks" }));
+  }catch(_){}
+  appState.ws.send(JSON.stringify({ ticks: symbol, subscribe: 1 }));
+  logLine("Subscribing ticks: " + symbol);
+}
+
 function handleResponse(res){
   if (res.error){
     const msg = res.error.message || "Unknown API error";
     logLine("API Error: " + msg);
 
-    // Common: symbol not allowed / wrong account
-    if (msg.toLowerCase().includes("symbol") || msg.toLowerCase().includes("market")){
+    // If trend request fails, don't leave it stuck on LOADING forever
+    if (appState.trend.enabled && msg.toLowerCase().includes("unrecognised request")){
+      appState.trend.status = "ERROR";
+      logLine("H4 Trend failed: wrong request. (Now fixed in this version)");
+      updateUI();
+    }
+
+    const m = msg.toLowerCase();
+    if (m.includes("symbol") || m.includes("market") || m.includes("available") || m.includes("not found")){
+      dom.accountWarning?.classList.remove("hidden");
       if (dom.blockReasonDisplay) dom.blockReasonDisplay.textContent = "Symbol not available on this account";
       updateTradeStatus("SYMBOL ERROR", "bg-red-600 text-white");
     }
@@ -1085,25 +1468,22 @@ function handleResponse(res){
       appState.isAuthenticated = true;
       const bal = Number(res.authorize.balance || 0);
       appState.currentBalance = bal;
+      appState.isDemo = !!res.authorize.is_virtual;
+
       if (dom.balanceDisplay){
         dom.balanceDisplay.textContent = `${res.authorize.currency || "USD"} ${bal.toFixed(2)}`;
       }
-      logLine("Authorized.");
 
-      // Subscribe to ticks for current symbol
+      logLine("Authorized. Account=" + (appState.isDemo ? "DEMO" : "REAL"));
+
       subscribeTicks(appState.symbol);
-
-      // Balance updates
       appState.ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
-
-      // Contract updates (global)
       appState.ws.send(JSON.stringify({ proposal_open_contract: 1, subscribe: 1 }));
 
-      // Trend
       appState.trend.lastUpdated = 0;
       if (appState.trend.enabled){
         appState.trend.status = "LOADING";
-        requestH4Candles();
+        requestH4Candles(); // ✅ now correct request
       } else {
         appState.trend.status = "OFF";
       }
@@ -1131,26 +1511,47 @@ function handleResponse(res){
       const price = Number(res.tick.quote);
       if (!Number.isFinite(price)) return;
 
-      // chart
-      updateCandleFromTick(price);
-
-      // clustering
+      updateSeriesFromTick(price);
       updateClustering(price);
 
-      // tick buffer
       appState.lastTick = price;
       appState.tickBuffer.push(price);
       while(appState.tickBuffer.length > appState.tickBufferSize) appState.tickBuffer.shift();
 
       maybeRefreshTrend();
 
-      // AUTO TRADING gate
       if (appState.autoTradingEnabled) checkAndEnterTrade();
 
       updateUI();
       break;
     }
 
+    /* ✅ FIXED: H4 candles now arrive as msg_type:"history" */
+    case "history":{
+      if (!appState.trend.enabled) return;
+
+      const candles = res.history?.candles;
+      if (!candles || !Array.isArray(candles) || candles.length < 10){
+        appState.trend.status = "ERROR";
+        logLine("H4 Trend history error (no candles).");
+        updateUI();
+        return;
+      }
+
+      const closes = candles
+        .map(c => parseFloat(c.close))
+        .filter(n => Number.isFinite(n));
+
+      const ema20 = calcEMA(closes, appState.trend.emaFast);
+      const ema50 = calcEMA(closes, appState.trend.emaSlow);
+
+      appState.trend.status = trendClassify(ema20, ema50);
+      logLine(`H4 Trend updated: ${appState.trend.status}`);
+      updateUI();
+      break;
+    }
+
+    /* (Optional backwards compatibility if any environment still returns "candles") */
     case "candles":{
       if (!res.candles || !Array.isArray(res.candles)){
         appState.trend.status = "ERROR";
@@ -1193,23 +1594,33 @@ function handleResponse(res){
 
       setSellable(c.is_sellable);
 
-      // only manage OUR contract
       if (appState.currentContractId && c.contract_id === appState.currentContractId){
-        // close logic
         if (c.is_sold === 1){
           const profit = Number(c.sell_price) - Number(c.buy_price);
+
           appState.sessionProfit += profit;
+          if (profit < 0) appState.sessionLoss += Math.abs(profit);
+
           updateProfit(appState.sessionProfit);
+          updateLoss(appState.sessionLoss);
+
+          const sym = appState.currentSymbolAtEntry || appState.symbol || "UNKNOWN";
+          const dir = appState.currentDirection || "UNKNOWN";
+          const pnl = (profit >= 0 ? "+" : "") + profit.toFixed(2);
+          txLogLine(`CLOSED | ${sym} | ${dir} | ${pnl}`);
 
           appState.currentContractId = null;
           appState.isSelling = false;
           appState.tickBuffer = [];
           appState.tradeCounter = 0;
 
+          appState.currentDirection = null;
+          appState.currentSymbolAtEntry = null;
+
           appState.cooldownUntil = Date.now() + (appState.cooldownDuration * 1000);
           if (dom.blockReasonDisplay) dom.blockReasonDisplay.textContent = "Cooldown";
           updateTradeStatus("Trade Closed. Cooldown...", "bg-orange-500 text-white");
-          logLine("Trade closed. Profit: " + profit.toFixed(2));
+          logLine("Trade closed. P/L: " + profit.toFixed(2));
 
           if (appState.autoResume){
             setTimeout(() => {
@@ -1230,17 +1641,9 @@ function handleResponse(res){
   }
 }
 
-function subscribeTicks(symbol){
-  if (!appState.ws || !appState.isAuthenticated) return;
-  try{
-    // forget any previous tick streams (safe)
-    appState.ws.send(JSON.stringify({ forget_all: "ticks" }));
-  }catch(_){}
-
-  appState.ws.send(JSON.stringify({ ticks: symbol, subscribe: 1 }));
-  logLine("Subscribing ticks: " + symbol);
-}
-
+/* =========================================================
+   Entry + TP/SL
+========================================================= */
 function checkAndEnterTrade(){
   if (!appState.isBotRunning || !appState.isAuthenticated) return;
 
@@ -1270,6 +1673,7 @@ function checkAndEnterTrade(){
     if (dom.blockReasonDisplay) dom.blockReasonDisplay.textContent = "Waiting Breakout";
     return;
   }
+
   if (appState.trend.enabled){
     if (appState.trend.status === "LOADING"){
       if (dom.blockReasonDisplay) dom.blockReasonDisplay.textContent = "H4 Trend Loading";
@@ -1288,6 +1692,9 @@ function checkAndEnterTrade(){
 function enterTrade(direction, stake){
   if (!appState.ws || !appState.isAuthenticated) return;
 
+  appState.currentDirection = direction;
+  appState.currentSymbolAtEntry = appState.symbol;
+
   appState.isEntryInProgress = true;
   appState.pendingProposalId = null;
   appState.tickBuffer = [];
@@ -1297,7 +1704,7 @@ function enterTrade(direction, stake){
     proposal: 1,
     amount: stake,
     basis: "stake",
-    contract_type: direction,      // CALL / PUT
+    contract_type: direction,
     currency: "USD",
     duration: appState.duration,
     duration_unit: appState.durationUnit,
@@ -1305,7 +1712,6 @@ function enterTrade(direction, stake){
   };
   appState.ws.send(JSON.stringify(req));
 
-  // timeout safety
   setTimeout(() => {
     if (!appState.isBotRunning) return;
     if (appState.currentContractId) return;
@@ -1323,13 +1729,11 @@ function enterTrade(direction, stake){
 function checkProfitAndLoss(contract){
   const currentProfit = Number(contract.profit);
 
-  // TP: try to sell
   if (currentProfit >= appState.tpUSD){
     sellContract();
     return;
   }
 
-  // SL only if Safe Mode ON
   if (appState.isSafeMode){
     const lossThreshold = -Math.abs(appState.slUSD);
     if (currentProfit <= lossThreshold){
@@ -1344,7 +1748,6 @@ function sellContract(){
 
   if (appState.is_sellable !== 1){
     if (dom.blockReasonDisplay) dom.blockReasonDisplay.textContent = "Not Sellable";
-    // Yes: profit is NOT “secured” until it is sold/settled. It keeps floating until sellable/expiry.
     return;
   }
 
@@ -1355,7 +1758,7 @@ function sellContract(){
 }
 
 /* =========================================================
-   Insights (fallback always works)
+   Insights (fallback)
 ========================================================= */
 function fallbackInsight(type){
   const trend = appState.trend.enabled ? appState.trend.status : "OFF";
@@ -1366,6 +1769,7 @@ function fallbackInsight(type){
   const delta = (first!=null && last!=null) ? (last-first) : 0;
 
   if (type === "sentiment"){
+    const conf = computeConfidence();
     return [
       `Safe Entry Suggestion (Fallback):`,
       `• Symbol: ${appState.symbol}`,
@@ -1373,15 +1777,16 @@ function fallbackInsight(type){
       `• Trend Filter: ${trend}`,
       `• Momentum: ${dir} | Δ=${delta.toFixed(4)}`,
       `• Breakout Strict: ${appState.breakoutStrict ? "ON" : "OFF"}`,
+      `• Confidence: ${conf.score}% | Signal: ${conf.signal}`,
       ``,
       `Suggested Action:`,
-      dir === "NONE" ? "• WAIT (not enough momentum)" :
-      (appState.trend.enabled && !trendAllows(dir)) ? `• AVOID (trend not aligned)` :
-      (!passesBreakoutFilter(dir)) ? "• WAIT (breakout not clean yet)" :
-      "• GOOD (signal conditions passing)",
+      conf.signal === "BUY" ? "• BUY setup is strong (conditions passing)" :
+      conf.signal === "SELL" ? "• SELL setup is strong (conditions passing)" :
+      conf.signal === "WATCH" ? "• WATCH (signal forming, wait cleaner move)" :
+      "• WAIT (not enough confirmation)",
       ``,
       `Risk Level: MEDIUM (synthetics move fast — keep stake small).`
-    ].join("\\n");
+    ].join("\n");
   }
 
   return [
@@ -1391,17 +1796,17 @@ function fallbackInsight(type){
     `• Duration: ${appState.duration} ${appState.durationUnit}`,
     `• Cooldown: ${appState.cooldownDuration}s`,
     `• Auto Trading: ${appState.autoTradingEnabled ? "ON" : "OFF"}`,
-    `• Session P/L: $${appState.sessionProfit.toFixed(2)}`
-  ].join("\\n");
+    `• Session P/L: $${appState.sessionProfit.toFixed(2)} | Loss: $${appState.sessionLoss.toFixed(2)}`
+  ].join("\n");
 }
 
 async function showInsight(type){
   if (!dom.geminiOut) return;
-  if (dom.geminiLoading) dom.geminiLoading.classList.remove("hidden");
+  dom.geminiLoading?.classList.remove("hidden");
   dom.geminiOut.textContent = "Analyzing...";
-  await new Promise(r => setTimeout(r, 350)); // quick UX pause
+  await new Promise(r => setTimeout(r, 350));
   dom.geminiOut.textContent = fallbackInsight(type);
-  if (dom.geminiLoading) dom.geminiLoading.classList.add("hidden");
+  dom.geminiLoading?.classList.add("hidden");
 }
 
 /* =========================================================
@@ -1429,7 +1834,10 @@ function manualPlaceTrade(mult=1){
     logLine("Manual trade blocked: trade already active.");
     return;
   }
+
+  const conf = computeConfidence();
   const dir = getMomentumDirection();
+
   if (!dir){
     updateTradeStatus("WAIT: no signal", "bg-yellow-600 text-white");
     logLine("Manual trade: no momentum signal yet.");
@@ -1445,38 +1853,54 @@ function manualPlaceTrade(mult=1){
     logLine("Manual trade: breakout not clean.");
     return;
   }
+
+  if (conf.score < 45){
+    updateTradeStatus("WATCH: confidence low", "bg-yellow-600 text-white");
+    logLine("Manual trade blocked: confidence below 45%.");
+    return;
+  }
+
   enterTrade(dir, appState.stakeAmount * mult);
 }
 
 function clearHistory(){
   appState.sessionProfit = 0;
+  appState.sessionLoss = 0;
   updateProfit(appState.sessionProfit);
-  logLine("History cleared (session profit reset).");
+  updateLoss(appState.sessionLoss);
+
+  if (TXLOG) TXLOG.textContent = "";
+
+  logLine("History cleared (session profit/loss reset).");
+  txLogLine("CLEARED | Transaction log reset");
 }
 
 /* =========================================================
-   Symbol switching (safe resubscribe)
+   Symbol switching
 ========================================================= */
 function setSymbol(newSymbol){
   newSymbol = (newSymbol || "").trim();
   if (!newSymbol) return;
 
+  dom.accountWarning?.classList.add("hidden");
+
   appState.symbol = newSymbol;
   if (dom.currentSymbolLabel) dom.currentSymbolLabel.textContent = newSymbol;
 
-  // reset buffers + chart state
   appState.tickBuffer = [];
   appState.lastDigits = [];
   appState.chart.lastCandleTime = 0;
   appState.chart.lastOHLC = null;
 
-  // trend refresh
   appState.trend.lastUpdated = 0;
   if (appState.trend.enabled) appState.trend.status = "LOADING";
 
   if (appState.isAuthenticated){
     subscribeTicks(newSymbol);
-    requestH4Candles();
+
+    // ✅ refresh trend candles for the NEW symbol
+    if (appState.trend.enabled) requestH4Candles();
+
     logLine("Symbol switched to: " + newSymbol);
   } else {
     logLine("Symbol set (will subscribe after connect): " + newSymbol);
@@ -1491,32 +1915,31 @@ document.addEventListener("DOMContentLoaded", () => {
   try{
     initChart();
 
-    // defaults
     loadDefaults(appState.mode);
     setSettingsLock(true);
 
-    // token preload
     if (appState.token && dom.apiToken){
       dom.apiToken.value = appState.token;
-      if (dom.editHint) dom.editHint.textContent = "Token loaded and saved. Click START BOT to connect.";
+      if (dom.editHint) dom.editHint.textContent = "Token loaded and saved. Type password then click START BOT to connect.";
     }
 
-    // default symbol
+    if (dom.pwInput) dom.pwInput.value = "";
+
     if (dom.symbolSelect) dom.symbolSelect.value = appState.symbol;
 
-    // bind inputs safely
     document.querySelectorAll("input, select").forEach(el => {
       el.addEventListener("input", updateStateFromUI);
       el.addEventListener("change", updateStateFromUI);
     });
 
-    // buttons
     dom.toggleBotBtn?.addEventListener("click", () => {
-      const token = (dom.apiToken?.value || "").trim();
-      if (!appState.isBotRunning && !token){
-        dom.tokenError?.classList.remove("hidden");
-        return;
-      } else dom.tokenError?.classList.add("hidden");
+      if (!appState.isBotRunning){
+        const token = (dom.apiToken?.value || "").trim();
+        if (!token){
+          dom.tokenError?.classList.remove("hidden");
+          return;
+        } else dom.tokenError?.classList.add("hidden");
+      }
 
       if (appState.isBotRunning) stopBot();
       else startBot();
@@ -1524,8 +1947,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     dom.unlockBtn?.addEventListener("click", () => setSettingsLock(!appState.isSettingsLocked));
     dom.modeSelect?.addEventListener("change", (e) => loadDefaults(e.target.value));
-    dom.safeToggle?.addEventListener("change", (e) => { appState.isSafeMode = !!e.target.checked; updateUI(); });
-    dom.autoResumeToggle?.addEventListener("change", (e) => { appState.autoResume = !!e.target.checked; updateUI(); });
+
+    dom.safeToggle?.addEventListener("change", () => updateStateFromUI());
+    dom.autoResumeToggle?.addEventListener("change", () => updateStateFromUI());
 
     dom.toggleVisibilityBtn?.addEventListener("click", toggleTokenVisibility);
     dom.copyApiUrlBtn?.addEventListener("click", copyApiUrl);
@@ -1557,14 +1981,25 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // initial UI
+    dom.clearTxLogBtn?.addEventListener("click", () => { if (TXLOG) TXLOG.textContent = ""; txLogLine("CLEARED | Transaction log reset"); });
+    dom.exportTxLogBtn?.addEventListener("click", async () => {
+      try{
+        await navigator.clipboard.writeText(TXLOG?.textContent || "");
+        logLine("Transaction log copied to clipboard.");
+      }catch(e){
+        logLine("Copy transaction log failed.");
+      }
+    });
+
     updateConnection("DISCONNECTED", "bg-red-800 text-white");
     updateTradeStatus("Idle", "bg-slate-600 text-slate-300");
     setSellable(0);
     updateProfit(appState.sessionProfit);
+    updateLoss(appState.sessionLoss);
     updateUI();
 
     logLine("Kut Milz TB loaded. Ready.");
+    txLogLine("READY | Transaction log initialized");
   }catch(e){
     logLine("Init error: " + e.message);
   }
